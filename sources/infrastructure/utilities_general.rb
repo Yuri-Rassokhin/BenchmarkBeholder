@@ -43,12 +43,11 @@ end
 #  end
 
   def file_exists?(file)
-    File.exist?(file)
-    #`test -f #{file} && echo 1`.strip == "1"
+    File.exist?(`which #{file}`.strip)
   end
 
   def block_device_exists?(file)
-    File.blockdev?(file)
+    File.blockdev?(`which #{file}`.strip)
   end
 
   def dir_exists?(file)

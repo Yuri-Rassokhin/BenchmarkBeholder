@@ -7,7 +7,13 @@ require 'open3'
 require 'mysql2'
 
 def cartesian(dimensions)
-  filtered_dimensions = dimensions.reject(&:empty?)
+  # Ensure all dimensions are arrays
+  normalized_dimensions = dimensions.map do |dim|
+    dim.is_a?(Enumerable) ? dim.to_a : [dim]
+  end
+
+  # Remove empty dimensions
+  filtered_dimensions = normalized_dimensions.reject(&:empty?)
 
   # Handle special case: single dimension
   if filtered_dimensions.size == 1

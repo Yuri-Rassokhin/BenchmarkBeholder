@@ -17,6 +17,8 @@ $startup_health = "http://127.0.0.1:5000/health" # how to check if the target is
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_iterations = 4
+$iterate_processes = "30 60"
+$iterate_requests = "30 60"
 
 # INFRASTRUCTURE
 $infra_hosts = "127.0.0.1" # Benchmark Hosts

@@ -7,7 +7,13 @@ require 'open3'
 require 'mysql2'
 
 def cartesian(dimensions)
-  filtered_dimensions = dimensions.reject(&:empty?)
+  # Ensure all dimensions are arrays
+  normalized_dimensions = dimensions.map do |dim|
+    dim.is_a?(Enumerable) ? dim.to_a : [dim]
+  end
+
+  # Remove empty dimensions
+  filtered_dimensions = normalized_dimensions.reject(&:empty?)
 
   # Handle special case: single dimension
   if filtered_dimensions.size == 1
@@ -95,12 +101,12 @@ end
     # CUSTOMIZE: add your semantics of the benchmark invocation
 
     # launch the target: uvicorn+fastapi inference server
-    target = spawn("uvicorn yolo_fastapi_binary_inference_server:app --host 0.0.0.0 --port 5000 --workers #{iterate_processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
+    target = spawn("uvicorn yolo_fastapi_binary_inference_server:app --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
     Process.detach(target)
     sleep(5)
 
     # execute the benchmark and capture its raw output
-    command = "ab -n #{requests*10} -c #{requests} -p post_data.txt -T "application/octet-stream" http://localhost:5000/predict/ 2>&1"
+    command = "ab -n #{requests*10} -c #{requests} -p post_data.txt -T \"application/octet-stream\" http://localhost:5000/predict/ 2>&1"
     raw_result = `#{command}`
 
     # kill the inference server
