@@ -21,13 +21,6 @@ require './sources/approach/target.rb'
 require './sources/launch.rb'
 require './sources/misc/ssh_sharing.rb'
 
-if false
-  require './profiling/profiler.rb'
-  class Object
-    prepend MethodLogger
-  end
-end
-
 series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
 options = Options.new(logger, ARGV)
