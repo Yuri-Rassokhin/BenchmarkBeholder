@@ -14,9 +14,9 @@ def launch(config)
   # Define parameter space, a Cartesian of those parameters we want to iterate over
   dimensions = [
     (1..config[:collect_iterations]).to_a,
-    config[:iterate_schedulers].split(',').reject(&:empty?).to_a,
-    config[:iterate_sizes].split(',').reject(&:empty?).to_a,
-    config[:iterate_operations].split(',').reject(&:empty?).to_a
+    config[:iterate_schedulers],
+    config[:iterate_sizes],
+    config[:iterate_operations]
   ]
 
   # Main loop: iterate over parameter space
