@@ -146,7 +146,7 @@ end
   end
 
 def get_filesystem_block_size(main_dev, filesystem)
-  nil if main_dev.nil? || %w[tmpfs ramfs nfs].include?(filesystem)
+  "NA" if main_dev.nil? || %w[tmpfs ramfs nfs NA].include?(filesystem)
 
   case filesystem
   when "ext2", "ext3", "ext4"
@@ -154,9 +154,9 @@ def get_filesystem_block_size(main_dev, filesystem)
   when "xfs"
     `xfs_info #{main_dev} | grep bsize | grep data | sed -e 's/^.*bsize=//' | awk '{print $1}'`.strip
   when "vboxsf"
-    "n/a"
+    "NA"
   else
-    "error: unsupported filesystem '#{filesystem}'"
+    "error: unsupported filesystem #{filesystem}"
   end
 end
 

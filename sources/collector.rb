@@ -30,7 +30,7 @@ def initialize(config, url, mode_raw, logger, series)
   if target_has_device?(config.get(:startup_type))
     device_info = run!(:check_device, src)
   else
-    device_info = { filesystem: "N/A", type: "N/A", members: "N/A", aggregated: false }
+    device_info = { filesystem: "NA", type: "NA", members: "NA", aggregated: false }
   end
   filesystem = device_info[:filesystem]
   type = device_info[:type]
@@ -68,7 +68,7 @@ def initialize(config, url, mode_raw, logger, series)
            when "ramfs", "tmpfs" then "RAM"
            when "nfs" then "NFS"
            when "fuse.glusterfs" then "GlusterFS"
-           else main_dev
+           else "NA"
            end,
     gds_supported: run!(:check_gds, filesystem),
 #   gpu_info: run!(:get_gpu_consumption, @number_installed_gpus),

@@ -23,19 +23,18 @@ def push(config, output, iterators)
       series_owner_name = '#{config[:series_owner_name]}',
       series_owner_email = '#{config[:series_owner_email]}',
       startup_actor = '#{config[:startup_actor]}',
-      startup_command = '#{iterators[:command]}',
+      startup_command = '\"#{iterators[:command]}\"',
       iterate_scheduler = '#{iterators[:scheduler]}',
       iterate_iteration = '#{iterators[:iteration]}',
       iterate_operation = '#{iterators[:operation]}',
-      iterate_size = '#{iterators[:size]}',
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
-      infra_filesystem = '#{config[:filesystem]}', 
-      infra_filesystem_block_size = '#{config[:fs_block_size]}',
+      infra_filesystem = '\"#{config[:filesystem]}\"', 
+      infra_filesystem_block_size = '\"#{config[:fs_block_size]}\"',
       infra_filesystem_mount_options = '\"#{config[:fs_mount_options]}\"',
-      infra_storage = '#{config[:storage_type]}',
-      infra_device = '#{config[:device]}',
-      infra_drives = '#{config[:raid_members_amount]}',
+      infra_storage = '\"#{config[:storage_type]}\"',
+      infra_device = '\"#{config[:device]}\"',
+      infra_drives = '\"#{config[:raid_members_amount]}\"',
       infra_architecture = '\"#{config[:arch]}\"',
       infra_os = '\"#{config[:release]}\"',
       infra_kernel = '\"#{config[:kernel]}\"',
@@ -83,7 +82,7 @@ end
       puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
       output = { bandwidth: bandwidth_mbps, error: "" }
       command = "RUBY: object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
-      push(config, bandwidth_mbps, {iteration: iteration, command: command, scheduler: "N/A" , operation: "read" })
+      push(config, output, {iteration: iteration, command: command.gsub("'", "''"), scheduler: "NA" , operation: "read" })
     end
   end
 end
