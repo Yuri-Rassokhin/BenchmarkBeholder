@@ -8,7 +8,7 @@ def initialize
 end
 
 def project_codes
-    return `mysql -N -B -e "select code from bbh.projects;"`.split("\n").join.tr("\"",'')
+    return `mysql -N -B -e "select code from projects;"`.split("\n").join.tr("\"",'')
 end
 
 def projects
@@ -28,7 +28,7 @@ private
 
 def table?
   raise "Database table has not been specified" unless @table
-  result = @client.query("select count(*) as table_exists from information_schema.tables where table_schema = 'bbh' and table_name = '#{@table}';")
+  result = @client.query("select count(*) as table_exists from information_schema.tables where table_schema = 'BENCHMARKING' and table_name = '#{@table}';")
   (result.first['table_exists'] > 0) ? true : false
 end
 
@@ -46,12 +46,12 @@ end
 # COLLECT: Metrics collected during the benchmark
 
 def table_add_specific
-  @client.query("alter table bbh.#{@table} #{@schema}")
+  @client.query("alter table #{@table} #{@schema}")
 end
 
 def table_create_generic
   @client.query(<<~SQL)
-    CREATE TABLE bbh.#{@table} (
+    CREATE TABLE #{@table} (
       project_description VARCHAR(500),
       project_code VARCHAR(50),
       project_tier VARCHAR(50),

@@ -64,7 +64,7 @@ unless parser.mode == :space
     logger.info("Checking if CPU is idle on '#{host}'")
       logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
     logger.info("Checking if storage is idle on '#{host}'")
-      logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host, :io_idle) < 90
+      logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host,:io_idle) < 90
   end
 end
 
@@ -121,7 +121,7 @@ end
 # during creation, collector gathers all static data about its infrastructure
 mode = full_config.get(:infra_hosts).size > 1 ? "multiple" : "single"
 full_config.get(:infra_hosts).each do |host|
-  logger.info("Initializing agent on '#{host}'")
+  logger.info("Initializing benchmark '#{class_needed.downcase}' on '#{host}'")
   collector[host] = Object.const_get(class_needed).new(full_config, host, mode, logger, series)
 end
 
@@ -145,7 +145,7 @@ end
 
 full_config.get(:infra_hosts).each do |host|
   full_config.merge(collector[host].infra_static)
-  logger.info("Launching agent on '#{host}'")
+  logger.info("Launching benchmark '#{class_needed.downcase}' on '#{host}'")
   collector[host].detach(host, :launch, full_config)
 # `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
 end

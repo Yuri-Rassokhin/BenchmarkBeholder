@@ -24,11 +24,16 @@ def initialize(config, url, mode_raw, logger, series)
   shape, subshape = run!(:guess_shape)
   src = config.get(:startup_media)
   main_dev = run!(:main_device, src)
-  main_dev = File.basename(src) if main_dev == "udev"
-  main_dev_name = File.basename(main_dev)
-  filesystem = run!(:get_filesystem, src)
-  raid_info = run!(:check_raid, main_dev_name)
+#  main_dev = File.basename(src) if main_dev == "udev"
+#  main_dev_name = File.basename(main_dev)
+#  filesystem = run!(:get_filesystem, src)
+  device_info = run!(:check_device, src)
+  filesystem = device_info[:filesystem]
+  type = device_info[:type]
+  members = device_info[:members].split
 
+#  puts "src: #{src}, main_dev: #{main_dev}, raid_info: #{raid_info}"
+#  puts "fs: #{filesystem}"
   @infra_static = {
     series: series,
     user: user,
@@ -44,11 +49,13 @@ def initialize(config, url, mode_raw, logger, series)
     cores: run!(:core_count),
     ram: run!(:cpu_ram_amount),
     main_dev: main_dev,
-    main_dev_name: main_dev_name,
+#    main_dev_name: main_dev_name,
     filesystem: filesystem,
-    raid_members: raid_info[:raid_members],
-    raid_members_amount: raid_info[:raid_members_amount],
-    storage_type: raid_info[:storage_type],
+    raid_members: members,
+    raid_members_amount: members.size,
+    root_dev: device_info[:aggregated] ? get_aggregated_root_dev(main_dev) : get_root_dev(main_dev),
+    aggregated: device_info[:aggregated],
+    storage_type: type,
     fs_block_size: run!(:get_filesystem_block_size, main_dev, filesystem),
     fs_mount_options: get_filesystem_mount_options(main_dev),
     shape: shape,
@@ -86,6 +93,15 @@ end
   #File.delete(conf_file)
 
 private
+
+# gets root device name for a given partiion; NOTE: it doesn't work with RAID/LVM
+def get_root_dev(main_dev)
+  File.basename(main_dev).gsub(/\d+$/, '')
+end
+
+def get_aggregated_root_dev(main_dev)
+  `sudo lvs --segments -o +devices #{main_dev} | tac | head -1 | awk '{print $7}' | sed 's/[0-9].*$//'`
+end
 
 def description_eval(description)
   media = @infra_static[:media]

@@ -162,7 +162,9 @@ end
     Net::SSH.start(host, @user, password: @password) do |ssh|
       ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
       ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
-      output(ssh.exec!("ruby /tmp/remote_method_call.rb 2>&1"))
+      ttt = ssh.exec!("ruby /tmp/remote_method_call.rb 2>&1")
+      sss = output(ttt)
+      sss
 #      ssh.exec!("rm /tmp/remote_method_call.{rb,64}")
     end
   rescue => e

@@ -13,10 +13,10 @@ $series_owner_email = "yuri.rassokhin@gmail.com"
 # STARTUP: app input to be able to start it up
 $startup_executable = "/usr/bin/dd" # Path to the benchmarked executable
 # NOTE: benchmark-specific parameter
-$startup_media = "/shared/file.dump" # Media the benchmark executable will be using (a file, a block device ...)
+$startup_media = "/file.dump" # Media the benchmark executable will be using (a file, a block device ...)
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
-$iterate_schedulers = "none, kyber, mq-deadline,  bfq" # Linux IO schedulers: mq-deadline, bfq, kyber, none
+$iterate_schedulers = "none, kyber, mq-deadline, bfq" # Linux IO schedulers: mq-deadline, bfq, kyber, none
 # NOTE: benchmark-specific parameter
 $iterate_sizes = "4096, 65536, 262144"
 $iterate_operations = "read, write"

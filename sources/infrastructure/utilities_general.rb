@@ -153,22 +153,67 @@ def get_units(value)
   end
 end
 
-def switch_scheduler(main_dev_name, filesystem, scheduler, raid_members)
+def switch_scheduler(dev, filesystem, scheduler, raid_members, aggregated)
   return if %w[ramfs tmpfs nfs fuse.glusterfs].include?(filesystem) || scheduler == "N/A"
 
-  if raid_members.empty?
-    return unless File.exist?("/sys/block/#{main_dev_name}/queue/scheduler")
-    `sudo bash -c "echo #{scheduler} > /sys/block/#{main_dev_name}/queue/scheduler"`
-    `cat /sys/block/#{main_dev_name}/queue/scheduler`.strip
+  dev_name = File.basename(dev)
+  # If a physical device
+  if not aggregated
+    return unless File.exist?("/sys/block/#{dev_name}/queue/scheduler")
+    `sudo bash -c "echo #{scheduler} > /sys/block/#{dev_name}/queue/scheduler"`
+    `cat /sys/block/#{dev_name}/queue/scheduler`.strip
   else
+    # If LVM or RAID, /sys/block configuration of IO scheduling may differ between parent and children
+    # To stay safe, we attempt to set it for all
+    `sudo bash -c "echo #{scheduler} > /sys/block/#{dev_name}/queue/scheduler"` if File.exists?("/sys/block/#{dev_name}/queue/scheduler")
     raid_members.each do |drive|
       if drive.include?("nvme") && `cat /sys/module/nvme_core/parameters/multipath`.strip == "Y"
         drive = drive.gsub(/(\d)/, 'c\1')
       end
-      `sudo bash -c "echo #{scheduler} > /sys/block/#{drive}/queue/scheduler"`
-      `cat /sys/block/#{drive}/queue/scheduler on #{drive}`
+      dev = File.basename(drive)
+      parent = dev.gsub(/\d+$/, '')
+      `sudo bash -c "echo #{scheduler} > /sys/block/#{parent}/#{dev}/queue/scheduler"` if File.exists?("/sys/block/#{parent}/#{dev}/queue/scheduler")
+#      `cat /sys/block/#{dev}/queue/scheduler on #{dev}`
     end.join(" ")
   end
+end
+
+# Run shell command as root and capture output
+def run_sudo(cmd)
+  result = `sudo #{cmd}`
+  result.strip
+end
+
+def check_device(src)
+  raise "Incorrect path or not a regular file '#{src}'" unless File.file?(src)
+
+  # Get the mount point, filesystem, and device where the file resides
+  mount_point = run_sudo("df --output=target #{src} | tail -1")
+  filesystem = run_sudo("df --output=fstype #{src} | tail -1")
+  device = run_sudo("df --output=source #{src} | tail -1")
+  type = ""
+  members = ""
+
+  # Detect if the device is LVM or RAID
+  if device.include?("/dev/mapper")
+    # For LVM, use pvs to find the underlying physical volumes
+    type = "LVM"
+    vg_name = run_sudo("lvdisplay #{device} | grep 'VG Name' | awk '{print $3}'")
+    physical_volumes = run_sudo("pvs --noheadings -o pv_name --select vg_name=#{vg_name}")
+    members = physical_volumes
+    aggregated = true
+  elsif device.include?("/dev/md")
+    # For RAID, use mdadm to get the underlying devices
+    type = "RAID"
+    raid_devices = run_sudo("mdadm --detail #{device} | grep '/dev/' | awk '{print $7}'")
+    members = raid_devices
+    aggregated = true
+  else
+    # For regular block devices, just show the device
+    type = "physical device"
+    aggregated = false
+  end
+  { filesystem: "#{filesystem}", type: "#{type}", members: "#{members}", aggregated: aggregated }
 end
 
 def check_raid(main_dev_name)

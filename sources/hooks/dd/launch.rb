@@ -35,7 +35,7 @@ def push(config, output, iterators)
 #      consumption_storage_tps = '#{storage_tps}',
 
   query = <<-SQL
-    insert into bbh.#{config[:series_benchmark]} set
+    insert into #{config[:series_benchmark]} set
       collect_bandwidth = '#{output[:bandwidth]}',
       collect_error = '\"#{output[:error]}\"',
       project_description = '\"#{config[:project_description]}\"',
@@ -87,7 +87,8 @@ end
 
   # Main loop: iterate over parameter space
   dimensions.inject(&:product).map(&:flatten).each do |iteration, scheduler, size, operation|
-    switch_scheduler(scheduler)
+    puts "Iteration"
+    switch_scheduler(config[:root_dev], config[:filesystem], scheduler, config[:raid_members], config[:aggregated])
     case operation
     when "read"
       flow = "if=#{config[:startup_media]} of=/dev/null"
