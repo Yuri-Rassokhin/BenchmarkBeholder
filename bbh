@@ -46,8 +46,8 @@ end
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
 config.get(:infra_hosts).each do |host|
-  logger.info("Checking benchmark executable on '#{host}'")
-    logger.error("#{config.get(:startup_executable)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_executable))
+  logger.info("Checking actor on '#{host}'")
+    logger.error("#{config.get(:startup_actor)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
 end
 
 # enable all available kernel IO schedulers on the nodes
@@ -120,7 +120,7 @@ full_config.get(:infra_hosts).each do |host|
     when "bucket"
       logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_bucket_exists?, full_config.get(:startup_media))
     when "object"
-      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_object_exists?, full_config.get(:startup_media), full_config.get(:sstartup_namespace))
+      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_object_exists?, full_config.get(:startup_media), full_config.get(:startup_namespace))
     else
       logger.error("unknown media type '#{full_config.get(:startup_type)}'")
     end
@@ -137,7 +137,7 @@ end
 # during creation, collector gathers all static data about its infrastructure
 mode = full_config.get(:infra_hosts).size > 1 ? "multiple" : "single"
 full_config.get(:infra_hosts).each do |host|
-  logger.info("Initializing benchmark '#{class_needed.downcase}' on '#{host}'")
+  logger.info("Initializing hook for '#{class_needed.downcase}' on '#{host}'")
   collector[host] = Object.const_get(class_needed).new(full_config, host, mode, logger, series)
 end
 
@@ -161,10 +161,10 @@ end
 
 full_config.get(:infra_hosts).each do |host|
   full_config.merge(collector[host].infra_static)
-  logger.info("Launching benchmark '#{class_needed.downcase}' on '#{host}'")
+  logger.info("Launching hook for '#{class_needed.downcase}' on '#{host}'")
   collector[host].detach(host, :launch, full_config)
 # `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
 end
 
-logger.info("Benchmark '#{full_config.get(:series_benchmark)}' series #{series} has launched, check logs on '#{full_config.get(:infra_hosts).join(', ')}'")
+logger.info("Benchmarking '#{full_config.get(:series_benchmark)}' series #{series} has launched, check logs on '#{full_config.get(:infra_hosts).join(', ')}'")
 

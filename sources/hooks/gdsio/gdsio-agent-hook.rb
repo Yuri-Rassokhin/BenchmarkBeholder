@@ -39,7 +39,7 @@ def get_eta(total_time, run, duration)
   end
 end
 
-def get_executable(path, benchmark)
+def get_actor(path, benchmark)
   path.empty? ? benchmark : "#{path}/#{benchmark}"
 end
 
@@ -89,7 +89,7 @@ increment = ENV['INCREMENT']
 schedulers = ENV['SCHEDULERS']
 hosts = ENV['HOSTS']
 
-executable = get_executable(path, benchmark)
+actor = get_actor(path, benchmark)
 
 while iteration <= ENV['ITERATIONS'].to_i
   operations.split.each do |operation|
@@ -99,7 +99,7 @@ while iteration <= ENV['ITERATIONS'].to_i
           jobs = jobs_from.to_i
           while jobs <= jobs_to.to_i
             # Replace switch_scheduler function with appropriate Ruby logic if needed
-            line = "#{executable} -f #{src} -d 0 -w #{jobs} -s 1G -x #{gpu_mode} -i #{block_size} -I #{operation} -T #{duration}"
+            line = "#{actor} -f #{src} -d 0 -w #{jobs} -s 1G -x #{gpu_mode} -i #{block_size} -I #{operation} -T #{duration}"
             percentage = run * 100 / total_runs
             eta = get_eta(total_time, run, duration)
             puts "NODE #{host} | SERIES #{series} | TIER #{project_tier} | RUN #{run}/#{total_runs} | DONE #{percentage}% | ETA=#{eta} | CONF=#{conf_file}"

@@ -11,8 +11,10 @@ $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
 # STARTUP: how to create the workload?
-$startup_executable = "" # No external benchmark needed, we'll benchmark from within the hook
-$startup_media = "coco-2017-images" # data source
+$startup_actor = "TODO" # No external actor needed, we'll run from within the hook
+$startup_media = "coco-2017-images" # name of the bucket
+$startup_type = "object"
+$startup_namespace = "fr9qm01oq44x"
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_schedulers = "none" # Linux IO schedulers don't make any difference
@@ -25,4 +27,5 @@ $iterate_iterations = 4
 $infra_hosts = "dev"
 # User for passwordless ssh to the benchmark nodes
 $infra_user = "yuri"
+$infra_platform = "oci"
 

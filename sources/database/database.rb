@@ -41,9 +41,9 @@ end
 # All configuration parameters and (extended) database columns are grouped as
 # PROJECT: Description of a project, which is a collection of related series, potentially different benchmarks in different setups
 # SERIES: Description of a series, which is a single invocation of BBH for a given benchmark in a given setup
-# STARTUP: Configuration of HOW to execute the series (which executable, which media if any, how to treat grace period if any, etc)
+# STARTUP: Configuration of HOW to execute the series (actor, target, how to treat grace period if any, etc)
 # ITERATE: Parameters the benchmark iterates over
-# COLLECT: Metrics collected during the benchmark
+# COLLECT: Metrics collected during the benchmarking
 
 def table_add_specific
   @client.query("alter table #{@table} #{@schema}")
@@ -62,7 +62,7 @@ def table_create_generic
       series_owner_name VARCHAR(50) NOT NULL,
       series_owner_email VARCHAR(50) NOT NULL,
 
-      startup_executable VARCHAR(100) NOT NULL,
+      startup_actor VARCHAR(100) NOT NULL,
       startup_command VARCHAR(500) NOT NULL,
 
       iterate_scheduler VARCHAR(50),

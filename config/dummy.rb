@@ -11,7 +11,7 @@ $series_owner_email = "yuri.rassokhin@gmail.com"
 
 # STARTUP: app input to be able to start it up
 $startup_path = "/tmp" # Directory under which the application is installed
-$startup_src = "#{$startup_path}/dummy.sh" # Path to the benchmarked executable
+$startup_src = "#{$startup_path}/dummy.sh" # Path to the actor
 
 # ITERATE: what parameters to benchmark
 $iterate_schedulers = "none" # Linux IO schedulers: mq-deadline, bfq, kyber, none

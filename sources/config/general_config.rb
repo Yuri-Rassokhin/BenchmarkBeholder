@@ -17,7 +17,7 @@ def initialize(conf_file, project_codes)
     series_owner_name: VStr.new(non_empty: true, comma_separated: false),
     series_owner_email: VStr.new(non_empty: true, comma_separated: false),
 
-    startup_executable: VStr.new(non_empty: true, comma_separated: false),
+    startup_actor: VStr.new(non_empty: true, comma_separated: false),
 
     iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true, allowed_values: [ "mq-deadline", "bfq", "kyber", "none"]),
 

@@ -39,7 +39,7 @@ def get_eta(total_time, run, duration)
   end
 end
 
-def get_executable(path, benchmark)
+def get_actor(path, benchmark)
   path.empty? ? benchmark : "#{path}/#{benchmark}"
 end
 
@@ -94,7 +94,7 @@ error_counter = 0
 run = 1
 
 # Execution
-executable = get_executable(ENV['PATH'], config[:benchmark])
+actor = get_actor(ENV['PATH'], config[:benchmark])
 
 (1..ENV['ITERATIONS'].to_i).each do |iteration|
   config[:operations].each do |operation|
@@ -103,7 +103,7 @@ executable = get_executable(ENV['PATH'], config[:benchmark])
         config[:block_sizes].each do |block_size|
           jobs = config[:jobs_from]
           while jobs <= config[:jobs_to]
-            line = "#{executable} -f #{ENV['SRC']} -d 0 -w #{jobs} -s 1G -x #{gpu_mode} -i #{block_size} -I #{operation} -T #{config[:duration]}"
+            line = "#{actor} -f #{ENV['SRC']} -d 0 -w #{jobs} -s 1G -x #{gpu_mode} -i #{block_size} -I #{operation} -T #{config[:duration]}"
             percentage = run * 100 / total_runs
             eta = get_eta(total_time, run, config[:duration])
             puts "NODE #{config[:host]} | SERIES #{config[:series]} | TIER #{config[:project_tier]} | RUN #{run}/#{total_runs} | DONE #{percentage}% | ETA=#{eta} | CONF=#{ENV['CONF_FILE']}"

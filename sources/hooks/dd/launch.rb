@@ -46,7 +46,7 @@ def push(config, output, iterators)
       series_benchmark = '#{config[:series_benchmark]}',
       series_owner_name = '#{config[:series_owner_name]}',
       series_owner_email = '#{config[:series_owner_email]}',
-      startup_executable = '#{config[:startup_executable]}',
+      startup_actor = '#{config[:startup_actor]}',
       startup_command = '#{iterators[:command]}',
       iterate_scheduler = '#{iterators[:scheduler]}',
       iterate_iteration = '#{iterators[:iteration]}',
@@ -75,7 +75,7 @@ end
 
   total_invocations = config[:iteratable_size]
   media = config[:startup_media]
-  executable = config[:startup_executable]
+  actor = config[:startup_actor]
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over
   dimensions = [
@@ -96,7 +96,7 @@ end
       flow = "if=/dev/zero of=#{config[:startup_media]}"
     end
     count = (`stat --format=%s #{config[:startup_media]}`.to_i)/size
-    command = "#{executable} #{flow} bs=#{size} count=#{count}"
+    command = "#{actor} #{flow} bs=#{size} count=#{count}"
     # Commonly used: run the prepared command and capture its output
     stdout, stderr, status = Open3.capture3("#{command}")
     output = extract(stderr)
