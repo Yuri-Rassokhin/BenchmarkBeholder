@@ -5,9 +5,9 @@ def launch(config)
 
 def extract(raw)
 
-  error = `echo "#{raw}" | grep error`
-  bandwidth = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`
-  units = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`
+  error = `echo "#{raw}" | grep error`.strip
+  bandwidth = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
+  units = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
 
   case units
   when "kB/s"
@@ -29,7 +29,7 @@ def extract(raw)
 end
 
 def push(config, output, iterators)
-  mysql = Mysql2::Client.new
+  mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
 
 #      consumption_cpu = '#{cpu_consumption}',
 #      consumption_storage_tps = '#{storage_tps}',
