@@ -1,13 +1,12 @@
-
 class Parser
 
-def helper(version, option, hooks)
+def helper(option, hooks)
 
   if ["help", "-h", "--help", nil].include?(option)
     puts <<~USAGE
       Usage:
       Show this help: bbh { -h, --help, help }
-      Show version, supported benchmarks & environments: bbh { -v, --version, version }
+      Show supported benchmarks & environments: bbh { -v, --version, version }
       Show registered projects: bbh -p
       Launch benchmark: bbh <benchmark> <configuration_file>
     USAGE
@@ -24,7 +23,7 @@ def helper(version, option, hooks)
 
 if ["version", "-v", "--version"].include?(option)
     puts <<~VERSION
-    BenchmarkBeholder version #{version}
+    BenchmarkBeholder
     
     >>> Registered benchmarks
     #{hooks.map { |h| "#{h}" }.join("\n")}
@@ -57,32 +56,18 @@ end
 
 end
 
-def initialize(version, logger, conf_file)
+def initialize(logger, conf_file)
 
   @logger = logger
   @conf_file = conf_file
 
   @hooks_dir = "./sources/hooks/"
   @hooks = Dir.entries(@hooks_dir) - %w[. ..]
-  helper(version, @conf_file, @hooks)
+  helper(@conf_file, @hooks)
 
   # check if configuration file available
   @logger.error("missing configuration file") if conf_file.nil? || conf_file.empty?
   @logger.error("configuration file '#{conf_file}' not found") if !File.exist?(conf_file)
-#  load @conf_file
-
-#  @hook = $benchmark
-#  @hook_dir = "#{@hooks_dir}/#{@hook}/"
-
-#  @check = "#{@hook_dir}/#{@hook}-check"
-#  @hook_database = "#{@hook_dir}/#{@hook}-database"
-# @generic_launcher = "#{@root_dir}/sources/generic-launcher"
-#  @local_hook = "#{@hook_dir}/#{@hook}-agent-hook"
-
-#  @remote_generic_launcher = "/tmp/generic-launcher"
-#  @remote_hook = "/tmp/#{@hook}-agent-hook"
-#  @remote_conf_file = "/tmp/#{File.basename(@conf_file)}"
- 
 end
 
 def check(hook)
@@ -95,14 +80,6 @@ def check(hook)
     @logger.error("configuration file is missing")
   end
 end
-
-#if !File.exist?(@check)
-#  @logger.warning("benchmark-specific checks aren't implemented for #{@hook}")
-#elsif !File.exist?(@local_hook)
-#  @logger.error("incorrect registration of #{@hook}, node agent is missing")
-#end
-
-#@logger.error("database access isn't implemented for '#{@hook}'") unless File.size?(@hook_database)
 
 end
 
