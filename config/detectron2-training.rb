@@ -10,8 +10,8 @@ $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@oracle.com"
 
 # STARTUP: app input to be able to start it up
-$startup_path = "/mnt/fss/app" # Directory under which the application is installed
-$startup_src = "#{$startup_path}/detectron2/tools/train_net.py" # Path to the benchmarked executable of Detectron2
+$startup_path = "/tmp" # Directory under which the application is installed
+$startup_src = "#{$startup_path}/dummy_benchmark.sh" # Path to the benchmarked executable of Detectron2
 # learning rate, that is, a size of the gradient step when adapting the weights upon each learning iteration
 $startup_solver_initial_lr_per_gpu = 0.0025 # TODO: BBH does NOT iterate this one
 # This parameter hard-stops the training after predefined learning iterations, no matter the result

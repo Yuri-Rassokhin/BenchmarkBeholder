@@ -16,7 +16,7 @@ class Collector < Agent
 #warning_log = ARGV[7]
 #hook_database = ARGV[8]
  
-def initialize(config, url, mode, logger, series)
+def initialize(config, url, mode_raw, logger, series)
 
   @error_counter = 0
   @series = series
@@ -34,7 +34,6 @@ def initialize(config, url, mode, logger, series)
   @cpu = run!(:cpu_model)
   @cores = run!(:core_count)
   @ram = run!(:cpu_ram_amount)
-
 # Temp files to accumulate benchmark output before pushing it to database
 #output = Tempfile.new
 #error = Tempfile.new
@@ -49,7 +48,7 @@ def initialize(config, url, mode, logger, series)
   @raid_info = run!(:check_raid, @main_dev_name)
   @fs_block_size = run!(:get_filesystem_block_size, main_dev, filesystem)
   @fs_mount_options = get_filesystem_mount_options(main_dev)
-  @shape, @subshape = run!(:guess_shape)
+  $shape, @subshape = run!(:guess_shape)
   @device = case filesystem
            when "ramfs", "tmpfs" then "RAM"
            when "nfs" then "NFS"
@@ -60,13 +59,11 @@ def initialize(config, url, mode, logger, series)
   @gpu_info = run!(:get_gpu_consumption, @number_installed_gpus)
   @cpu_consumption = run!(:get_cpu_consumption)
   @storage_consumption = run!(:get_storage_consumption, @device, @main_dev)
-  @mode_description = ( mode == "single" ? "a single" : mode)
-  @media = ( @filesystem == "N/A" ? "raw device #{@src}" : @filesystem )
+  $mode = ( mode_raw == "single" ? "a single" : mode_raw )
+  $media = ( @filesystem == "N/A" ? "raw device #{@src}" : @filesystem )
   @get_nvidia_versions = run!(:get_nvidia_versions)
 
-  puts config.get(:series_description)
-  desc = eval("#{config.get(:series_description)}")
-  puts desc
+  @desc = eval('"' + config.get(:series_description) + '"')
 
   #if File.readlines(warning_log).size > 0
   #  printf '%-70s', "Checking warnings #{warning_log}"

@@ -1,7 +1,7 @@
 
 require 'timeout'
 
-class Detectron2training < Collector
+class Dummy < Collector
 
 def initialize(config, url, mode, logger, series)
   super(config, url, mode, logger, series)
@@ -42,8 +42,6 @@ def push(config)
   cpu = config[:cpu]
   cores = config[:cores]
   ram = config[:ram]
-  nvidia_cuda_version = config[:nvidia_cuda_version]
-  nvidia_driver_version = config[:nvidia_driver_version]
   benchmark = config[:benchmark]
   line = config[:line]
   error = config[:error]
@@ -57,25 +55,6 @@ def push(config)
   series_owner_email = config[:series_owner_email]
   debug_scheduler = config[:debug_scheduler]
   host = config[:host]
-  eta_minutes = config[:eta_minutes]
-  iter = config[:iter]
-  total_loss = config[:total_loss]
-  loss_cls = config[:loss_cls]
-  loss_box_reg = config[:loss_box_reg]
-  loss_mask = config[:loss_mask]
-  loss_rpn_cls = config[:loss_rpn_cls]
-  loss_rpn_loc = config[:loss_rpn_loc]
-  timing = config[:timing]
-  last_timing = config[:last_timing]
-  data_timing = config[:data_timing]
-  last_data_timing = config[:last_data_timing]
-  lr = config[:lr]
-  max_mem = config[:max_mem]
-  real_time = config[:real_time]
-  real_time_human = config[:real_time_human]
-  number_of_gpus = config[:number_of_gpus]
-  gds_supported = config[:gds_supported]
-  chunk = config[:chunk]
 
   # Check if error file exists and is not empty
   if !File.exist?(error_file) || File.size(error_file).zero?
@@ -103,23 +82,6 @@ def push(config)
       storage_type = '#{storage_type}',
       storage_drives = '#{raid_members_amount}',
       storage_device = '#{device}',
-      consumption_gpu0 = '#{gpu_consumption[0]}',
-      consumption_gpu1 = '#{gpu_consumption[1]}',
-      consumption_gpu2 = '#{gpu_consumption[2]}',
-      consumption_gpu3 = '#{gpu_consumption[3]}',
-      consumption_gpu4 = '#{gpu_consumption[4]}',
-      consumption_gpu5 = '#{gpu_consumption[5]}',
-      consumption_gpu6 = '#{gpu_consumption[6]}',
-      consumption_gpu7 = '#{gpu_consumption[7]}',
-      consumption_ram_gpu0 = '#{gpu_ram_consumption[0]}',
-      consumption_ram_gpu1 = '#{gpu_ram_consumption[1]}',
-      consumption_ram_gpu2 = '#{gpu_ram_consumption[2]}',
-      consumption_ram_gpu3 = '#{gpu_ram_consumption[3]}',
-      consumption_ram_gpu4 = '#{gpu_ram_consumption[4]}',
-      consumption_ram_gpu5 = '#{gpu_ram_consumption[5]}',
-      consumption_ram_gpu6 = '#{gpu_ram_consumption[6]}',
-      consumption_ram_gpu7 = '#{gpu_ram_consumption[7]}',
-      consumption_ram_per_gpu = '#{gpu_ram_per_device}',
       consumption_cpu = '#{cpu_consumption}',
       consumption_storage_tps = '#{storage_tps}',
       infra_arch = '#{arch}',
@@ -128,8 +90,6 @@ def push(config)
       infra_oscpu = '#{cpu}',
       infra_cores = #{cores},
       infra_ram = #{ram},
-      infra_cuda_version = '#{nvidia_cuda_version}',
-      infra_cuda_driver_version = '#{nvidia_driver_version}',
       benchmark = '#{benchmark}',
       invocation_command = '#{line}',
       invocation_error = '#{File.read(error) if File.exist?(error)}',
@@ -143,24 +103,6 @@ def push(config)
       owner_email = '#{series_owner_email}',
       debug_scheduler = '\"#{debug_scheduler}\"',
       debug_host = '#{host}',
-      app_eta = '#{eta_minutes}',
-      app_iter = '#{iter}',
-      app_total_loss = '#{total_loss}',
-      app_loss_cls = '#{loss_cls}',
-      app_loss_box_reg = '#{loss_box_reg}',
-      app_loss_mask = '#{loss_mask}',
-      app_loss_rpn_cls = '#{loss_rpn_cls}',
-      app_loss_rpn_loc = '#{loss_rpn_loc}',
-      app_time = '#{timing}',
-      app_last_time = '#{last_timing}',
-      app_data_time = '#{data_timing}',
-      app_last_data_time = '#{last_data_timing}',
-      app_lr = '#{lr}',
-      app_max_mem = '#{max_mem}',
-      real_time_passed_sec = '#{real_time}',
-      real_time_passed = '\"#{real_time_human}\"',
-      app_gpu_quantity = '#{number_of_gpus}',
-      infra_gds_enabled = '\"#{gds_supported}\"',
       log = '\"#{chunk}\"';
   SQL
 

@@ -1,5 +1,5 @@
 
-class Detectron2TrainingConfig < GenericConfig
+class Detectron2trainingConfig < GenericConfig
 
   def initialize(conf_file)
     @parameters = {

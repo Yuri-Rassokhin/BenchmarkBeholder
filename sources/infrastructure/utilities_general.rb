@@ -18,7 +18,11 @@ module UtilitiesGeneral
   end
 
   def count_gpu
-    `nvidia-smi --list-gpus | wc -l`.strip
+    if gpu?
+      `nvidia-smi --list-gpus | wc -l`.strip
+    else
+      "0"
+    end
   end
 
   def hostname
@@ -26,7 +30,31 @@ module UtilitiesGeneral
   end
 
   def os_release
-    `lsb_release -si`.strip + " " + `lsb_release -sr`.strip
+    distro_name = "Unknown"
+    distro_version = "Unknown"
+
+    if File.exist?('/etc/os-release')
+      File.readlines('/etc/os-release').each do |line|
+        if line.start_with?('NAME=')
+          distro_name = line.split('=')[1].strip.delete('"')
+        elsif line.start_with?('VERSION=')
+          distro_version = line.split('=')[1].strip.delete('"')
+        end
+      end
+    else
+      Dir.glob('/etc/*-release').each do |file|
+        File.readlines(file).each do |line|
+          if line.start_with?('NAME=')
+            distro_name = line.split('=')[1].strip.delete('"')
+          elsif line.start_with?('VERSION=')
+            distro_version = line.split('=')[1].strip.delete('"')
+          end
+        end
+      end
+    end
+
+  "#{distro_name} #{distro_version}"
+  #    `lsb_release -si`.strip + " " + `lsb_release -sr`.strip
   end
 
   def kernel_release

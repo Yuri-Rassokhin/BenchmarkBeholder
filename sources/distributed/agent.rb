@@ -104,10 +104,11 @@ class Agent < Object
   def output(raw_output)
     out = raw_output.downcase.strip
 
-    if out.include?("error:")
-      @error = out
-      return nil
-    end
+#    puts "OUTPUT: #{raw_output}"
+#    if out.include?("error:")
+#      @error = out
+#      return nil
+#    end
 
     if [ "true", "false" ].include?(out)
       return to_bool(out)

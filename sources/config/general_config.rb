@@ -25,8 +25,9 @@ def initialize(conf_file, project_codes)
     # How many times to repeat every individual invocation (to accumulate statistics)
     collect_iterations: VNum.new(natural: true),
     # How often to fetch data from the application during training, seconds (can be a fraction, 0.1 or greater)
-    collect_frequency: VNum.new(positive: true, greater: 0.1),
-    collect_grace_period: VNum.new(natural: true, positive: true),
+# TODO: THIS MUST BE APPLICATION-SPECIFIC
+#    collect_frequency: VNum.new(positive: true, greater: 0.1),
+#    collect_grace_period: VNum.new(natural: true, positive: true),
 
     infra_hosts: VStr.new(non_empty: true, comma_separated: true),
     infra_user: VStr.new(non_empty: true, comma_separated: false),

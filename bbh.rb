@@ -103,16 +103,20 @@ end
 
 collector = Hash.new
 # depending on benchmark, load a proper config and define its class for the use later
-case config.get(:series_benchmark)
-  when "detectron2training" then class_needed = "Detectron2Training"
-  else logger.fatal("unknown benchmark")
-end
+# TODO: this has to be a formuale where class_needed = uppercase variable
+#case config.get(:series_benchmark)
+#  when "detectron2training" then class_needed = "Detectron2Training"
+#  when "dummy" then class_needed = "Dummy"
+#  else logger.fatal("unknown benchmark")
+#end
+
+class_needed = config.get(:series_benchmark).capitalize
 
 require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}.rb"
- require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}-config.rb"
+require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}-config.rb"
 
 # create benchmark-specific config and merge the general config into it
-full_config = Object.const_get("#{class_needed}Config").new(ARGV[0])
+full_config = Object.const_get("#{class_needed}config").new(ARGV[0])
 full_config.merge(config)
 
 # assign collector, aka permanent agent, for each node

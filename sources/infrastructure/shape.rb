@@ -1,6 +1,47 @@
 module Shape
 
 def guess_shape
+
+def detect_cpu_based_shape
+  shape = ""
+  nvme_number = `lsblk | grep nvme | wc -l`.to_i
+  cpu = `grep "model name" /proc/cpuinfo | sed -e 's/^.*: //' | head -n 1`.strip
+  cores = `grep processor /proc/cpuinfo | wc -l`.to_i
+
+  if cpu.include?("EPYC 7J13") && nvme_number == 8
+    shape = "BM.DenseIO.E4"
+  elsif cpu.include?("EPYC 7J13") && nvme_number < 8
+    shape = "VM.DenseIO.E4"
+  elsif cpu.include?("Xeon 6354") && nvme_number == 1
+    shape = "BM.Optimized3.36"
+  elsif cpu.include?("Platinum 8358") && cores == 128
+    shape = "BM.Standard3.64"
+  elsif cpu.include?("EPYC 7J13") && cores == 256
+    shape = "BM.Standard.E4.128"
+  elsif cpu.include?("EPYC 9J14") && cores == 192
+    shape = "BM.Standard.E5.192"
+  elsif cpu.include?("Altra Q80-30") && cores == 320
+    shape = "BM.Standard.A1.160"
+  elsif cpu.include?("Platinum 8358")
+    shape = "VM.Standard3"
+  elsif cpu.include?("EPYC 7551")
+    shape = "VM.Standard.E2.1.Micro"
+    subshape = "E2 generation"
+  elsif cpu.include?("EPYC 7742")
+    shape = "VM.Standard.E2.1.Micro"
+    subshape = "E3 generation"
+  elsif cpu.include?("EPYC 7J13")
+    if cores > 2 || `free -h --giga --total | grep Total | awk '{print $2}' | sed 's/G//'`.to_i > 1
+      shape = "VM.Standard.E4.Flex"
+    else
+      shape = "VM.Standard.E4.Flex or VM.Standard.E2.1.Micro (E4 generation)"
+    end
+  else
+    shape = "unknown compute shape"
+  end
+  [ shape, subshape ]
+end
+
   shape = ""
   subshape = ""
   gpu_model = ""
@@ -59,46 +100,7 @@ def guess_shape
   else
     [ shape, subshape ]
   end
-end
 
-def detect_cpu_based_shape
-  shape = ""
-  nvme_number = `lsblk | grep nvme | wc -l`.to_i
-  cpu = `grep "model name" /proc/cpuinfo | sed -e 's/^.*: //' | head -n 1`.strip
-  cores = `grep processor /proc/cpuinfo | wc -l`.to_i
-
-  if cpu.include?("EPYC 7J13") && nvme_number == 8
-    shape = "BM.DenseIO.E4"
-  elsif cpu.include?("EPYC 7J13") && nvme_number < 8
-    shape = "VM.DenseIO.E4"
-  elsif cpu.include?("Xeon 6354") && nvme_number == 1
-    shape = "BM.Optimized3.36"
-  elsif cpu.include?("Platinum 8358") && cores == 128
-    shape = "BM.Standard3.64"
-  elsif cpu.include?("EPYC 7J13") && cores == 256
-    shape = "BM.Standard.E4.128"
-  elsif cpu.include?("EPYC 9J14") && cores == 192
-    shape = "BM.Standard.E5.192"
-  elsif cpu.include?("Altra Q80-30") && cores == 320
-    shape = "BM.Standard.A1.160"
-  elsif cpu.include?("Platinum 8358")
-    shape = "VM.Standard3"
-  elsif cpu.include?("EPYC 7551")
-    shape = "VM.Standard.E2.1.Micro"
-    subshape = "E2 generation"
-  elsif cpu.include?("EPYC 7742")
-    shape = "VM.Standard.E2.1.Micro"
-    subshape = "E3 generation"
-  elsif cpu.include?("EPYC 7J13")
-    if cores > 2 || `free -h --giga --total | grep Total | awk '{print $2}' | sed 's/G//'`.to_i > 1
-      shape = "VM.Standard.E4.Flex"
-    else
-      shape = "VM.Standard.E4.Flex or VM.Standard.E2.1.Micro (E4 generation)"
-    end
-  else
-    shape = "unknown compute shape"
-  end
-  [ shape, subshape ]
 end
 
 end
