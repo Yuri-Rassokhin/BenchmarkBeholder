@@ -1,7 +1,17 @@
 module Shape
 
-def guess_shape
+def guess_shape(platform)
 
+case platform
+when "oci"
+  require 'oci'
+  `oci-metadata | grep "Instance shape:" | awk '{print $3}'`
+else
+  "unknown compute shape"
+end
+return
+
+# obsolete - maybe it's worth just to get distinction of intra-node interconnections, and GPU-subshapes
 def detect_cpu_based_shape
   shape = ""
   nvme_number = `lsblk | grep nvme | wc -l`.to_i
