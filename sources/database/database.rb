@@ -125,7 +125,6 @@ def table_create_generic
 
       startup_actor VARCHAR(100) NOT NULL,
       startup_command VARCHAR(4196) NOT NULL,
-      startup_language VARCHAR(20) NOT NULL,
 
       iterate_iteration INT NOT NULL,
       
