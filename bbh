@@ -33,11 +33,11 @@ options = Options.new(logger, ARGV)
 database = Database.new(logger)
 config = GeneralConfig.new(options.workload, database.project_codes)
 hook = config.get(:series_benchmark)
-hosts = config.get(:infra_hosts)
+hosts = options.hosts
 options.check_hook(hook) # check if hooks directory exists and contains mandatory files
 agent = Agent.new(nil, nil)
 
-logger.info("Checking SSH persistance on the central node") # maximize the performance of inter-host communication
+logger.info("Checking SSH persistance on the central node") # maximize SSH performance
 ssh_sharing_enable
 
 hosts.each do |host|
