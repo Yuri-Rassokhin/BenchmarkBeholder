@@ -138,7 +138,7 @@ private
 def process(line)
   get_dynamic_metrics
   push
-  @logger.info("node #{@host} | series #{@series} | tier #{@project_tier} | run #{@invocation}/#{@total_invocations} | eta #{@eta_msg}")
+  @logger.info("node #{@host} | series #{@series} | tier #{@project_tier} | run #{@invocation}/#{@total_invocations}")
 
 # return a map of data elements extracted from line
 def extract(line)

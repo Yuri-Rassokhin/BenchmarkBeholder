@@ -16,7 +16,7 @@ class CustomLogger
 
     #create log directories
     @log_dir = "bbh-#{series}"
-    tmp_dir = "/tmp/#{@log_dir}"
+    tmp_dir = "/tmp/bbh/#{@log_dir}"
     FileUtils.mkdir_p(tmp_dir)
     @warning_log = Tempfile.new(['warning', '.log'], tmp_dir)
     @warning_log = File.open(@warning_log.path, 'a')
