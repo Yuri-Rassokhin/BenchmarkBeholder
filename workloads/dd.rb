@@ -12,7 +12,6 @@ $series_owner_email = "yuri.rassokhin@gmail.com"
 # STARTUP: app input to be able to start it up
 $startup_actor = "/usr/bin/dd" # actor
 $startup_target = "/file.dump" # target the actor will be using (a file, a block device ...)
-$startup_type = "file"
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_iterations = 4 # how many times to repeat an invocation

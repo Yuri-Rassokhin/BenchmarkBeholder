@@ -59,8 +59,8 @@ end
   # NOTE: adding workload-specific initialization of the target
   oci_conf = OCI::ConfigFileLoader.load_config()
   object_storage = OCI::ObjectStorage::ObjectStorageClient.new(config: oci_conf)
-  namespace = 'fr9qm01oq44x'
-  bucket_name = 'coco-2017-images'
+  namespace = config[:startup_namespace]
+  bucket_name = config[:startup_target]
   response = object_storage.list_objects(namespace, bucket_name)
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over

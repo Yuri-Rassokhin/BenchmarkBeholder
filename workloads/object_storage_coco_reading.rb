@@ -13,7 +13,6 @@ $series_owner_email = "yuri.rassokhin@gmail.com"
 # STARTUP: how to create the workload?
 $startup_actor = "self" # No external actor needed, we'll run from within the hook
 $startup_target = "bucket://coco-2017-images" # name of the bucket
-$startup_type = "bucket" # type of the target
 $startup_namespace = "fr9qm01oq44x" # workload-specific parameter
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian

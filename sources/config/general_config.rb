@@ -19,7 +19,6 @@ def initialize(conf_file, project_codes)
 
     startup_actor: VStr.new(non_empty: true, comma_separated: false),
     startup_target: VStr.new(non_empty: true),
-    startup_type: VStr.new(non_empty: true, allowed_values: ["file", "device", "bucket", "object"]),
 
     iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true, allowed_values: [ "mq-deadline", "bfq", "kyber", "none"]),
 
