@@ -68,7 +68,9 @@ end
 def push(config, collect, iterate, startup)
   query = <<-SQL
       collect_inference_time = '#{collect[:inference_time]}',
-      collect_error = '#{collect[:error]}',
+      collect_failed_requests = '#{collect[:failed_requests]}',
+      collect_cuda_error = '\"#{collect[:cuda_error]}\"',
+      collect_response_error = '\"#{collect[:response_error]}\"',
       iterate_iteration = '#{iterate[:iteration]}',
       iterate_processes = '#{iterate[:processes]}',
       iterate_requests = '#{iterate[:requests]}',
@@ -89,6 +91,9 @@ end
   # CUSTOMIZE: add initialization of the variables relevant to your target
   language = "bash"
   app = config[:startup_target_application]
+  app = app.end_with?('.py') ? app.chomp('.py') : app
+  app_dir = File.dirname(app)
+  app_name = File.basename(app)
 
   # CUSTOMIZE: add your dimensions here in the form config[:my_option].to_a
   dimensions = [
@@ -101,29 +106,35 @@ end
   cartesian(dimensions).each do |iteration, processes, requests|
     # CUSTOMIZE: add your semantics of the benchmark invocation
 
+    reader, writer = IO.pipe
     # launch the target: uvicorn+fastapi inference server
-    target = spawn("uvicorn #{app}:app --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
+    target = spawn("uvicorn #{app_name}:app --app-dir #{app_dir} --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: writer, err: writer)
+    writer.close
     Process.detach(target)
-    sleep(5)
+    sleep(10)
 
     # execute the benchmark and capture its raw output
-    command = "ab -n #{requests*10} -c #{requests} -p post_data.txt -T \"application/octet-stream\" http://localhost:5000/predict/ 2>&1"
+    command = "ulimit -n 65535; ab -n #{requests*10} -c #{requests} -p #{app_dir}/post_data.txt -T \"application/octet-stream\" http://localhost:5000/predict/ 2>&1"
     raw_result = `#{command}`
+
+    server_raw_output = reader.read
 
     # kill the inference server
     Process.kill("TERM", target)
 
     # extract benchmark results
     inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`
-    error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`
-    error = ( error_count == "0" ? "" : "#{error_count} requests failed" )
+    request_error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`
+    failed_requests = ( error_count == "0" ? "" : "#{error_count} requests failed" )
+
+    cuda_error = `server_raw_output | grep "CUDA run out of memory"`[0..499]
+    response_error = `server_raw_output | grep -i "error | grep -vi dictionary"`[0..499]
 
     # push benchmark results to the database
-    collect = { inference_time: inference_time, error: error }
+    collect = { inference_time: inference_time, failed_requests: faile_requests, cuda_error: cuda_error, response_error: response_error }
     iterate = { iteration: iteration, processes: processes, requests: requests }
     startup = { command: command.gsub("'", "''"), language: language }
     push(config, collect, iterate, startup)
-
   end
 end
 
