@@ -8,8 +8,7 @@ class Collector < Agent
 
 def initialize(config, url, mode_raw, logger, series, target)
   @config = config
-  user = config.get(:infra_user)
-  super(user, url)
+  super(nil, url)
   @logger = logger
 
   platform = config.get(:infra_platform)
@@ -32,7 +31,6 @@ def initialize(config, url, mode_raw, logger, series, target)
 #  puts "fs: #{filesystem}"
   @infra_static = {
     series: series,
-    user: user,
     src: src,
     url: url,
     password: nil,

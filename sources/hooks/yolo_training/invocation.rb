@@ -39,9 +39,10 @@ def invocation(config, iterator)
   image_size = config[:startup_image_size]
   batch = config[:startup_batch]
   device = config[:startup_device]
+  yolo_dir = File.dirname(target)
 
   if model.include? "yolov5"
-    target_command = "python3 train.py --img #{image_size} --batch #{batch} --epochs #{epochs} --data #{dataset} --weights #{model}.pt --device #{device}"
+    target_command = "cd #{yolo_dir} && python3 train.py --img #{image_size} --batch #{batch} --epochs #{epochs} --data #{dataset} --weights #{model}.pt --device #{device}"
   else
     target_command = "#{target} task=detect mode=train model=#{model}.pt data=#{dataset} epochs=#{epochs} imgsz=#{image_size} batch=#{batch} device=#{device}"
   end

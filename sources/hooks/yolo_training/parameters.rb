@@ -19,7 +19,7 @@ def startup_parameters
       startup_epochs: VStr.new(non_empty: true, natural: true),
       startup_image_size: VStr.new(non_empty: true, natural: true),
       startup_batch: VStr.new(non_empty: true, positive: true),
-      startup_device: VStr.new(non_empty: true, allowed_values: [ "cuda:0", "cuda", "cpu" ] )
+      startup_device: VStr.new(non_empty: true, allowed_values: [ "0", "1", "2", "3", "4", "5", "6", "7", "cuda", "cpu" ] ),
   }
 end
 

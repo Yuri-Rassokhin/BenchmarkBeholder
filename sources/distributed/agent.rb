@@ -32,7 +32,6 @@ class Agent < Object
   # @return [String] textual output of the method
   def run(host, method, *args)
     raise "Remote URL not set" unless host
-    raise "SSH user not set" unless user
     @error = nil
     case args.size
     when 0 then res_args = nil
@@ -54,7 +53,6 @@ class Agent < Object
  
   def detach(host, method, *args, dependencies: [])
     raise "Remote URL not set" unless host
-    raise "SSH user not set" unless user
     @error = nil
     case args.size
     when 0 then res_args = nil
@@ -87,7 +85,7 @@ class Agent < Object
   end
 
   def available?(host)
-    test = `ssh -o StrictHostKeyChecking=no #{@user}@#{host} sudo ls / 2>&1`
+    test = `ssh -o StrictHostKeyChecking=no #{host} sudo ls / 2>&1`
     if test.include?("terminal")
       set_error("passwordless sudo required on '#{host}'")
       return false
