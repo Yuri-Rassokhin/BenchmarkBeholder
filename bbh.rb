@@ -5,6 +5,7 @@ require 'open3'
 require 'tempfile'
 require 'date'
 require 'method_source'
+require 'mysql2'
 
 require './sources/logger.rb'
 require './sources/basic/validation'
@@ -12,25 +13,21 @@ require './sources/config/generic_config.rb'
 require './sources/config/general_config.rb'
 require './sources/distributed/agent.rb'
 require './sources/parser.rb'
-require './sources/database/projects.rb'
-require './sources/database/benchmarks.rb'
+require './sources/database/database.rb'
 require './sources/collector.rb'
 require './sources/distributed/transfer.rb'
 
-version = "4.0"
 series = Time.now.to_i.to_s
-
 logger = CustomLogger.new(series)
-parser = Parser.new(version, logger, ARGV[0])
-db_projects = Projects.new()
-config = GeneralConfig.new(ARGV[0], db_projects.codes)
+parser = Parser.new(logger, ARGV[0])
+database = Database.new
+config = GeneralConfig.new(ARGV[0], database.project_codes)
 parser.check(config.get(:series_benchmark))
-db_benchmarks = Benchmarks.new(config.get(:series_benchmark))
 
 agent = Agent.new(config.get(:infra_user), nil)
 
 config.get(:infra_hosts).each do |host|
-  logger.note("availability of the node '#{host}'") do
+  logger.note("availability of '#{host}'") do
     logger.error("'#{host}' is unavailable, #{agent.error}") if !agent.available?(host)
   end
 end
@@ -60,10 +57,10 @@ logger.note("specification of kernel IO schedulers") do
 end
 
 config.get(:infra_hosts).each do |host|
-  logger.note("if the node '#{host}' has idle CPU") do
+  logger.note("if CPU is idle on '#{host}'") do
     logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
   end
-  logger.note ("if the node '#{host}' has idle storage") do
+  logger.note ("if storage is idle on '#{host}'") do
     logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host, :io_idle) < 90
   end
 end
@@ -95,7 +92,7 @@ full_config.merge(config)
 # TODO: This parameter is benchmark-specific and may not be need for other benchmarks?..
 # check if a media the benchmark is going to read from/write to exists on the nodes
 full_config.get(:infra_hosts).each do |host|
-  logger.note("media #{full_config.get(:startup_media)} on '#{host}'") do
+  logger.note("media '#{full_config.get(:startup_media)}' on '#{host}'") do
     logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_media))
     end
 end
@@ -108,6 +105,7 @@ full_config.get(:startup_media))
 end
 
 # assign collector, aka permanent agent, for each node
+# during creation, collector gathers all static data about its infrastructure
 mode = full_config.get(:infra_hosts).size > 1 ? "multiple" : "single"
 logger.note("agent on each node") do
   full_config.get(:infra_hosts).each do |host|
@@ -115,12 +113,16 @@ logger.note("agent on each node") do
   end
 end
 
+# create database table for the requested benchmark, if it doesn't exist yet
+schema = load "./sources/hooks/#{class_needed.downcase}/schema.rb"
+database.table_set(full_config.get(:series_benchmark), schema)
+
 # Calculate size of the parameter space, and add it to the config for reporting purposes
 full_config.merge({ iteratable_size: full_config.iteratable_size })
 
 logger.note("launch on the node(s)") do
   full_config.get(:infra_hosts).each do |host|
-    collector[host].run(host, :launch, full_config)
+    collector[host].run(host, :launch, full_config.merge(collector[host].infra_static))
 #    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
   end
 end
