@@ -21,6 +21,7 @@ FileUtils.touch("#{srcdir}/launch.rb")
 FileUtils.touch("#{srcdir}/schema.rb")
 FileUtils.touch("#{srcdir}/config.rb")
 FileUtils.touch("#{srcdir}/#{hook}.rb")
+FileUtils.touch("#{srcdir}/parameters.rb")
 
 # populate class definition
 class_definition = <<~CLASS
@@ -41,12 +42,20 @@ config = <<~CONFIG
 class #{hook.capitalize}config < GenericConfig
 
   def initialize(conf_file)
-    @parameters = {
-    # ADD YOUR DEFINITIONS OF STARTUP AND ITERATABLE PARAMETERS
-    iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true)
-    }
+    @parameters = startup_parameters
+    @parameters << iterate_parameters
     load_conf(conf_file)
   end
+
+def startup_parameters
+  { }
+end
+
+def iterate_parameters
+  { }
+end
+
+  include Parameters
 
 end
 CONFIG
@@ -219,4 +228,25 @@ end
 end
 LAUNCH
 File.open("#{srcdir}/launch.rb", "a") { |file| file.write(launch) }
+
+# template file for workload-specific parameters
+parameters = <<~PARAMETERS
+module Parameters
+
+# ADD DEFINITIONS OF WORKLOAD-SPECIFIC STARTUP PARAMETERS
+def startup_parameters
+  {
+    iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true)
+  }
+end
+
+# ADD YOUR DEFINITIONS OF WORKLOAD-SPECIFIC ITERATABLE PARAMETERS
+def iterate_parameters
+  {
+  }
+end
+
+end
+PARAMETERS
+File.write("#{srcdir}/parameters.rb", parameters)
 
