@@ -13,8 +13,6 @@ def initialize(conf_file, project_codes)
 
     series_description: VStr.new(non_empty: true),
     series_benchmark: VStr.new(non_empty: true),
-    series_owner_name: VStr.new(non_empty: true, comma_separated: false),
-    series_owner_email: VStr.new(non_empty: true, comma_separated: false),
 
     startup_actor: VStr.new(non_empty: true, comma_separated: false),
     startup_target: VStr.new(non_empty: true),

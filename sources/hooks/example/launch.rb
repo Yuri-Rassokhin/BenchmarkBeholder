@@ -42,8 +42,6 @@ def push!(query, config)
       series_id = '#{config[:series]}',
       series_description = '\"#{config[:series_description]}\"',
       series_benchmark = '#{config[:series_benchmark]}',
-      series_owner_name = '#{config[:series_owner_name]}',
-      series_owner_email = '#{config[:series_owner_email]}',
       startup_actor = '#{config[:startup_actor]}',
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
@@ -76,6 +74,7 @@ def push(config, collect, iterate, startup)
   push!(query, config)
 end
 
+
   total_invocations = config[:parameter_space_size]
   target = config[:startup_target]
   actor = config[:startup_actor]
@@ -97,7 +96,7 @@ end
     command = "sleep 5 2>&1"
     raw_result = `#{command}`
 
-    # CUSTOMIZE: gather your collectable parameters    
+    # CUSTOMIZE: gather your collectable parameters
     collect = { }
 
     # CUSTOMIZE: add your iteratable parameters
