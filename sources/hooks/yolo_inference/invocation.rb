@@ -62,11 +62,12 @@ def invocation(config, iterator)
       "-k", "uvicorn.workers.UvicornWorker",
       "-w", processes.to_s,
       "-b", "0.0.0.0:8080",
-      "--pid", "gunicorn.pid",
       "--chdir", app_dir,
       "#{app_name}:app"
    ]
    env = { "DEVICE" => device }
+
+    puts target_array.join(" ")
 
    target_command = "DEVICE=#{device} #{target_array.join(' ')}"
 
@@ -81,13 +82,15 @@ def invocation(config, iterator)
   time_start = Time.now
   raw_result = `#{command}`
   inference_time = Time.now - time_start
-  server_raw_output = "" #reader.read
+  server_raw_output = "" #writer.read
+
+  `pkill gunicorn`
 
   # extract benchmark results
   error = (`echo "#{server_raw_output}" | grep "CUDA run out of memory"` << `echo "#{server_raw_output}" | grep -i "error | grep -vi dictionary"`)[0..499]
 
   # collect result
-  collect = { inference_time: inference_time, error: error, image_resolution: image_resolution, image_format: image_format, image_metadata: image_metadata }
+  collect = { inference_time: inference_time, error: error.chomp, image_resolution: image_resolution.chomp, image_format: image_format.chomp, image_metadata: image_metadata.chomp }
   iterate = { iteration: iterator[:iteration], processes: processes, requests: requests, device: device }
   startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(config[:startup_target_application]).gsub("'", "''")}
 
