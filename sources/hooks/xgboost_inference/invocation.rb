@@ -91,10 +91,14 @@ def invocation(config, iterator)
   requests_per_second = requests / inference_time
 
   `pkill gunicorn`
+  sleep(5)
+  
+  `fuser -k 8080/tcp`
+  sleep(3)
 
   # detect error in the output of the requests, and save erroneous log in the database
   error = ( raw_result.chomp.downcase.include?("error") ? raw_result.chomp : "")
-
+#  error = raw_result.chomp.downcase
   # collect all the results
   collect = { inference_time: inference_time, requests_per_second: requests_per_second, error: error[0..99], input_elements: raw_payload.size }
   iterate = { iteration: iterator[:iteration], processes: processes, requests: requests, device: device }
