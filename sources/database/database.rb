@@ -14,11 +14,10 @@ def project_codes
     return `mysql -N -B -e "select code from projects;"`.split("\n").join.tr("\"",'')
 end
 
-def table_set(name, schema)
-  raise "Benchmark database table cannot be nil" unless name
-  raise "Benchmark database table schema cannot be nil" unless schema
-  @table = name
-  @schema = schema
+def table_set(hook)
+  raise "Benchmark database table cannot be nil" unless hook
+  @table = hook
+  @schema = schema_set(hook)
   table_create if !table?
 end
 
@@ -30,6 +29,13 @@ def table_add_io_schedulers
 end
 
 private
+
+def schema_set(hook)
+  input = File.expand_path("../hooks/#{hook}/parameters.rb", __dir__)
+  require input
+  self.extend(Object.const_get(:Parameters))
+  database_parameters
+end
 
 def table?
   raise "Database table has not been specified" unless @table

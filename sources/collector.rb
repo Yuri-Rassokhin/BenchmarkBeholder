@@ -7,6 +7,7 @@ class Collector < Agent
   attr_reader :infra_static
 
 def initialize(config, url, mode_raw, logger, series, target)
+  @config = config
   user = config.get(:infra_user)
   super(user, url)
   @logger = logger
@@ -75,9 +76,9 @@ def initialize(config, url, mode_raw, logger, series, target)
   launch_set
 end
 
-def launch
-  file, line = caller_locations(1,1)[0].absolute_path, caller_locations(1,1)[0].lineno
-  logger.fatal("(#{file} line #{line}): method '#{__method__}' called must be implemented in benchmark-specific heir")
+def launch(*args)
+  puts("method 'launch' must be overridden")
+  exit
 end
 
 def completed
@@ -93,11 +94,11 @@ private
 
 # instantiate 'launch' method from the specificed hook
 def launch_set
-  hook = self.get(:series_benchmark)
-  input = File.expand_path("../hooks/#{hook}/input_parameters.rb", __dir__)
+  hook = @config.get(:series_benchmark)
+  input = File.expand_path("../sources/hooks/#{hook}/launch.rb", __dir__)
   require input
-  mod = Object.const_get(:InputParameters)
-  include mod # adds as instance method
+  mod = Object.const_get(:Launch)
+  self.class.prepend(mod) # adds as instance method
 end
 
 # gets root device name for a given partiion; NOTE: it doesn't work with RAID/LVM

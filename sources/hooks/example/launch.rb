@@ -1,5 +1,6 @@
-class Example < Collector
-def launch(config)
+module Launch
+
+  def launch(config)
 
 require 'open3'
 require 'mysql2'

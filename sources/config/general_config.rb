@@ -11,9 +11,9 @@ end
 
 def delayed_init
   hook = self.get(:series_benchmark)
-  input = File.expand_path("../hooks/#{hook}/input_parameters.rb", __dir__)
+  input = File.expand_path("../hooks/#{hook}/parameters.rb", __dir__)
   require input
-  self.extend(Object.const_get(:InputParameters))
+  self.extend(Object.const_get(:Parameters))
 
   parameters = startup_parameters
   parameters.merge!(iterate_parameters)

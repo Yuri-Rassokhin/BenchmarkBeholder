@@ -89,8 +89,7 @@ hosts.each do |host|
 end
 
 # create database table for the requested benchmark, if it doesn't exist yet
-load "./sources/hooks/#{class_needed.downcase}/output_parameters.rb"
-database.table_set(hook), OUTPUT_PARAMETERS)
+database.table_set(hook)
 
 if target.io_schedulers_apply?
 
@@ -124,7 +123,7 @@ end
 
 hosts.each do |host|
   config.merge(collector[host].infra_static)
-  logger.info("Launching workload '#{class_needed.downcase}' on '#{host}'")
+  logger.info("Launching workload '#{hook}' on '#{host}'")
   collector[host].detach(host, :launch, config)
 end
 
