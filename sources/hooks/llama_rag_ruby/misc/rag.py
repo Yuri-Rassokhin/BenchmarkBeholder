@@ -1,34 +1,48 @@
-from flask import Flask, request, jsonify
+
+# run me: 
+# uvicorn rag.py:app --host 0.0.0.0 --port 3000 --workers 4
+# Tune the number of workers to fairly saturate your CPU cores
+
+from fastapi import FastAPI, HTTPException, Request, Form
+from pydantic import BaseModel
 import os
 import requests
 import PyPDF2
 import faiss
 from sentence_transformers import SentenceTransformer
+from fastapi.responses import JSONResponse
 
-# Initialize the Flask app
-flask_app = Flask(__name__)
+# Initialize the FastAPI app
+app = FastAPI()
 
 # Configuration for the LLAMA vLLM endpoint
 LLAMA_API_ENDPOINT = "http://130.61.28.203:8000/v1/completions"  # Replace with your vLLM endpoint
 MODEL_NAME = "meta-llama/Llama-3.3-70B-Instruct"  # Specify your LLAMA model name from vLLM /v1/models
 
 # Load the embedding model
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
+#embedder = SentenceTransformer('all-MiniLM-L6-v2')
+embedder = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
 
 # Directory for PDF documents
 PDF_DIR = "pdf_documents"  # Replace with your directory containing PDF files
 
-@flask_app.route('/llama/qa', methods=['POST'])
-def document_question_answering():
+MAX_CHARS_PER_DOC = 30000
+
+# Input schema for validation
+class QuestionRequest(BaseModel):
+    question: str
+    max_tokens: int = 100
+    temperature: float = 0.1
+
+@app.post("/llama/qa")
+async def document_question_answering(request: QuestionRequest):
     try:
-        # Check if question is provided
-        if 'question' not in request.form:
-            return jsonify({"error": "Please provide a question."}), 400
+        question = request.question
+        max_tokens = request.max_tokens
+        temperature = request.temperature
 
-        question = request.form['question']
-        max_tokens = int(request.form.get('max_tokens', 200))
-        temperature = float(request.form.get('temperature', 0.7))
-
+        # May be needed to avoid contention under high load
+        # faiss.omp_set_num_threads(1)
         # Load FAISS index and metadata
         index = faiss.read_index("document_index.faiss")
         with open("file_metadata.txt", "r") as f:
@@ -38,7 +52,7 @@ def document_question_answering():
         question_embedding = embedder.encode([question])
 
         # Perform similarity search
-        k = 3  # Number of top documents to retrieve
+        k = 1  # Number of top documents to retrieve
         distances, indices = index.search(question_embedding, k)
         relevant_docs = [file_names[i] for i in indices[0]]
 
@@ -56,7 +70,7 @@ def document_question_answering():
 You are an AI assistant trained to answer questions based on the provided documents. 
 Here are the most relevant documents:
 
-{context}
+{context[:MAX_CHARS_PER_DOC]}
 
 Now, answer the following question:
 
@@ -77,23 +91,25 @@ Now, answer the following question:
 
         # Check for errors in the response
         if response.status_code != 200:
-            return jsonify({"error": f"LLAMA API error: {response.text}"}), response.status_code
+            raise HTTPException(status_code=response.status_code, detail=f"LLAMA API error: {response.text}")
 
         # Parse the response
         llama_response = response.json()
         answer = llama_response.get("choices", [{}])[0].get("text", "").strip()
 
         # Return the answer and relevant document names
-        return jsonify({
+        return {
             "question": question,
             "answer": answer,
             "relevant_documents": relevant_docs
-        })
+        }
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-if __name__ == '__main__':
-    flask_app.run(host='0.0.0.0', port=3000)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=3000)
+
 
