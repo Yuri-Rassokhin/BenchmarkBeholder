@@ -30,7 +30,11 @@ logger = CustomLogger.new(series)
 parser = Parser.new(logger, ARGV)
 database = Database.new(logger)
 config = GeneralConfig.new(parser.conf_file, database.project_codes)
-parser.check(config.get(:series_benchmark))
+
+hook = config.get(:series_benchmark)
+hosts = config.get(:infra_hosts)
+
+parser.check(hook)
 
 agent = Agent.new(config.get(:infra_user), nil)
 
@@ -38,8 +42,6 @@ agent = Agent.new(config.get(:infra_user), nil)
 # This will maximize the performance of inter-host communication
 logger.info("Checking SSH persistance on the central node")
 `./sources/misc/ssh_sharing.sh`
-
-hosts = config.get(:infra_hosts)
 
 hosts.each do |host|
   logger.info("Checking SSH availability of benchmark node '#{host}'")
@@ -80,15 +82,15 @@ config.set(:startup_target, target.path)
 
 # collector is a permanent agent assigned to each node to store its infrastructure information and perform actions on it
 collector = Hash.new
-mode = config.get(:infra_hosts).size > 1 ? "multiple" : "single"
-config.get(:infra_hosts).each do |host|
+mode = hosts.size > 1 ? "multiple" : "single"
+hosts.each do |host|
   logger.info("Initializing workload '#{class_needed.downcase}' on '#{host}'")
   collector[host] = Collector.new(config, host, mode, logger, series, target)
 end
 
 # create database table for the requested benchmark, if it doesn't exist yet
 load "./sources/hooks/#{class_needed.downcase}/output_parameters.rb"
-database.table_set(config.get(:series_benchmark), OUTPUT_PARAMETERS)
+database.table_set(hook), OUTPUT_PARAMETERS)
 
 if target.io_schedulers_apply?
 
@@ -120,11 +122,11 @@ end
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
-config.get(:infra_hosts).each do |host|
+hosts.each do |host|
   config.merge(collector[host].infra_static)
   logger.info("Launching workload '#{class_needed.downcase}' on '#{host}'")
   collector[host].detach(host, :launch, config)
 end
 
-logger.info("Workload '#{config.get(:series_benchmark)}' series #{series} has launched on '#{config.get(:infra_hosts).join(', ')}'")
+logger.info("Workload '#{hook}' series #{series} has launched on '#{hosts.join(', ')}'")
 
