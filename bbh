@@ -27,26 +27,23 @@ parser.check(config.get(:series_benchmark))
 agent = Agent.new(config.get(:infra_user), nil)
 
 config.get(:infra_hosts).each do |host|
-  logger.note("availability of '#{host}'") do
-    logger.error("'#{host}' is unavailable, #{agent.error}") if !agent.available?(host)
-  end
+  logger.info("Checking availability of '#{host}'")
+  logger.error("'#{host}' is unavailable, #{agent.error}") if !agent.available?(host)
 end
 
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
 config.get(:infra_hosts).each do |host|
-  logger.note("benchmark executable on '#{host}'") do
+  logger.info("Checking benchmark executable on '#{host}'")
     logger.error("#{config.get(:startup_executable)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_executable))
-    end
 end
 
 # enable all available kernel IO schedulers on the nodes
-logger.note("available kernel IO schedulers") do
+logger.info("Checking available kernel IO schedulers")
   config.get(:infra_hosts).each do |host|
     %w[mq-deadline kyber bfq none].each do |scheduler|
       `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} sudo modprobe -q #{scheduler}`
     end
-  end
 end
 
 logger.note("specification of kernel IO schedulers") do
