@@ -174,7 +174,7 @@ end
 def check_raid(main_dev_name)
   raid_level = `grep #{main_dev_name} /proc/mdstat | tr ' ' '\n' | grep raid | sed -e 's/raid//'`.strip
   if raid_level.empty?
-    { raid_members: "", raid_members_amount: 1, storage_type: "\"Single Drive\"" }
+    { raid_members: "n/a", raid_members_amount: 1, storage_type: "\"Single Drive\"" }
   else
     raid_members = `grep #{main_dev_name} /proc/mdstat | tr ' ' '\n' | sed -n 's/\\[.*//p'`.strip
     raid_members_amount = raid_members.lines.count
