@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+
+if [ -z "$1" ]; then
+  echo "Usage: workload.template <workload_name>"
+  exit 0
+fi
+
+hook="$1"
+confdir=./workloads
+srcdir=./sources/hooks/$hook
+
+# template for workload configuration
+touch $confdir/$hook.rb
+
+# template for integration hook
+mkdir -p $srcdir
+mkdir -p $srcdir/misc
+touch $srcdir/launch.rb
+touch $srcdir/schema.rb
+touch $srcdir/config.rb
+touch $srcdir/$hook.rb
+
+# populate class definition
+
+class Yolo_inference_fastapi_uvicorn_gpu < Collector
+
+def initialize(config, url, mode, logger, series, target)
+  super(config, url, mode, logger, series, target)
+end
+
+require_relative 'launch'
+
+end
