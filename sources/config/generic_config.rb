@@ -73,9 +73,17 @@ class GenericConfig < Object
     @parameters.each do |parameter, value|
       iter = value.value if parameter == :iterate_iterations
       next if parameter == :iterate_iterations or parameter == :parameter_space_size
-      puts "#{parameter}: #{value}" if iteratable?(parameter)
+      if block_given?
+        yield "#{parameter}: [ #{value} ]" if iteratable?(parameter)
+      else
+        puts "#{parameter}: [ #{value} ]" if iteratable?(parameter)
+      end
     end
-    puts "iterate_iterations: #{iter}"
+    if block_given?
+      yield "iterate_iterations: [ #{(1..iter).to_a.join(", ")} ]"
+    else
+      puts "iterate_iterations: [ #{(1..iter).to_a.join(", ")} ]"
+    end
   end
 
   def merge(config_object)

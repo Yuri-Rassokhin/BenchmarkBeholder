@@ -119,9 +119,9 @@ end
 # Calculate size of the parameter space, and add it to the config for reporting purposes
 parameter_space_size = config.parameter_space_size
 config.merge({ parameter_space_size: parameter_space_size })
-logger.info("parameter space size: #{parameter_space_size} invocations")
 if parser.mode == :space
-  config.parameter_space_dimensions
+  config.parameter_space_dimensions { |line| logger.info("dimension #{line}") }
+  logger.info("parameter space size is #{parameter_space_size} invocations")
   exit 0
 end
 
