@@ -25,13 +25,10 @@ def initialize(target, health = nil)
   # determine path to the target
   @path = path(target)
   raise "target path is undefined" unless @path
-
 end
 
 def output_supported
-  @SUPPORTED.each |type, description| do
-    puts "#{type}://   #{description.uppercase}"
-  end
+  @SUPPORTED.each { |target| puts "#{target.type}://   #{target.description.uppercase}" }
 end
 
 def supports_fs?
@@ -58,9 +55,7 @@ def path(target)
 end
 
 def supported?(target_type)
-  @SUPPORTED.each |type, description| do
-    return true if type == target_type
-  end
+  @SUPPORTED.each { |target| return true if target.type == target_type }
   false
 end
 

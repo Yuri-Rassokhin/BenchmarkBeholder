@@ -16,6 +16,7 @@ require './sources/parser.rb'
 require './sources/database/database.rb'
 require './sources/collector.rb'
 require './sources/distributed/transfer.rb'
+require './sources/approach/target.rb'
 
 if false
   require './profiling/profiler.rb'
