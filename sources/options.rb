@@ -2,7 +2,7 @@ require 'optparse'
 
 class Options
 
-attr_reader :mode, :hosts, :workload, :debug
+attr_reader :mode, :hosts, :workload, :debug, :user
 
 def initialize(logger, argv)
   @logger = logger
@@ -11,6 +11,7 @@ def initialize(logger, argv)
   @workload = nil
   @hooks = Dir.entries("./sources/hooks") - %w[. ..]
   @debug = false
+  @user = nil
   options_parse(argv)
 end
 
@@ -26,7 +27,7 @@ def options_parse(argv)
   options = {}
 
   parser = OptionParser.new do |opts|
-    opts.banner = "Usage: bbh [-v] [-h] [-p] [-s] [workload_file] [host] ..."
+    opts.banner = "Usage: bbh [-v] [-h] [-d] [-u] [-s] [workload_file] [host] ..."
 
     opts.on('-h', '--help', 'Show help') do
       opts.to_s.each_line { |line| @logger.info line.chomp }
@@ -37,11 +38,15 @@ def options_parse(argv)
       @debug = true
     end
 
-    opts.on('-s', '--space', 'calculate parameter space size of the workload on host(s)') do
+    opts.on('-u', '--user', 'Manage user of the benchmark database') do
+      options[:user] = true
+    end
+
+    opts.on('-s', '--space', 'Calculate parameter space size of the workload on host(s)') do
       options[:space] = true
     end
 
-    opts.on('-v', '--version', 'show supported workloads and environments') do
+    opts.on('-v', '--version', 'Show supported workloads and environments') do
       options[:version] = true
     end
   end
@@ -52,7 +57,7 @@ def options_parse(argv)
   # Handle cases based on parsed options
   if options[:version]
     version_show
-    exit
+    exit 0
   elsif options[:space]
     if args.empty?
       @logger.error "-s requires workload file and at least one host"
@@ -61,6 +66,24 @@ def options_parse(argv)
     @mode = "space"
     @workload = args.shift
     @hosts ||= args
+  elsif options[:user]
+    if args.empty? then @logger.error "-u requires user action, add or delete" end
+    case args[0]
+    when "add"
+      if args.size !=3 then @logger.error "'-u add' requires 'full name' and email" end
+      full_name = args[1]
+      email = args[2]
+      username = email.split('@').first
+      @mode = "user"
+      @user = { operation: :add, full_name: full_name, username: username, email: email }
+    when "delete"
+      if args.size != 2 then @logger.error "'-u delete requires username" end
+      username = args[1]
+      @mode = "user"
+      @user = { operation: :delete, username: username }
+    else
+      @logger.error "unknown user operation"
+    end
   else
     if args.empty?
       @logger.error "missing arguments, use -h for help"
