@@ -84,7 +84,7 @@ config.set(:startup_target, target.path)
 collector = Hash.new
 mode = hosts.size > 1 ? "multiple" : "single"
 hosts.each do |host|
-  logger.info("Initializing workload '#{class_needed.downcase}' on '#{host}'")
+  logger.info("Initializing workload '#{hook}' on '#{host}'")
   collector[host] = Collector.new(config, host, mode, logger, series, target)
 end
 
