@@ -333,8 +333,8 @@ end
         $step += 1
         $time_passed += Time.now - start_time
     end
-  end
   message(:footer, "#{config[:tier]} series #{config[:series]} of #{config[:series_description]} on the host #{config[:host]}", config)
+  end
 end
 
 end
