@@ -2,7 +2,7 @@ class Exampleconfig < GenericConfig
 
   def initialize(conf_file)
     @parameters = startup_parameters
-    @parameters << iterate_parameters
+    @parameters.merge(iterate_parameters)
     load_conf(conf_file)
   end
 
