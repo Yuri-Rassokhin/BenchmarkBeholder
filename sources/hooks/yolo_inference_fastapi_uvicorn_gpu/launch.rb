@@ -120,12 +120,14 @@ end
     server_raw_output = reader.read
 
     # kill the inference server
-    Process.kill("TERM", target) rescue nil
+    #system('pkill -f "uvicorn" > /dev/null 2>&1')
+    Process.kill("TERM", target) rescue nil # TODO: check if previous isntance is dead
 
     # extract benchmark results
     inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`
     request_error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`
-    failed_requests = ( request_error_count == "0" ? "" : "#{request_error_count} requests failed" )
+    failed_requests = ( request_error_count == 0 ? "" : request_error_count )
+    puts failed_requests
 
     cuda_error = `server_raw_output | grep "CUDA run out of memory"`[0..499]
     response_error = `server_raw_output | grep -i "error | grep -vi dictionary"`[0..499]
