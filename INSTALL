@@ -109,3 +109,6 @@ EOF
 }
 
 echo "Done"
+
+echo "Don't forget to set MySQL access in ~/.my.cnf"
+
