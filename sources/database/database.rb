@@ -68,6 +68,7 @@ def table_create_generic
 
       startup_actor VARCHAR(100) NOT NULL,
       startup_command VARCHAR(500) NOT NULL,
+      startup_language VARCHAR(20) NOT NULL,
 
       iterate_iteration INT NOT NULL,
       
@@ -82,9 +83,7 @@ def table_create_generic
       infra_kernel VARCHAR(50) NOT NULL,
       infra_cpu VARCHAR(50) NOT NULL,
       infra_cores INT NOT NULL,
-      infra_ram BIGINT NOT NULL,
-
-      collect_error VARCHAR(500)
+      infra_ram BIGINT NOT NULL
     )
   SQL
 end
