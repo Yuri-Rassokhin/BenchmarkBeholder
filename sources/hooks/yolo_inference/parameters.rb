@@ -29,7 +29,7 @@ def iterate_parameters
 end
 
 # ADD ME: here, define everything that goes to database, in addition to default data
-# For instance, OUTPUT_PARAMETERS= "add column collect_inference_time double(20,16) not null, add column iterate_processes int not null"
+# For instance, "add column collect_inference_time double(20,16) not null, add column iterate_processes int not null"
 def database_parameters
   "
     add column collect_inference_time double(20,16) not null,
