@@ -6,7 +6,7 @@ $series_description = 'requests per second for YOLO object classification on #{m
 
 $startup_actor = "self"
 $startup_target = "http://127.0.0.1:8080/predict" # protocols: file, device, http, object, bucket, ram
-$startup_target_application = "/tmp/fastapi.py"
+$startup_target_application = "/tmp/target_fastapi.py"
 
 $iterate_iterations = 4
 $iterate_processes = "1, 2, 4, 8, 16, 32, 64"
