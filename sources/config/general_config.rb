@@ -48,7 +48,7 @@ def general_parameters
 # TODO: THIS MUST BE APPLICATION-SPECIFIC
 #    collect_frequency: VNum.new(positive: true, greater: 0.1),
 #    collect_grace_period: VNum.new(natural: true, positive: true),
-    infra_platform: VStr.new(non_empty: true, allowed_values: [ "oci" ]),
+    infra_platform: VStr.new(non_empty: true, allowed_values: [ "oci", "azure" ]),
     infra_hosts: VStr.new(non_empty: true, comma_separated: true),
     infra_user: VStr.new(non_empty: true, comma_separated: false),
   }
