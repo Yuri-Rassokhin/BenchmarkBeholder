@@ -19,9 +19,9 @@ require './sources/distributed/transfer.rb'
 
 series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
-parser = Parser.new(logger, ARGV[0])
+parser = Parser.new(logger, ARGV)
 database = Database.new
-config = GeneralConfig.new(ARGV[0], database.project_codes)
+config = GeneralConfig.new(parser.conf_file, database.project_codes)
 parser.check(config.get(:series_benchmark))
 
 agent = Agent.new(config.get(:infra_user), nil)
@@ -56,12 +56,14 @@ logger.note("specification of kernel IO schedulers") do
   end
 end
 
-config.get(:infra_hosts).each do |host|
-  logger.note("if CPU is idle on '#{host}'") do
-    logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
-  end
-  logger.note ("if storage is idle on '#{host}'") do
-    logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host, :io_idle) < 90
+unless parser.mode == :time
+  config.get(:infra_hosts).each do |host|
+    logger.note("if CPU is idle on '#{host}'") do
+      logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
+    end
+    logger.note ("if storage is idle on '#{host}'") do
+      logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host, :io_idle) < 90
+    end
   end
 end
 
@@ -86,7 +88,7 @@ require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}.rb"
 require "./sources/hooks/#{class_needed.downcase}/config.rb"
 
 # create benchmark-specific config and merge the general config into it
-full_config = Object.const_get("#{class_needed}config").new(ARGV[0])
+full_config = Object.const_get("#{class_needed}config").new(parser.conf_file)
 full_config.merge(config)
 
 # first phase of description substituion - here we substitute all the variables from the config file
@@ -129,7 +131,12 @@ load "./sources/hooks/#{class_needed.downcase}/schema.rb"
 database.table_set(full_config.get(:series_benchmark), SCHEMA)
 
 # Calculate size of the parameter space, and add it to the config for reporting purposes
-full_config.merge({ iteratable_size: full_config.iteratable_size })
+parameter_space = full_config.iteratable_size
+full_config.merge({ iteratable_size: parameter_space })
+if parser.mode == :time
+  logger.info("parameter space is #{parameter_space} invocations")
+  exit 0
+end
 
 logger.note("launch on the node(s)") do
   full_config.get(:infra_hosts).each do |host|
