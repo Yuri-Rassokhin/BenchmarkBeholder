@@ -28,7 +28,7 @@ end
 series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
 parser = Parser.new(logger, ARGV)
-database = Database.new
+database = Database.new(logger)
 config = GeneralConfig.new(parser.conf_file, database.project_codes)
 parser.check(config.get(:series_benchmark))
 

@@ -1,7 +1,10 @@
 
 class Database < Object
 
-def initialize
+require 'io/console'
+
+def initialize(logger)
+  @logger = logger
   @table = nil
   @client = Mysql2::Client.new(default_file: '~/.my.cnf')
   @schema = nil
@@ -14,7 +17,6 @@ end
 def table_set(name, schema)
   raise "Benchmark database table cannot be nil" unless name
   raise "Benchmark database table schema cannot be nil" unless schema
-
   @table = name
   @schema = schema
   table_create if !table?
@@ -23,7 +25,7 @@ end
 def table_add_io_schedulers
   return if table?
   raise "Database table has not been specified" unless @table
-  puts "alter table #{@table} add iterate_scheduler varchar(50) not null;"
+#  puts "alter table #{@table} add iterate_scheduler varchar(50) not null;"
   @client.query("alter table #{@table} add iterate_scheduler varchar(50) not null;")
 end
 
@@ -37,9 +39,11 @@ end
 
 def table_create
   raise "Database table has not been specified" unless @table
-  table_create_generic
-  table_add_specific
-  create_triggers
+  db_admin("creation") do
+    table_create_generic
+    table_add_specific
+    create_triggers
+  end
 end
 
 def create_triggers
@@ -49,8 +53,6 @@ end
 
 def create_trigger_project
 trigger_add_project_description = <<-SQL
-DELIMITER //
-
 CREATE TRIGGER add_project_description
 BEFORE INSERT ON #{@table}
 FOR EACH ROW
@@ -62,23 +64,18 @@ BEGIN
     LIMIT 1;
     SET NEW.project_description = project_description;
 END;
-//
-
-DELIMITER ;
 SQL
 @client.query(trigger_add_project_description)
 end
 
 def create_trigger_credentials
 trigger_add_credentials = <<-SQL
-DELIMITER //
-
 CREATE TRIGGER add_credentials
 BEFORE INSERT ON #{@table}
 FOR EACH ROW
 BEGIN
     DECLARE user_name VARCHAR(100) DEFAULT 'undefined';
-    DECLARE user_email VARCHAR(100) DEFAULT 'undefined’;
+    DECLARE user_email VARCHAR(100) DEFAULT 'undefined';
     DECLARE plain_username VARCHAR(50);
     SET plain_username = SUBSTRING_INDEX(USER(), '@', 1);
     SELECT name, email INTO user_name, user_email
@@ -88,9 +85,6 @@ BEGIN
     SET NEW.series_owner_name = user_name;
     SET NEW.series_owner_email = user_email;
 END;
-//
-
-DELIMITER ;
 SQL
 @client.query(trigger_add_credentials)
 end
@@ -139,6 +133,30 @@ def table_create_generic
       infra_ram BIGINT NOT NULL
     )
   SQL
+end
+
+def db_admin(operation, &block)
+  regular_client = @client
+  @logger.info("Admin rights requested for the #{operation} of the table '#{@table}'")
+  # Ask for ADMIN explicitly
+  print "Enter ADMIN username: "
+  username = IO.console.gets.chomp
+  print "Enter ADMIN password: "
+  password = IO.console.noecho(&:gets).chomp
+  puts # Move to the next line after password input
+
+  begin
+    @client = Mysql2::Client.new(
+      username: username,
+      password: password,
+      default_file: File.expand_path('~/.my.cnf')
+    )
+    yield
+  rescue Mysql2::Error => e
+    @logger.error("Can't access database as admin: #{e.message}")
+  ensure
+    @client = regular_client
+  end
 end
 
 end
