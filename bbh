@@ -47,6 +47,11 @@ hosts.each do |host|
 end
 
 hosts.each do |host|
+  logger.info("Checking if another BBH instance is running on benchmark node '#{host}'")
+  logger.error("another instance of BBH is running on '#{host}'") if agent.run(host, :bbh_running?) == "true"
+end
+
+hosts.each do |host|
   logger.info("Checking CLI dependencies on benchmark node '#{host}'")
   [ "ruby", "curl", "mpstat", "iostat" ].each { |tool| logger.error("'#{tool}' is missing ") if !agent.run(host, :file_exists?, "#{tool}") }
 end
