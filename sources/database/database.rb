@@ -62,8 +62,8 @@ def table_create_generic
       series_id INT NOT NULL,
       series_benchmark VARCHAR(50) NOT NULL,
       series_description VARCHAR(500),
-      series_owner_name VARCHAR(50) NOT NULL,
-      series_owner_email VARCHAR(50) NOT NULL,
+      series_owner_name VARCHAR(50),
+      series_owner_email VARCHAR(50),
 
       startup_actor VARCHAR(100) NOT NULL,
       startup_command VARCHAR(500) NOT NULL,

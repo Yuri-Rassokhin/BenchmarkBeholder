@@ -61,19 +61,12 @@ def push!(query, config)
   mysql.query(generic_query << query << ";")
 end
 
-# CUSTOMIZE: add your "collect" and "iterate" parameters in query
+# construct workload-specific part of the output data for the database
 def push(config, collect, iterate, startup)
-  query = <<-SQL
-      collect_inference_time = '#{collect[:inference_time]}',
-      collect_failed_requests = '#{collect[:failed_requests]}',
-      collect_cuda_error = '\"#{collect[:cuda_error]}\"',
-      collect_response_error = '\"#{collect[:response_error]}\"',
-      iterate_iteration = '#{iterate[:iteration]}',
-      iterate_processes = '#{iterate[:processes]}',
-      iterate_requests = '#{iterate[:requests]}',
-      startup_command = '\"#{startup[:command]}\"',
-      startup_language = '\"#{startup[:language]}\"'
-  SQL
+  query = ""
+  collect.each_key { |p| query << "collect_#{p} = '#{collect}[:#{p}]'" }
+  iterate.each_key { |p| query << "iterate_#{p} = '#{iterate}[:#{p}]'" }
+  startup.each_key { |p| query << "startup_#{p} = '#{startup}[:#{p}]'" }
   push!(query, config)
 end
 
@@ -112,12 +105,12 @@ end
 
     # gather everything to push it to the database
     # CUSTOMIZE: extract values from raw_result and any other infrastructure mettrics, if you defined any
-    collect = { inference_time: "", failed_requests: "", cuda_error: "", response_error: "" }
+    collect = { }
     iterate = { iteration: iteration }
     startup = { command: command.gsub("'", "''"), language: language }
 
     # CUSTOMIZE: when you have prepared collectables, iteratables, and startup values above, uncomment push statement below to push it all to database
-    #push(config, collect, iterate, startup)
+    push(config, collect, iterate, startup)
   end
 end
 
