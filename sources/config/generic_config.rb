@@ -16,7 +16,7 @@ class GenericConfig < Object
   end
 
   # given hash of parameters, fulfills their values from a given file
-  def load_conf(file, project_codes: , parameters: nil)
+  def load_conf(file, project_codes: nil, parameters: nil)
     # from config file, assign all the values to internal config object, and validate their correctness
     load file
     if parameters == nil
