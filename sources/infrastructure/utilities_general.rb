@@ -5,6 +5,10 @@ require 'tempfile'
 
 module UtilitiesGeneral
 
+  def args_show(args)
+    puts args
+  end
+
 #  def out(status, output)
 #    puts "[ " + status.to_s + ", #{output} ]"
 #  end
@@ -18,6 +22,16 @@ module UtilitiesGeneral
   end
 
   def count_gpu
+
+    def gpu?
+      if `lspci | grep -i nvidia`.empty?
+        return false
+      elsif `which nvidia-smi`.empty?
+        return false
+      end
+      true
+    end
+
     if gpu?
       `nvidia-smi --list-gpus | wc -l`.strip
     else
@@ -110,6 +124,8 @@ def get_filesystem_block_size(main_dev, filesystem)
     `sudo tune2fs -l #{main_dev} | grep -i "block size" | awk '{print $3}'`.strip
   when "xfs"
     `xfs_info #{main_dev} | grep bsize | grep data | sed -e 's/^.*bsize=//' | awk '{print $1}'`.strip
+  when "vboxsf"
+    "n/a"
   else
     "error: unsupported filesystem '#{filesystem}'"
   end

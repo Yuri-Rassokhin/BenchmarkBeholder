@@ -10,6 +10,16 @@ def gpu?
 end
 
 def get_nvidia_versions
+
+def gpu?
+  if `lspci | grep -i nvidia`.empty?
+    return false
+  elsif `which nvidia-smi`.empty?
+    return false
+  end
+  true
+end
+
   if gpu?
     nvidia_driver_version = `nvidia-smi | grep NVIDIA-SMI | awk '{print $6}'`.strip
     nvidia_cuda_version = `nvidia-smi | grep NVIDIA-SMI | awk '{print $9}'`.strip
@@ -21,6 +31,16 @@ def get_nvidia_versions
 end
 
 def get_gpu_consumption(number_installed_gpus)
+
+def gpu?
+  if `lspci | grep -i nvidia`.empty?
+    return false
+  elsif `which nvidia-smi`.empty?
+    return false
+  end
+  true
+end
+
   if gpu?
     consumption = `nvidia-smi --query-gpu=utilization.gpu --format=csv`
     gpu_consumptions = Array.new(number_installed_gpus) { |i| consumption.split("\n")[i + 1].split(',')[0].strip.to_i rescue -1 }
@@ -36,12 +56,30 @@ def get_gpu_consumption(number_installed_gpus)
 end
 
 def check_gpu_idle(gpu_consumptions)
+def gpu?
+  if `lspci | grep -i nvidia`.empty?
+    return false
+  elsif `which nvidia-smi`.empty?
+    return false
+  end
+  true
+end
+
   return if !gpu?
   load = gpu_consumptions.sum
   error("GPU load >= 10%, no good for benchmarking") if load >= 10
 end
 
 def check_gds(filesystem)
+def gpu?
+  if `lspci | grep -i nvidia`.empty?
+    return false
+  elsif `which nvidia-smi`.empty?
+    return false
+  end
+  true
+end
+
   if !gpu?
     gds_supported = "N/A"
   else
