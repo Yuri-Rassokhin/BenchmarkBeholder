@@ -150,18 +150,15 @@ def detach_remote(host, code)
   pid = fork do
     begin
       Net::SSH.start(host, @user, password: @password) do |ssh|
-        puts "STARTING"
         ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
         ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
         ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1")
         output("")
-        puts "DONE"
       end
     rescue => e
       # TODO: message error to TG
       # You could add a mechanism to log or send a message here
     ensure
-      puts "COMPLETED"
       # TODO: report completion in detached mode
     end
   end

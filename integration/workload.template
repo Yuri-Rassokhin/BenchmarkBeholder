@@ -181,41 +181,34 @@ def push(config, collect, iterate, startup)
   push!(query, config)
 end
 
+
   total_invocations = config[:parameter_space_size]
   target = config[:startup_target]
   actor = config[:startup_actor]
 
-  # CUSTOMIZE: add the modules required for your hook
-  #require 'oci'
-  #require 'pathname'
+  # CUSTOMIZE: add 'require' for the modules required for your hook
 
   # CUSTOMIZE: add initialization of the variables relevant to your target
   language = "bash"
-#  app = config[:startup_target_application]
-#  app = app.end_with?('.py') ? app.chomp('.py') : app
-#  app_dir = File.dirname(app)
-#  app_name = File.basename(app)
 
-  # CUSTOMIZE: add your dimensions here in the form config[:my_option].to_a
+  # CUSTOMIZE: add dimensions for your iteratable parameters in the form config[:my_option].to_a, for instance: config[:iterate_requests].to_a, comma-separated
   dimensions = [
     (1..config[:iterate_iterations]).to_a
-# ,
-#    config[:iterate_processes].to_a,
-#    config[:iterate_requests].to_a
   ]
 
-  # CUSTOMIZE: add your iterator names
+  # CUSTOMIZE: add names of your iteratables
   cartesian(dimensions).each do |iteration|
 
-    # CUSTOMIZE: add your semantics of the benchmark invocation
-
-    # execute the benchmark and capture its raw output
-    # CUSTOMIZE: build your owb benchmark invokation
+    # CUSTOMIZE: this is the main part, add your semantics of the benchmark invocation
     command = "sleep 5 2>&1"
     raw_result = `#{command}`
 
-    collect = { } # CUSTOMIZE: gather your collectable parameters
-    iterate = { iteration: iteration } # CUSTOMIZE: add your iteratable parameters
+    # CUSTOMIZE: gather your collectable parameters
+    collect = { }
+
+    # CUSTOMIZE: add your iteratable parameters
+    iterate = { iteration: iteration }
+
     startup = { command: command.gsub("'", "''"), language: language }
     push(config, collect, iterate, startup)
   end
