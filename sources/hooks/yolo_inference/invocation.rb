@@ -67,7 +67,7 @@ def invocation(config, iterator)
    ]
    env = { "DEVICE" => device }
 
-    puts target_array.join(" ")
+#   puts target_array.join(" ")
 
    target_command = "DEVICE=#{device} #{target_array.join(' ')}"
 

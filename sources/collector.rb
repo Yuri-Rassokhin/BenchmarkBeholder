@@ -145,7 +145,7 @@ end
 
 def iterator_format(iterator, config)
   seconds_left = ( $time_passed == 0 ? "TBD time" : human_readable_time((($time_passed)/$step)*(config[:parameter_space_size]-$step).to_i) )
-  "**Run #{$step} of #{config[:parameter_space_size]}\n\n#{iterator.to_s.gsub(':', '').gsub('=>', ': ').gsub('"', '')}\n\n#{seconds_left} left**"
+  "Run #{$step} of #{config[:parameter_space_size]}NEW#{iterator.to_s.gsub(':', '').gsub('=>', ': ').gsub('"', '')}NEW#{seconds_left} left"
 end
 
 def message(format, body, config)
@@ -160,17 +160,32 @@ def message(format, body, config)
   puts result
 end
 
+'''
 def msg(text)
     return if not $config[:chat_id]
     uri = URI("https://api.telegram.org/bot#{$config[:token]}/sendMessage")
     params = {
       chat_id: $config[:chat_id],
-      text: text,
-      parse_mode: 'MarkdownV2'
+      text: text
     }
     response = Net::HTTP.post_form(uri, params)
   rescue StandardError => e
     puts "Error: #{e.message}"
+end
+'''
+def msg(text)
+  return if not $config[:chat_id]
+
+  uri = URI("https://api.telegram.org/bot#{$config[:token]}/sendMessage")
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(uri.path, { 'Content-Type' => 'application/json' })
+  request.body = { chat_id: $config[:chat_id], text: text }.to_json
+
+  response = http.request(request)
+rescue StandardError => e
+  puts "Error: #{e.message}"
 end
 
 # Simple method to capture and resend all output (stdout and stderr) in real-time
@@ -190,7 +205,7 @@ def capture
     # Start a thread to read and output data as it comes
     output_thread = Thread.new do
       while (line = combined_r.gets)
-          msg(line)
+        msg(line.gsub("NEW", "\n"))
 #        File.open('output.log', 'a') { |file| file.write(line) }  # Write combined output to a file
       end
     end
@@ -294,7 +309,7 @@ end
   $time_passed = 0
   prepare(config)
   capture do
-    message(:header, "#{config[:project_tier].upcase} series #{config[:series]}, #{config[:series_description]}, #{config[:platform]} platform", config)
+    message(:header, "series #{config[:series]}NEWNEWTier: #{config[:project_tier].upcase}NEWNEWWorkload: #{config[:series_description]}NEWNEWPlatform: #{config[:platform]}", config)
     cartesian(dimensions(config)) do |vector|
         start_time = Time.now
         iterator = dim(vector)
