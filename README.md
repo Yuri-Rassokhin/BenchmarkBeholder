@@ -61,56 +61,132 @@ By default, all the three nodes are the host where you cloned the repo. If you w
 
 3. To make Benchmark Nodes store benchmark results in the database, ensure that HTTP port 3306 is accessible from Benchmark Nodes to Database Node.
 
-# Integrating Your Benchmark To BenchmarkBeholder
+# Integrating New Benchmark To BenchmarkBeholder
 
-Perhaps you want to benchmark a new workload. For the sake of example, let it be bandwidth of OCI Object Storage. To properly integrate the workload to BBH, let us plan the workload.
-Suppose we have a bucket named "coco-2017-images" in OCI Object Storage located in the namespace "qwertyuiop", and the bucket contains around 118,000 image files from the publicly available dataset COCO, version of 2017. Suppose we want to benchmark bandwidth of reading and writing of the entire dataset. Therefore, to launch BBH series, we have to specify operation (read or write), bucket name, and bucket namespace. Our target metric is bandwidth of reading/writing. Therefore, during the benchmarking, we will be collecting bandwidth of reading/writing of each image file. Additionally, we will be collecting CPU utilization and RAM utilization of the OCI compute instance reading from/writing to the bucket, to get additional insight of how comptute capacity can influence the target metric. When all the images have been read/written, we will be able to use BI tool (MS Excel, PowerBI, etc.) to calculate the bandwidth of reading/writing of the entire dataset the way we want. For instance, we may calculate the bandwidth as the average of the bandwidth of all the images in the dataset.
+## Describe the workload
 
-Now, we can configure this workload.
+Perhaps you want to run benchmarking of your new workload. For the sake of example, let us suppose that you have AI vision application, for which you train an AI model, and you want to maximize the performance of the training, which means that you want to reduce training time as much as possible.
 
-* **Actor:** no external executable needed, we will be reading directly from the integration hook.
-* **Target:** a bucket in OCI Object Storage named "coco-2017-images" located in the namespace "qwertyuiop".
-* **Operation:** either "read" or "write".
-* **Infrastructure:** OCI Compute Shape of the compute instance that runs the actor. Let's take Flex5.
+As your AI model trains on GPU devices, it reads massive amount of image files from some storage. Therefore, training time of your AI models depends on the bandwidth of the storage. To be exact, bandwidth of the storage should be good enough to keep GPU cores constantly busy, and there is no point for you to aim on even higher performance of the storage, because extra performance won't be able to accelerate trianing process if the GPU cores are fully saturated.
 
-To integrate this workload to BBH, we will do the following.
+Here it comes! You have just found yourself in a classical situation that requires performance benchmarking. Moreover, it requires multidimensial analysis of the most influential factors of the perfomance - and this is exactly what BenchmarkBeholder has been created for :)
 
-0. Create directory for the hook: `mkdir ./hooks/oci_object_storage`. This directory will contain all the integration of the workload to BBH.
+To reduce time of AI training and avoid unneeded extra cost, you have to clarify the following questions:
 
-1. Define workload-specific startup parameters. To launch the workload, we must know namespace of the bucket. Therefore, we are creating the file `./hooks/object_storage/config.rb`:
+1. What is the minimal bandwidth that keeps my GPU cores constantly busy close to 100% utilization?
 
-class Ddconfig < GenericConfig
+2. Of all storage options available on OCI, which one provides such optimal bandwidth at the minimal cost?
+
+3. Are there any other factors influencing performance of the storage?
+
+For the sake of brevity, let us assume that you have completed step 1 and found out the minimum required bandwidth is 5.0 gbps; and let us assume that you only have two storage options, local NVMe SSD in your compute instance, and object storage.
+
+Local NVMe drives do provide 5.0 gbps, hence the question: **is it even possible to hit 5.0 gbps on object storage, and if yes, then what influential factors should we consider?**
+
+Time has come to leverage BenchmarkBeholder to answer these questions.
+
+## Define workload components
+
+BenchmarkBeholder represents a workload as an **Actor** that initiates **Operation** on the **Target** and receives its result, all that happening in **Infrastructure**.
+Let us define all four components in our example.
+
+Perhaps the storage is an OCI Object Storage bucket named "coco-2017-images", located in the namespace "qwertyuiop", and the bucket contains all ~118,000 image files from the publicly available dataset COCO, version of 2017. Then the workload components will look like this.
+
+* **Actor:** as there is no any particular application involved, we will be reading/writing directly from the integration hook.
+* **Target:** A bucket named "coco-2017-images" located in the namespace "qwertyuiop".
+* **Operation:** Just "read" once we only run AI training on the image files.
+* **Infrastructure:** As we want to identify influential factors of the bandwidth, it makes sense to track CPU consumption and RAM consumption on the compute instance that run the actor; this way we will know if CPU or RAM can be a bottleneck.
+
+## Define workload-specific parameters
+
+Now that we defined workload components, let us decide what are the parameters specific to our workload?
+
+Workload parameters
+
+1. Startup Parameters
+	* Location of the actor (not workload-specific, BBH supports it automatically)
+	* Bucket name (not workload-specific, BBH supports target name automatically)
+	* Namespace name
+2. Parameters iteratable during benchmarking
+        * Name of operation (in our example, we are only interested in "read" though)
+3. Parameters collectable as result of every benchmark
+	* CPU consumption (not workload-specific, BBH supports it automatically)
+	* RAM consumption (not workload-specific, BBH supports it automatically)
+	* Bandwidth demonstrated on the operation on the current image file
+
+Note that many parameters that we need aren't specific for our workload - on the contrary, they are mandatory for ANY workload. Such parameters have already been implemented in BBH, and we don't actually have to consider their integration. Therefore, we have finalized the list of workload parameters:
+
+Workload-specific parameters
+
+1. Startup Parameters
+        * Namespace name
+2. Parameters iteratable during benchmarking
+        * Name of operation (in our example, we are only interested in "read" though)
+3. Parameters collectable as result of every benchmark
+	* Bandwidth demonstrated on the operation on the current image file
+
+## On workload parameters
+
+As we saw in the previous paragraph, BBH distinguishes three groups of workload parameters.
+
+* **Startup** are the input parameters that remain static during the benchmarking.
+
+* **Iterate** are the input parameters that vary during benchmarking. A Cartesian of allowed values of all the iteratable parameters is called **parameter space** of the workload. BBH traverses the parameters space running the actor on each combination of values of the iteratable parameters.
+
+* **Collect** are the output parameters that are calculated as BBH traverses the parameter space.
+
+This comprehensive and flexible approach to workload parameters is the real power of BBH.
+
+## Integrate the workload to BBH
+
+Now, we will integrate our workload-specific parameters to BenchmarkBeholder by creating so-called integration hook.
+
+1. Create directory for the hook: `mkdir ./hooks/oci_object_storage`. This directory will contain all the integration of the workload to BBH.
+
+2. Define workload-specific input parameters (that is, "startup" and "iterate") by creating the file `./hooks/object_storage/config.rb`. Note that it's a template, where only class name and two parameters must be manually defined.
+
+```
+# class name must be the same as the directory name for the hook, starting from a capital
+class Oci_object_storage < GenericConfig
 
   def initialize(conf_file) 
     @parameters = {
-      startup_namespace: VStr.new(non_empty: true), # Namespace must be non-empty string
-      iterate_operations: VStr.new(non_empty: true, comma_separated: true, allowed_values: ["read", "write"], iteratable: true) # Operations are given as the list of "read" or "write"
+      # Adding customer parameter: namespace, which must be a non-empty string
+      startup_namespace: VStr.new(non_empty: true),
+      # Adding custom parameters: operation, which is a list of operation names, but in our case can only be "read"
+      iterate_operations: VStr.new(non_empty: true, comma_separated: true, allowed_values: ["read"], iteratable: true)
     }
     load_conf(conf_file)
   end
 
 end
+```
 
-2. `./config/object_storage.rb`
+Definition of the parameters above has a nuance, the directive `iteratable: true` for one of the two input parameters. This directive implements an extra flexibility for dealing with iteratable parameters. It simply denotes if the itereatlbe parameter should really be iterated through. This allows for dynamic enabling and disabling of particular dimensions during multi-dimensional analysis of performance.
+
+3. Finally, let us implement output parameters ("collect" ones) by adding SQL definition of such parameters to another template file `./sources/hooks/oci_object_storage/schema.rb`:
+
+```
+SCHEMA = "
+    add column collect_bandwidth int not null after iterate_operation
+  "
+```
+
+4. Define semantics of how to run the workload, and how to fetch its results, by adding manual code to the final template file `./sources/hooks/oci_object_storage/launch.rb`:
+
+TODO
+
+That's it, the new workload has been integrated in BBH. Now we can run the benchmark of the new workload, as described in the next paragraph.
+
+
+5. Add all the workload-specific input parameters (that is, "startup" and "iterate") to the workload configuration file `./config/oci_object_storage.rb` (file name must be identical to the hook name).
+
+## Run the benchmarking of the newly integrated workload
+
+Benchmarking configuration is defined in so-called **benchmark file**, where most of the parameters are available in BBH out of box, and some others are custom parameters integrated by the hook.
+
 ```
 $startup_namespace = "qwertyuiop" # workload-specific parameter
-$startup_operations = "read"
+$startup_operations = "read" # workload-specific parameter
 ```
-
-2. Specify type and allowed values of the startup parameters. To do this, we are adding the following to 
-
-class Ddconfig < GenericConfig
-
-  def initialize(conf_file)
-    @parameters = {
-      startup_namespace: VStr.new(non_empty: true), # Namespace must be non-empty string
-      iterate_operations: VStr.new(non_empty: true, comma_separated: true, allowed_values: ["read", "write"], iteratable: true) # Operations are given as the list of "read" or "write"
-    }
-    load_conf(conf_file)
-  end
-
-end
-
-2. Define workload-specific "collect" parameters. During the benchmarking we will be collecting 
-
 
