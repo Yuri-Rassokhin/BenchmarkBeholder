@@ -18,8 +18,8 @@ $startup_target_application = "/home/opc/yolo_server.py"
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_iterations = 4
-$iterate_processes = "30, 60"
-$iterate_requests = "30, 60"
+$iterate_processes = "30, 60, 120"
+$iterate_requests = "10, 20, 30, 60, 120, 240"
 
 # INFRASTRUCTURE
 $infra_hosts = "127.0.0.1" # Benchmark Hosts
