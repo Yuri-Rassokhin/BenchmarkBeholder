@@ -43,7 +43,7 @@ def push(config, output, iterators)
       startup_command = '\"#{iterators[:command]}\"',
       iterate_iteration = '#{iterators[:iteration]}'
   SQL
-  push!(query)
+  push!(query, config)
 end
 
   require 'open3'
