@@ -5,13 +5,19 @@
 source /etc/os-release
 
 if [[ "$ID" == "ol" ]] || [[ "$ID" == "rhel" ]] || [[ "$ID" == "centos" ]]; then
-        sudo yum -y install git ruby ruby-devel mysql sysstat rubygem-mysql2 rubygem
+        sudo yum -y install git ruby ruby-devel mysql sysstat rubygem-mysql2
         gem install --user-install method_source ruby-mysql2 ruby-mysql net-ssh sourcify
 elif [[ "$ID" == "ubuntu" ]]; then
         sudo apt -y install ruby ruby-dev ruby-mysql2 libmysqlclient-dev mysql-client sysstat
         gem install --user-install method_source mysql2 net-ssh sourcify
         export GEM_PATH="$(ruby -e 'puts Gem.user_dir'):$GEM_PATH"
 fi
+
+touch ~/.ssh/config
+echo "Host 127.0.0.1" >> ~/.ssh/config
+echo "	user $(whoami)" >> ~/.ssh/config
+
+exit 0
 
 ### Set up MySQL database for BBH
 
