@@ -20,6 +20,8 @@ def prepare(config = nil)
   require 'json'
   require 'thread'
   require 'method_source'
+
+  Process.setrlimit(:NOFILE, 65535)
 end
 
 def invocation(config, iterator)
@@ -41,10 +43,8 @@ def invocation(config, iterator)
 
   # Configuration
   url = URI("#{config[:startup_target_protocol]}://#{config[:startup_target]}")
-  puts url
   payload = {
-    "model": "meta-llama/Llama-3.3-70B-Instruct",
-    "prompt": config[:startup_question],
+    "question": config[:startup_question],
     "max_tokens": iterator[:tokens],
     "temperature": iterator[:temperature],
     "stop": ["\n"]
@@ -67,6 +67,8 @@ def invocation(config, iterator)
       begin
         # Send POST request
         http = Net::HTTP.new(url.host, url.port)
+        http.read_timeout = 3000 # Increase this value if needed
+        http.open_timeout = 120 # Increase if connection setup takes time
         request = Net::HTTP::Post.new(url, headers)
         request.body = payload
         response = http.request(request)
@@ -88,19 +90,26 @@ def invocation(config, iterator)
   threads.each(&:join)
   time_elapsed = Time.now - time_start
 
-  puts "BEGIN"
   # Print responses
   error_count = 0
   result = ""
+  ref = ""
+  failure = ""
   responses.each do |response|
-    parsed_body = JSON.parse(response[:body])
-    answer = parsed_body["choices"][0]["text"].strip
-    result << "#{answer} "
-    error_count += 1 if ( response[:status] != "200" or response[:error] )
+    if response[:error]
+      error_count += 1
+      failure << response[:error] << "; "
+      result = ""
+      ref = ""
+    else
+      parsed_body = JSON.parse(response[:body])
+      ref = parsed_body["relevant_documents"].join(", ")
+      answer = parsed_body["answer"].strip
+      puts answer
+      result << "#{answer} "
+    end
   end
-    puts result
-    puts "END"
-    collect = { processing_time: time_elapsed, failed_requests: error_count, request_time_ratio: time_elapsed/iterator[:requests], answer: sanitise(result) }
+  collect = { processing_time: time_elapsed, failed_requests: error_count, failure: failure, request_time_ratio: time_elapsed/iterator[:requests], answer: sanitise(result)[0..4095], references: sanitise(ref) }
     iterate = { iteration: iterator[:iteration], requests: iterator[:requests], tokens: iterator[:tokens], temperature: iterator[:temperature] }
     startup = { command: "self", language: "ruby", question: config[:startup_question] }
 

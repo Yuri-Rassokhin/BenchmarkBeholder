@@ -35,11 +35,13 @@ def database_parameters
     add column collect_processing_time double(20,16) not null,
     add column collect_request_time_ratio double(20,16) not null,
     add column collect_failed_requests int not null,
+    add column collect_failure varchar(1024),
     add column iterate_requests int not null,
     add column iterate_tokens int not null,
     add column iterate_temperature double(20,16) not null,
     add column startup_question varchar(500) not null,
-    add column collect_answer varchar(8192) not null
+    add column collect_answer varchar(4096) not null,
+    add column collect_references varchar(512)
   "
 end
 
