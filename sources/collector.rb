@@ -11,8 +11,8 @@ def initialize(config, url, mode_raw, logger, series, target)
   super(nil, url)
   @logger = logger
 
-  platform = config.get(:infra_platform)
-  shape = run!(:guess_shape, platform)
+  platform = run!(:guess_platform)
+  shape = run!(:guess_shape)
   src = config.get(:startup_target)
   main_dev = run!(:main_device, src)
 #  main_dev = File.basename(src) if main_dev == "udev"
@@ -52,6 +52,7 @@ def initialize(config, url, mode_raw, logger, series, target)
     storage_type: type,
     fs_block_size: run!(:get_filesystem_block_size, main_dev, filesystem),
     fs_mount_options: get_filesystem_mount_options(main_dev),
+    platform: platform,
     shape: shape,
     subshape: "",
     device: case filesystem

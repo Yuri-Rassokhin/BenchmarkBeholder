@@ -6,12 +6,12 @@ require 'io/console'
 def initialize(logger)
   @logger = logger
   @table = nil
-  @client = Mysql2::Client.new(default_file: '~/.my.cnf')
+  @client = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
   @schema = nil
 end
 
 def project_codes
-    return `mysql -N -B -e "select code from projects;"`.split("\n").join.tr("\"",'')
+  (`mysql -N -B -e "select code from projects;"`.split("\n"))
 end
 
 def table_set(hook)

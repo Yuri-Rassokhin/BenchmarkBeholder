@@ -6,7 +6,7 @@ class GeneralConfig < GenericConfig
 def initialize(conf_file, project_codes)
   @conf_file = conf_file
   @parameters = general_parameters
-  load_conf(conf_file, project_codes) { |p, v| v.checks = { allowed_values: project_codes } if  project_codes and p == :project_code }
+  load_conf(conf_file, project_codes: project_codes)
 end
 
 def delayed_init
@@ -48,9 +48,6 @@ def general_parameters
 # TODO: THIS MUST BE APPLICATION-SPECIFIC
 #    collect_frequency: VNum.new(positive: true, greater: 0.1),
 #    collect_grace_period: VNum.new(natural: true, positive: true),
-    infra_platform: VStr.new(non_empty: true, allowed_values: [ "oci", "azure" ]),
-#    infra_hosts: VStr.new(non_empty: true, comma_separated: true)
-#    infra_user: VStr.new(non_empty: true, comma_separated: false),
   }
 end
 
