@@ -65,16 +65,15 @@ def push!(query, config)
 end
 
 # CUSTOMIZE: add your "collect" and "iterate" parameters in query
-def push(config, collect, iterate)
+def push(config, collect, iterate, startup)
   query = <<-SQL
       collect_inference_time = '#{collect[:inference_time]}',
       collect_error = '#{collect[:error]}',
       iterate_iteration = '#{iterate[:iteration]}',
       iterate_processes = '#{iterate[:processes]}',
       iterate_requests = '#{iterate[:requests]}',
-      startup_command = '\"#{iterate[:command]}\"',
-      startup_language = '\"#{iterate[:language]}\"',
-      startup_target_application = '\"#{iterate[:target_application]}\"'
+      startup_command = '\"#{startup[:command]}\"',
+      startup_language = '\"#{startup[:language]}\"',
   SQL
   push!(query, config)
 end
@@ -89,6 +88,7 @@ end
 
   # CUSTOMIZE: add initialization of the variables relevant to your target
   language = "bash"
+  app = config[:startup_target_application]
 
   # CUSTOMIZE: add your dimensions here in the form config[:my_option].to_a
   dimensions = [
@@ -102,7 +102,7 @@ end
     # CUSTOMIZE: add your semantics of the benchmark invocation
 
     # launch the target: uvicorn+fastapi inference server
-    target = spawn("uvicorn yolo_server:app --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
+    target = spawn("uvicorn #{app}:app --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
     Process.detach(target)
     sleep(5)
 
@@ -114,15 +114,15 @@ end
     Process.kill("TERM", target)
 
     # extract benchmark results
-    inference_time = `echo #{raw_result} | grep "Requests per second" | awk '{print $4}'`
-    error_count = `echo #{raw_result} | grep "Failed requests" | awk '{print $3}'`
+    inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`
+    error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`
     error = ( error_count == "0" ? "" : "#{error_count} requests failed" )
 
     # push benchmark results to the database
     collect = { inference_time: inference_time, error: error }
     iterate = { iteration: iteration, processes: processes, requests: requests }
     startup = { command: command.gsub("'", "''"), language: language }
-    push(config, output, iterators, startup)
+    push(config, collect, iterate, startup)
 
   end
 end
