@@ -40,7 +40,11 @@ def invocation(config, iterator)
   batch = config[:startup_batch]
   device = config[:startup_device]
 
-  target_command = "#{target} task=detect mode=train model=#{model} data=#{dataset} epochs=#{epochs} imgsz=#{image_size} batch=#{batch} device=#{device}"
+  if model.include? "yolov5"
+    target_command = "python3 train.py --img #{image_size} --batch #{batch} --epochs #{epochs} --data #{dataset} --weights #{model}.pt --device #{device}"
+  else
+    target_command = "#{target} task=detect mode=train model=#{model}.pt data=#{dataset} epochs=#{epochs} imgsz=#{image_size} batch=#{batch} device=#{device}"
+  end
 
   time_start = Time.now
   raw_result = `#{target_command}`

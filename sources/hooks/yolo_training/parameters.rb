@@ -14,12 +14,12 @@ module Parameters
 # ADD DEFINITIONS OF WORKLOAD-SPECIFIC STARTUP PARAMETERS
 def startup_parameters
   {
-      startup_model: VStr.new(non_empty: true),
+      startup_model: VStr.new(non_empty: true, allowed_values: [ "yolov8n", "yolov8s", "yolov8m", "yolov8l", "yolov8x", "yolov5n", "yolov5s", "yolov5m", "yolov5l", "yolov5x" ]),
       startup_dataset: VStr.new(non_empty: true),
       startup_epochs: VStr.new(non_empty: true, natural: true),
       startup_image_size: VStr.new(non_empty: true, natural: true),
       startup_batch: VStr.new(non_empty: true, positive: true),
-      startup_device: VStr.new(non_empty: true, allowed_values: [ "cuda", "cpu" ] )
+      startup_device: VStr.new(non_empty: true, allowed_values: [ "cuda:0", "cuda", "cpu" ] )
   }
 end
 
