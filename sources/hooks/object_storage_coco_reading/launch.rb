@@ -3,6 +3,9 @@ class Object_storage_coco_reading < Collector
 
 def launch(config)
 
+require 'open3'
+require 'mysql2'
+
 def cartesian(dimensions)
   filtered_dimensions = dimensions.reject(&:empty?)
   cartesian = filtered_dimensions.size > 1 ? filtered_dimensions.inject(&:product) : filtered_dimensions.first.map { |e| [e] }
@@ -57,18 +60,15 @@ def push(config, output, iterators)
   push!(query, config)
 end
 
-  require 'open3'
-  require 'mysql2'
+  total_invocations = config[:parameter_space_size]
+  target = config[:startup_target]
+  actor = config[:startup_actor]
 
   # CUSTOMIZE: add the modules required for your hook
   require 'oci'
   require 'pathname'
 
-  total_invocations = config[:parameter_space_size]
-  target = config[:startup_target]
-  actor = config[:startup_actor]
-
-  # NOTE: adding workload-specific initialization of the target
+  # CUSTOMIZE: add initialization of the variables relevant to your target
   oci_conf = OCI::ConfigFileLoader.load_config()
   object_storage = OCI::ObjectStorage::ObjectStorageClient.new(config: oci_conf)
   namespace = config[:startup_namespace]
@@ -80,7 +80,8 @@ end
     (1..config[:iterate_iterations]).to_a
   ]
 
-  cartesian(dimensions).each  do |iteration|
+  cartesian(dimensions).each do |iteration|
+    # CUSTOMIZE: add your semantics of the benchmark invocation
     response.data.objects.each do |object|
       object_name = object.name
       start_time = Time.now
