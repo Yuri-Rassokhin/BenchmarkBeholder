@@ -3,7 +3,7 @@ module Shape
 def guess_shape(platform)
   case platform
   when "oci"
-    shape = `curl -s --connect-timeout 3 http://169.254.169.254/opc/v1/instance/ | grep "shape" | awk '{ print $2 }'`
+    shape = `curl -s --connect-timeout 3 http://169.254.169.254/opc/v1/instance/ | grep '"shape"' | awk -F': ' '{print $2}' | tr -d '",'`
   when "azure"
     shape = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
   when "aws"

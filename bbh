@@ -119,8 +119,8 @@ end
 # Calculate size of the parameter space, and add it to the config for reporting purposes
 parameter_space_size = config.parameter_space_size
 config.merge({ parameter_space_size: parameter_space_size })
+logger.info("parameter space size: #{parameter_space_size} invocations")
 if parser.mode == :space
-  logger.info("parameter space size is #{parameter_space_size} invocations")
   config.parameter_space_dimensions
   exit 0
 end
@@ -129,6 +129,8 @@ end
 logger.info("loading integration hook")
 load "./sources/hooks/#{hook}/invocation.rb"
 #end
+
+config.merge( { startup_target_protocol: target.protocol } )
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 

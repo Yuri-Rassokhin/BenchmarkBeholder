@@ -121,7 +121,7 @@ def table_create_generic
       series_owner_email VARCHAR(50),
 
       startup_actor VARCHAR(100) NOT NULL,
-      startup_command VARCHAR(500) NOT NULL,
+      startup_command VARCHAR(4196) NOT NULL,
       startup_language VARCHAR(20) NOT NULL,
 
       iterate_iteration INT NOT NULL,
