@@ -1,17 +1,17 @@
 ### PROJECT: what project this benchmark is a part of
-$project_description = "ADDME"
-$project_code = "cheetah"
+$project_description = "Testing workload integration"
+$project_code = "test"
 $project_tier = "test"
 
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "example"
-$series_description = 'ADDME. You can use #{mode} and #{shape} variables here'
-$series_owner_name = "ADDME"
-$series_owner_email = "ADDME"
+$series_description = 'sleep on #{$startup_target} on #{mode} #{shape}'
+$series_owner_name = "John Doe"
+$series_owner_email = "john.doe@acme.com"
 
 # STARTUP: how to create the workload?
-$startup_actor = "self" # No external actor needed, we'll run from within the hook
+$startup_actor = "sleep" # No external actor needed, we'll run from within the hook
 $startup_target = "file:///etc/hosts" # protocols: file, device, http, object, bucket, ram
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian

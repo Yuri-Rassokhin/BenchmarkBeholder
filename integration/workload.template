@@ -18,10 +18,10 @@ FileUtils.touch("#{confdir}/#{hook}.rb")
 # Create directories for integration hook
 FileUtils.mkdir_p("#{srcdir}/misc")
 FileUtils.touch("#{srcdir}/launch.rb")
-FileUtils.touch("#{srcdir}/schema.rb")
+FileUtils.touch("#{srcdir}/output_parameters.rb")
 FileUtils.touch("#{srcdir}/config.rb")
 FileUtils.touch("#{srcdir}/#{hook}.rb")
-FileUtils.touch("#{srcdir}/parameters.rb")
+FileUtils.touch("#{srcdir}/input_parameters.rb")
 
 # populate class definition
 class_definition = <<~CLASS
@@ -55,6 +55,7 @@ def iterate_parameters
   { }
 end
 
+  require_relative 'input_parameters'
   include Parameters
 
 end
@@ -63,19 +64,19 @@ File.write("#{srcdir}/config.rb", config)
 
 workload = <<~WORKLOAD
 ### PROJECT: what project this benchmark is a part of
-$project_description = "ADDME"
-$project_code = "cheetah"
+$project_description = "Testing workload integration"
+$project_code = "test"
 $project_tier = "test"
 
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
-$series_benchmark = "#{hook}"
-$series_description = 'ADDME. You can use #\{mode\} and #\{shape\} variables here'
-$series_owner_name = "ADDME"
-$series_owner_email = "ADDME"
+$series_benchmark = "example"
+$series_description = '#\{$startup_actor\} on #\{$startup_target\} on #\{mode\} #\{shape\}'
+$series_owner_name = "John Doe"
+$series_owner_email = "john.doe@acme.com"
 
 # STARTUP: how to create the workload?
-$startup_actor = "self" # No external actor needed, we'll run from within the hook
+$startup_actor = "sleep" # No external actor needed, we'll run from within the hook
 $startup_target = "file:///etc/hosts" # protocols: file, device, http, object, bucket, ram
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
@@ -85,18 +86,18 @@ $iterate_schedulers = "none, bfq, kyber, mq-deadline"
 # INFRASTRUCTURE
 $infra_hosts = "127.0.0.1" # ADDME: benchmark hosts
 # User for passwordless ssh to the benchmark nodes
-$infra_user = "#{`whoami`.chomp}" # user for passwordless SSH to the benchmark nodes
+$infra_user = "opc" # user for passwordless SSH to the benchmark nodes
 $infra_platform = "oci" # which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
 WORKLOAD
 File.write("#{confdir}/#{hook}.rb", workload)
 
-collectables = <<~COLLECTABLES
-# ADD ME: define database column name, type, and mandatory/not mandatory for each collectable parameter, and add the definitions to the variable below, separated by colon
-# For instance, SCHEMA = "add column collect_inference_time double(20,16) not null, add column iterate_processes int not null"
-SCHEMA = "
+output = <<~OUTPUT
+# ADD ME: here, define everything that goes to database, in addition to default data
+# For instance, OUTPUT_PARAMETERS= "add column collect_inference_time double(20,16) not null, add column iterate_processes int not null"
+OUTPUT_PARAMETERS = "
 "
-COLLECTABLES
-File.write("#{srcdir}/schema.rb", collectables)
+OUTPUT
+File.write("#{srcdir}/output_parameters.rb", output)
 
 # populate launch script
 File.write("#{srcdir}/launch.rb", "class #{hook.capitalize} < Collector")
@@ -259,5 +260,5 @@ end
 
 end
 PARAMETERS
-File.write("#{srcdir}/parameters.rb", parameters)
+File.write("#{srcdir}/input_parameters.rb", parameters)
 
