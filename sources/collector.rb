@@ -73,12 +73,6 @@ def initialize(config, url, mode_raw, logger, series, target)
   }
   @infra_static[:series_description] = description_eval(config.get(:series_description))
 
-  launch_set
-end
-
-def launch(*args)
-  puts("method 'launch' must be overridden")
-  exit
 end
 
 def completed
@@ -91,15 +85,6 @@ end
   #File.delete(conf_file)
 
 private
-
-# instantiate 'launch' method from the specificed hook
-def launch_set
-  hook = @config.get(:series_benchmark)
-  input = File.expand_path("../sources/hooks/#{hook}/launch.rb", __dir__)
-  require input
-  mod = Object.const_get(:Launch)
-  self.class.prepend(mod) # adds as instance method
-end
 
 # gets root device name for a given partiion; NOTE: it doesn't work with RAID/LVM
 def get_root_dev(main_dev)
@@ -127,6 +112,92 @@ def push()
   logger.fatal("(#{file} line #{line}): method '#{__method__}' called must be implemented in benchmark-specific heir")
 end
 
+def launch(config)
+
+require 'open3'
+require 'mysql2'
+
+def cartesian(dimensions)
+  # Ensure all dimensions are arrays
+  normalized_dimensions = dimensions.map do |dim|
+    dim.is_a?(Enumerable) ? dim.to_a : [dim]
+  end
+
+  # Remove empty dimensions
+  filtered_dimensions = normalized_dimensions.reject(&:empty?)
+
+  # Handle special case: single dimension
+  if filtered_dimensions.size == 1
+    return filtered_dimensions.first.to_enum unless block_given?
+    filtered_dimensions.first.each { |e| yield([e]) }
+    return
+  end
+
+  # Handle multiple dimensions (Cartesian product)
+  cartesian = filtered_dimensions.inject(&:product).map(&:flatten)
+
+  # Return an enumerator if no block is given
+  return cartesian.to_enum unless block_given?
+
+  # Yield each combination as a single array
+  cartesian.each do |combination|
+    yield combination
+  end
 end
 
+def push!(query, config)
+  mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
+  # consumption_cpu = '#{cpu_consumption}',
+  # consumption_storage_tps = '#{storage_tps}',
+  generic_query = <<-SQL
+      insert into #{config[:series_benchmark]} set
+      project_code = '#{config[:project_code]}',
+      project_tier = '\"#{config[:project_tier]}\"',
+      series_id = '#{config[:series]}',
+      series_description = '\"#{config[:series_description]}\"',
+      series_benchmark = '#{config[:series_benchmark]}',
+      startup_actor = '#{config[:startup_actor]}',
+      infra_host = '#{config[:host]}',
+      infra_shape = '#{config[:shape]}',
+      infra_filesystem = '\"#{config[:filesystem]}\"',
+      infra_storage = '\"#{config[:storage_type]}\"',
+      infra_device = '\"#{config[:device]}\"',
+      infra_drives = '#{config[:raid_members_amount]}',
+      infra_architecture = '\"#{config[:arch]}\"',
+      infra_os = '\"#{config[:release]}\"',
+      infra_kernel = '\"#{config[:kernel]}\"',
+      infra_cpu = '\"#{config[:cpu]}\"',
+      infra_cores = '#{config[:cores]}',
+      infra_ram = '#{config[:ram]}',
+  SQL
 
+  formatted_query = query.lines.map.with_index do |line, index|
+    index == query.lines.size - 1 ? line.strip : "#{line.strip},"
+  end.join("\n") << ";"
+
+  mysql.query(generic_query << formatted_query)
+end
+
+# construct workload-specific part of the output data for the database
+def push(config, collect, iterate, startup)
+  query = ""
+  collect.each_key { |p| query << "collect_#{p} = '#{collect[p]}'\n" }
+  iterate.each_key { |p| query << "iterate_#{p} = '#{iterate[p]}'\n" }
+  startup.each_key { |p| query << "startup_#{p} = '#{startup[p]}'\n" }
+  puts query
+  push!(query, config)
+end
+
+def dim(vector)
+    Hash[dimension_naming.zip(vector)]
+end
+
+  cartesian(dimensions(config)) do |vector|
+    iterator = dim(vector)
+    result = invocation(config, iterator)
+    push(config, result[:collect], result[:iterate], result[:startup])
+  end
+
+end
+
+end
