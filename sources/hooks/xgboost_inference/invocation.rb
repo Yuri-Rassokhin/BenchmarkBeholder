@@ -89,14 +89,14 @@ def invocation(config, iterator)
   inference_time = Time.now - time_start
   debug(config, "requests returned", raw_result.chomp)
   requests_per_second = requests / inference_time
-  server_raw_output = "" #writer.read
 
   `pkill gunicorn`
 
-  error = ""
+  # detect error in the output of the requests, and save erroneous log in the database
+  error = ( raw_result.chomp.downcase.include?("error") ? raw_result.chomp : "")
 
-  # collect result
-  collect = { inference_time: inference_time, requests_per_second: requests_per_second, error: error.chomp, input_elements: raw_payload.size }
+  # collect all the results
+  collect = { inference_time: inference_time, requests_per_second: requests_per_second, error: error, input_elements: raw_payload.size }
   iterate = { iteration: iterator[:iteration], processes: processes, requests: requests, device: device }
   startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(config[:startup_target_application]).gsub("'", "''")}
 
