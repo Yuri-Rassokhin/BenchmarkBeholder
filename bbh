@@ -49,6 +49,11 @@ hosts.each do |host|
   logger.error("#{agent.error}") if !agent.available?(host)
 end
 
+hosts.each do |host|
+  logger.info("Checking CLI dependencies on benchmark node '#{host}'")
+  [ "ruby", "curl", "mpstat", "iostat" ].each { |tool| logger.error("'#{tool}' is missing ") if !agent.run(host, :file_exists?, "#{tool}") }
+end
+
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
 if config.get(:startup_actor) == "self"
