@@ -66,7 +66,8 @@ end
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over
   dimensions = [
-    (1..config[:iterate_iterations]).to_a
+    (1..config[:iterate_iterations]).to_a,
+    config[:iterate_operations].to_a
   ]
 
   # NOTE: loop is a template, workload-specific iterators inherited from the 'dimensions' variable
@@ -82,7 +83,7 @@ end
       puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
       output = { bandwidth: bandwidth_mbps, error: "" }
       command = "RUBY: object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
-      push(config, bandwidth, {iteration: iteration, command: command, scheduler: "N/A" , operation: "read" })
+      push(config, bandwidth_mbps, {iteration: iteration, command: command, scheduler: "N/A" , operation: "read" })
     end
   end
 end
