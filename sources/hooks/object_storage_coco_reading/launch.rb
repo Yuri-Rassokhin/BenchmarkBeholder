@@ -3,6 +3,17 @@ class Object_storage_coco_reading < Collector
 
 def launch(config)
 
+def cartesian(dimensions)
+  filtered_dimensions = dimensions.reject(&:empty?)
+  cartesian = filtered_dimensions.size > 1 ? filtered_dimensions.inject(&:product) : filtered_dimensions.first.map { |e| [e] }
+  # Return an enumerator if no block is given
+  return cartesian.map(&:flatten).to_enum unless block_given?
+  # Yield each combination if a block is given
+  cartesian.map(&:flatten).each do |combination|
+    yield(*combination)
+  end
+end
+
 def push!(query, config)
   mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
   # consumption_cpu = '#{cpu_consumption}',
@@ -67,9 +78,9 @@ end
   # CUSTOMIZE: add your dimensions here in the form config[:my_option].to_a
   dimensions = [
     (1..config[:iterate_iterations]).to_a
-  ].reject(&:empty?)
-  cartesian = dimensions.size > 1 ? dimensions.inject(&:product) : dimensions.first.map { |e| [e] }
-  cartesian.map(&:flatten).each do |iteration|
+  ]
+
+  cartesian(dimensions).each  do |iteration|
     response.data.objects.each do |object|
       object_name = object.name
       start_time = Time.now
