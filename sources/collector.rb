@@ -116,6 +116,116 @@ def launch(config)
 
 require 'open3'
 require 'mysql2'
+require 'net/http'
+require 'json'
+
+def get_chat_id(token, user_name, user_surname)
+    uri = URI("https://api.telegram.org/bot#{token}/getUpdates")
+    response = Net::HTTP.get(uri)
+    updates = JSON.parse(response)
+    updates["result"].each do |update|
+      name = "#{update['message']['chat']['first_name']}"
+      surname = "#{update['message']['chat']['last_name']}"
+      return update['message']['chat']['id'] if name == user_name && surname == user_surname
+    end
+    raise "Chat ID not found for #{name} #{surname}"
+end
+
+at_exit do
+  puts "\nExiting having #{$step/$total_steps} of benchmarks finished"
+end
+
+# Trap common termination signals
+%w[INT TERM].each do |signal|
+  Signal.trap(signal) do
+    puts "\nReceived #{signal} signal"
+    exit
+  end
+end
+
+$token = '8103208089:AAEWSv3YSaFvWy38E1ucvpt_ikzoTKKO43c'
+$name = "Yuri"
+$surname = "Rassokhin"
+$chat_id = get_chat_id($token, $name, $surname)
+$total_steps = config[:parameter_space_size]
+
+def human_readable_time(seconds)
+  days = (seconds / (24 * 3600)).to_i
+  hours = (seconds % (24 * 3600) / 3600).to_i
+  minutes = (seconds % 3600 / 60).to_i
+  readable = []
+  readable << "#{days}d" if days > 0
+  readable << "#{hours}h" if hours > 0
+  readable << "#{minutes}min" if minutes > 0
+  readable.empty? ? "less than a minute" : readable.join(" : ")
+end
+
+def iterator_format(iterator, config)
+  seconds_left = ( $time_passed == 0 ? "TBD time" : human_readable_time((($time_passed)/$step)*(config[:parameter_space_size]-$step).to_i) )
+  "Running #{$step} of #{config[:parameter_space_size]}\n\n#{iterator.to_s.gsub(':', '').gsub('=>', ': ').gsub('"', '')}\n\n#{seconds_left} left"
+end
+
+def message(format, body, config)
+  case format
+  when :header
+    result = "Starting #{body}"
+  when :footer
+    result = "Completed #{body}"
+  when :iterator
+    result = iterator_format(body, config)
+  end
+  puts result
+end
+
+def msg(token, chat_id, text)
+    uri = URI("https://api.telegram.org/bot#{token}/sendMessage")
+    params = {
+      chat_id: chat_id,
+      text: text
+    }
+    response = Net::HTTP.post_form(uri, params)
+  rescue StandardError => e
+    puts "Error: #{e.message}"
+end
+
+# Simple method to capture and resend all output (stdout and stderr) in real-time
+def capture
+  # Create a single pipe for both stdout and stderr
+  combined_r, combined_w = IO.pipe
+
+  # Save the original stdout and stderr
+  original_stdout = $stdout
+  original_stderr = $stderr
+
+  begin
+    # Redirect stdout and stderr to the same write end of the pipe
+    $stdout = combined_w
+    $stderr = combined_w
+
+    # Start a thread to read and output data as it comes
+    output_thread = Thread.new do
+      while (line = combined_r.gets)
+          msg($token, $chat_id, line)
+#        File.open('output.log', 'a') { |file| file.write(line) }  # Write combined output to a file
+      end
+    end
+
+    # Run the block of code
+    yield
+
+  ensure
+    # Restore original stdout and stderr
+    $stdout = original_stdout
+    $stderr = original_stderr
+
+    combined_w.close  # Close the write end of the pipe
+
+    # Wait for the thread to finish reading
+    output_thread.join
+
+    combined_r.close
+  end
+end
 
 def cartesian(dimensions)
   # Ensure all dimensions are arrays
@@ -190,14 +300,24 @@ end
 def dim(vector)
     Hash[dimension_naming.zip(vector)]
 end
-
+  
+  $step = 1
+  $start_time = Time.now
+  $time_passed = 0
   prepare(config)
-  cartesian(dimensions(config)) do |vector|
-    iterator = dim(vector)
-    result = invocation(config, iterator)
-    push(config, result[:collect], result[:iterate], result[:startup])
+  capture do
+    message(:header, "#{config[:project_tier]} series #{config[:series]} of #{config[:series_description]} on the host #{config[:host]}", config)
+    cartesian(dimensions(config)) do |vector|
+        start_time = Time.now
+        iterator = dim(vector)
+        message(:iterator, iterator, config)
+        result = invocation(config, iterator)
+        push(config, result[:collect], result[:iterate], result[:startup])
+        $step += 1
+        $time_passed += Time.now - start_time
+    end
   end
-
+  message(:footer, "#{config[:tier]} series #{config[:series]} of #{config[:series_description]} on the host #{config[:host]}", config)
 end
 
 end
