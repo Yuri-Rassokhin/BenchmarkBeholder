@@ -1,0 +1,57 @@
+#!/usr/bin/ruby
+
+require 'optparse'
+
+# Default options
+options = {
+  user: nil,
+  name: nil,
+  email: nil
+}
+
+# Parse options
+OptionParser.new do |opts|
+  opts.banner = "Usage: user.add [options]"
+
+  opts.on('-u', '--user USER', 'database user name') do |user|
+    options[:user] = user
+  end
+
+  opts.on('-n', '--name NAME', 'Name of the user') do |name|
+    options[:name] = name
+  end
+
+  opts.on('-e', '--email EMAIL', 'Email of the user') do |email|
+    options[:email] = email
+  end
+
+  opts.on_tail('--help', 'Display this help message') do
+    puts opts
+    exit
+  end
+end.parse!
+
+if not (options[:user] && options[:name] && options[:email])
+  puts "Missing required options. Use --help for usage details."
+end
+
+query = <<-SQL
+INSERT INTO users (username, name, email)
+VALUES ('#{options[:user]}', '#{options[:name]}', '#{options[:email]}');
+SQL
+
+begin
+  puts "Connecting to the database..."
+  client = Mysql2::Client.new(
+#    host: DB_HOST,
+#    username: DB_USER,
+#    password: DB_PASS,
+#    database: DB_NAME
+  )
+  puts "Creating the user..."
+  client.query(query)
+rescue Mysql2::Error => e
+  puts "An error occurred while executing query: #{e.message}"
+ensure
+  client.close if client
+end

@@ -39,6 +39,60 @@ def table_create
   raise "Database table has not been specified" unless @table
   table_create_generic
   table_add_specific
+  create_triggers
+end
+
+def create_triggers
+  create_trigger_credentials
+  create_trigger_project
+end
+
+def create_trigger_project
+trigger_add_project_description = <<-SQL
+DELIMITER //
+
+CREATE TRIGGER add_project_description
+BEFORE INSERT ON #{@table}
+FOR EACH ROW
+BEGIN
+    DECLARE project_description VARCHAR(500) DEFAULT 'undefined';
+    SELECT description INTO project_description
+    FROM projects
+    WHERE code = NEW.project_code
+    LIMIT 1;
+    SET NEW.project_description = project_description;
+END;
+//
+
+DELIMITER ;
+SQL
+@client.query(trigger_add_project_description)
+end
+
+def create_trigger_credentials
+trigger_add_credentials = <<-SQL
+DELIMITER //
+
+CREATE TRIGGER add_credentials
+BEFORE INSERT ON #{@table}
+FOR EACH ROW
+BEGIN
+    DECLARE user_name VARCHAR(100) DEFAULT 'undefined';
+    DECLARE user_email VARCHAR(100) DEFAULT 'undefined’;
+    DECLARE plain_username VARCHAR(50);
+    SET plain_username = SUBSTRING_INDEX(USER(), '@', 1);
+    SELECT name, email INTO user_name, user_email
+    FROM users
+    WHERE username = plain_username
+    LIMIT 1;
+    SET NEW.series_owner_name = user_name;
+    SET NEW.series_owner_email = user_email;
+END;
+//
+
+DELIMITER ;
+SQL
+@client.query(trigger_add_credentials)
 end
 
 # All configuration parameters and (extended) database columns are grouped as
