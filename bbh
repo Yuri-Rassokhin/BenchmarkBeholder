@@ -59,7 +59,7 @@ end
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
 if config.get(:startup_actor) == "self"
-  logger.info("checking actor: 'self' specificed, actor in the hook will be used")
+  logger.info("checking actor: self specificed, actor in the hook will be used")
 else
   logger.info "checking actor on benchmark node(s)"
   hosts.each do |host|
@@ -69,12 +69,12 @@ end
 
 target = Target.new(agent, logger, config.get(:startup_target))
 
-logger.info "checking target '#{target.protocol}://#{target.path}'"
+logger.info "checking target #{target.protocol}://#{target.path}"
 hosts.each { |host| target.check(host) }
 
 unless options.mode == :space
 
-  logger.info "checking if storage is idle on benchmark node(s)"
+  logger.info "checking if CPU is idle on benchmark node(s)"
   hosts.each do |host|
       logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
   end
