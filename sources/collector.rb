@@ -306,7 +306,7 @@ end
   $time_passed = 0
   prepare(config)
   capture do
-    message(:header, "#{config[:project_tier]} series #{config[:series]} of #{config[:series_description]} on the host #{config[:host]}", config)
+    message(:header, "#{config[:project_tier].upcase} series #{config[:series]}, #{config[:series_description]}, #{config[:infra_platform]} platform", config)
     cartesian(dimensions(config)) do |vector|
         start_time = Time.now
         iterator = dim(vector)
