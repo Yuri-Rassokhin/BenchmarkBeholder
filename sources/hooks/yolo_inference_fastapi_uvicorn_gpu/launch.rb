@@ -125,7 +125,7 @@ end
     # extract benchmark results
     inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`
     request_error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`
-    failed_requests = ( error_count == "0" ? "" : "#{error_count} requests failed" )
+    failed_requests = ( request_error_count == "0" ? "" : "#{request_error_count} requests failed" )
 
     cuda_error = `server_raw_output | grep "CUDA run out of memory"`[0..499]
     response_error = `server_raw_output | grep -i "error | grep -vi dictionary"`[0..499]
