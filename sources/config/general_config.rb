@@ -22,7 +22,7 @@ def initialize(conf_file, project_codes)
     iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true, allowed_values: [ "mq-deadline", "bfq", "kyber", "none"]),
 
     # How many times to repeat every individual invocation (to accumulate statistics)
-    collect_iterations: VNum.new(natural: true),
+    iterate_iterations: VNum.new(non_empty: true, natural: true, iteratable: true),
     # How often to fetch data from the application during training, seconds (can be a fraction, 0.1 or greater)
 # TODO: THIS MUST BE APPLICATION-SPECIFIC
 #    collect_frequency: VNum.new(positive: true, greater: 0.1),

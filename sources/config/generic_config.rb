@@ -46,7 +46,7 @@ class GenericConfig
     @parameters.each do |parameter, value|
       size = size * elements_count(value.value.to_s) if iteratable?(parameter)
    end
-    size * @parameters[:collect_iterations].value
+    return size
   end
 
   def merge(config_object)
