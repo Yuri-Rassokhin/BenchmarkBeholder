@@ -157,7 +157,7 @@ def human_readable_time(seconds)
   readable << "#{days}d" if days > 0
   readable << "#{hours}h" if hours > 0
   readable << "#{minutes}min" if minutes > 0
-  readable.empty? ? "less than a minute" : readable.join(" : ")
+  readable.empty? ? "less than a minute" : readable.join(" ")
 end
 
 def iterator_format(iterator, config)
