@@ -59,7 +59,7 @@ end
 
 target = Target.new(agent, logger, config.get(:startup_target))
 
-logger.info("Checking target: #{target.protocol} '#{target.path}'")
+logger.info("Checking target #{target.protocol}://'#{target.path}'")
 hosts.each { |host| target.check(host) }
 
 if target.io_schedulers_apply?
