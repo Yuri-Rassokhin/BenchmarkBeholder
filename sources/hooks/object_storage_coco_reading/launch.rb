@@ -8,11 +8,21 @@ require 'mysql2'
 
 def cartesian(dimensions)
   filtered_dimensions = dimensions.reject(&:empty?)
-  cartesian = filtered_dimensions.size > 1 ? filtered_dimensions.inject(&:product) : filtered_dimensions.first.map { |e| [e] }
+
+  # Handle special case: single dimension
+  if filtered_dimensions.size == 1
+    return filtered_dimensions.first.to_enum unless block_given?
+    return filtered_dimensions.first.each { |e| yield(e) }
+  end
+
+  # Handle multiple dimensions
+  cartesian = filtered_dimensions.inject(&:product).map(&:flatten)
+
   # Return an enumerator if no block is given
-  return cartesian.map(&:flatten).to_enum unless block_given?
+  return cartesian.to_enum unless block_given?
+
   # Yield each combination if a block is given
-  cartesian.map(&:flatten).each do |combination|
+  cartesian.each do |combination|
     yield(*combination)
   end
 end
