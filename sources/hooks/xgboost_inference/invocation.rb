@@ -96,7 +96,7 @@ def invocation(config, iterator)
   error = ( raw_result.chomp.downcase.include?("error") ? raw_result.chomp : "")
 
   # collect all the results
-  collect = { inference_time: inference_time, requests_per_second: requests_per_second, error: error, input_elements: raw_payload.size }
+  collect = { inference_time: inference_time, requests_per_second: requests_per_second, error: error[0..99], input_elements: raw_payload.size }
   iterate = { iteration: iterator[:iteration], processes: processes, requests: requests, device: device }
   startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(config[:startup_target_application]).gsub("'", "''")}
 
