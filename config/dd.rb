@@ -1,5 +1,5 @@
 ### PROJECT: what project this benchmark is a part of
-$project_description = "dd benchmark for BBH demo"
+$project_description = "BBH demo"
 $project_code = "kudu"
 $project_tier = "test"
 
