@@ -137,7 +137,10 @@ config.merge( { startup_target_protocol: target.protocol } )
 # check if Telegram chat is configured and active
 def check_telegram_logging(logger)
   token_file = File.expand_path("~/.bbh/telegram")
-  return { token: nil, chat_id: nil } if not File.exist?(token_file)
+    if not File.exist?(token_file)
+      logger.warning "telegram token hasn't been specified, there will be no telegram output"
+      return { token: nil, chat_id: nil }
+    end
   
   token = File.read(token_file).chomp
   uri = URI("https://api.telegram.org/bot#{token}/getUpdates")
@@ -147,7 +150,7 @@ def check_telegram_logging(logger)
     updates["result"].each do |update|
       return { token: token, chat_id: update['message']['chat']['id'] }
     end
-    raise "Chat ID not found for #{name} #{surname}"
+    logger.error "telegram chat not found, check correctness of the token"
 end
 
 # set Telegram chat for the benchmarks nodes to report to, nil means there's no chat configured
