@@ -20,6 +20,19 @@ def delayed_init
   @parameters.merge!(load_conf(@conf_file, parameters: parameters))
 end
 
+# first phase of description substituion - here we substitute all the variables from the config file
+def description_substitute
+  str = self.get(:series_description).gsub(/\#\{([^}]+)\}/) do |match|
+    v = match[2..-2]
+    if self.get?(v.to_sym)
+      self.get(v.to_sym)
+    else
+      "\#\{" + "#{v}" + "}"
+    end
+  end
+  self.set(:series_description, str)
+end
+
 private
 
 def general_parameters

@@ -85,41 +85,28 @@ class_needed = config.get(:series_benchmark).capitalize
 #require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}.rb"
 #require "./sources/hooks/#{class_needed.downcase}/config.rb"
 
-puts config.inspect
-
 config.delayed_init
-
-puts config.inspect
-exit
 
 # create workload-specific config and merge the general config into it
 #full_config = Object.const_get("#{class_needed}config").new(parser.conf_file)
 #full_config.merge(config)
 
 # first phase of description substituion - here we substitute all the variables from the config file
-str = full_config.get(:series_description).gsub(/\#\{([^}]+)\}/) do |match|
-  v = match[2..-2]
-  if full_config.get?(v.to_sym)
-    full_config.get(v.to_sym)
-  else
-    "\#\{" + "#{v}" + "}"
-  end
-end
-full_config.set(:series_description, str)
+config.description_substitute
 
-full_config.set(:startup_target, target.path)
+config.set(:startup_target, target.path)
 
 # assign collector, aka permanent agent, for each node
 # during creation, collector gathers all static data about its infrastructure
-mode = full_config.get(:infra_hosts).size > 1 ? "multiple" : "single"
-full_config.get(:infra_hosts).each do |host|
+mode = config.get(:infra_hosts).size > 1 ? "multiple" : "single"
+config.get(:infra_hosts).each do |host|
   logger.info("Initializing workload '#{class_needed.downcase}' on '#{host}'")
-  collector[host] = Object.const_get(class_needed).new(full_config, host, mode, logger, series, target)
+  collector[host] = Object.const_get(class_needed).new(config, host, mode, logger, series, target)
 end
 
 # create database table for the requested benchmark, if it doesn't exist yet
 load "./sources/hooks/#{class_needed.downcase}/output_parameters.rb"
-database.table_set(full_config.get(:series_benchmark), OUTPUT_PARAMETERS)
+database.table_set(config.get(:series_benchmark), OUTPUT_PARAMETERS)
 
 if target.io_schedulers_apply?
 
@@ -134,28 +121,28 @@ if target.io_schedulers_apply?
   end
 
   logger.info("Checking specification of kernel IO schedulers")
-    full_config.get(:iterate_schedulers).each do |scheduler|
+    config.get(:iterate_schedulers).each do |scheduler|
       system_schedulers = `cat /sys/block/sda/queue/scheduler`.strip + " N/A"
       logger.error("unknown IO scheduler '#{scheduler}'") unless system_schedulers.include?(scheduler)
   end
 end
 
 # Calculate size of the parameter space, and add it to the config for reporting purposes
-parameter_space_size = full_config.parameter_space_size
-full_config.merge({ parameter_space_size: parameter_space_size })
+parameter_space_size = config.parameter_space_size
+config.merge({ parameter_space_size: parameter_space_size })
 if parser.mode == :space
   logger.info("parameter space size is #{parameter_space_size} invocations")
-  full_config.parameter_space_dimensions
+  config.parameter_space_dimensions
   exit 0
 end
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
-full_config.get(:infra_hosts).each do |host|
-  full_config.merge(collector[host].infra_static)
+config.get(:infra_hosts).each do |host|
+  config.merge(collector[host].infra_static)
   logger.info("Launching workload '#{class_needed.downcase}' on '#{host}'")
-  collector[host].detach(host, :launch, full_config)
+  collector[host].detach(host, :launch, config)
 end
 
-logger.info("Workload '#{full_config.get(:series_benchmark)}' series #{series} has launched on '#{full_config.get(:infra_hosts).join(', ')}'")
+logger.info("Workload '#{config.get(:series_benchmark)}' series #{series} has launched on '#{config.get(:infra_hosts).join(', ')}'")
 
