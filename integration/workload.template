@@ -1,33 +1,90 @@
-#!/usr/bin/bash
+#!/usr/bin/ruby
 
-if [ -z "$1" ]; then
-  echo "Usage: workload.template <workload_name>"
+require 'fileutils'
+
+# Check if a workload name is provided
+if ARGV.empty?
+  puts "Usage: workload.template <workload_name>"
   exit 0
-fi
+end
 
-hook="$1"
-confdir=./workloads
-srcdir=./sources/hooks/$hook
+hook = ARGV[0]
+confdir = "../workloads"
+srcdir = "../sources/hooks/#{hook}"
 
-# template for workload configuration
-touch $confdir/$hook.rb
+# Create workload configuration template
+FileUtils.touch("#{confdir}/#{hook}.rb")
 
-# template for integration hook
-mkdir -p $srcdir
-mkdir -p $srcdir/misc
-touch $srcdir/launch.rb
-touch $srcdir/schema.rb
-touch $srcdir/config.rb
-touch $srcdir/$hook.rb
+# Create directories for integration hook
+FileUtils.mkdir_p("#{srcdir}/misc")
+FileUtils.touch("#{srcdir}/launch.rb")
+FileUtils.touch("#{srcdir}/schema.rb")
+FileUtils.touch("#{srcdir}/config.rb")
+FileUtils.touch("#{srcdir}/#{hook}.rb")
 
 # populate class definition
+class_definition = <<~CLASS
+class #{hook.capitalize} < Collector
 
-class Yolo_inference_fastapi_uvicorn_gpu < Collector
+  def initialize(config, url, mode, logger, series, target)
+    super(config, url, mode, logger, series, target)
+  end
 
-def initialize(config, url, mode, logger, series, target)
-  super(config, url, mode, logger, series, target)
+  require_relative 'launch'
+
 end
+CLASS
+File.write("#{srcdir}/#{hook}.rb", class_definition)
 
-require_relative 'launch'
+# populate definition of config parameters
+config = <<~CONFIG
+class #{hook.capitalize}config < GenericConfig
+
+  def initialize(conf_file)
+    @parameters = {
+    # ADD YOUR DEFINITIONS OF STARTUP AND ITERATABLE PARAMETERS
+    }
+    load_conf(conf_file)
+  end
 
 end
+CONFIG
+File.write("#{srcdir}/config.rb", config)
+
+workload = <<~WORKLOAD
+### PROJECT: what project this benchmark is a part of
+$project_description = "ADDME"
+$project_code = "ADDME"
+$project_tier = "ADDME"
+
+### SERIES: identification of this benchmark series
+# NOTE: this one must correspond to the directory name of the hook and its classes
+$series_benchmark = "#{hook}"
+$series_description = 'ADDME. You can use #\{mode\} and #\{shape\} variables here'
+$series_owner_name = "ADDME"
+$series_owner_email = "ADDME"
+
+# STARTUP: how to create the workload?
+$startup_actor = "ADDME" # No external actor needed, we'll run from within the hook
+$startup_target = "ADDME" # protocols: file, device, http, object, bucket, ram
+
+# ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
+$iterate_iterations = 4 # MODIFY ME
+
+# INFRASTRUCTURE
+$infra_hosts = "127.0.0.1" # ADDME: benchmark hosts
+# User for passwordless ssh to the benchmark nodes
+$infra_user = "#{`whoami`}" # user for passwordless SSH to the benchmark nodes
+$infra_platform = "oci" # which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
+WORKLOAD
+File.write("#{confdir}/#{hook}.rb", workload)
+
+collectables = <<~COLLECTABLES
+# ADD ME: define database column name, type, and mandatory/not mandatory for each collectable parameter, and add the definitions to the variable below, separated by colon
+# For instance, SCHEMA = "add column collect_inference_time double(20,16) not null, add column iterate_processes int not null"
+SCHEMA = "
+"
+COLLECTABLES
+File.write("#{srcdir}/schema.rb", collectables)
+
+
