@@ -148,7 +148,7 @@ def iterator_format(iterator, config)
   seconds_left = ( $time_passed == 0 ? "TBD" : human_readable_time((($time_passed)/$step)*(config[:parameter_space_size]-$step).to_i) )
   iter = ""
   iterator.each { |it, val| iter << "   #{it.to_s.gsub(':', '')} #{val}NEW" }
-  "Invocation #{$step} of #{config[:parameter_space_size]}NEWTime left: #{seconds_left}NEWParameters:NEW#{iter}"
+  "Series: #{config[:series]}NEWInvocation: #{$step} of #{config[:parameter_space_size]}NEWProgress:#{$step/config[:parameter_space_size]}NEWTime left: #{seconds_left}NEWParameters:NEW#{iter}"
 end
 
 def message(format, body, config)
