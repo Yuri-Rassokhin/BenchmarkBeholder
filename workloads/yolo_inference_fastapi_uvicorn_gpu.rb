@@ -26,3 +26,6 @@ $infra_hosts = "127.0.0.1" # Benchmark Hosts
 # User for passwordless ssh to the benchmark nodes
 $infra_user = "opc" # user for passwordless SSH to the benchmark nodes
 $infra_platform = "oci" # which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
+
+# dependencies
+# Benchmark Nodes: sudo apt install -y apache2-utils

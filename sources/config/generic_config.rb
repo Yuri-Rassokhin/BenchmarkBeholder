@@ -53,7 +53,7 @@ class GenericConfig < Object
       size = size * elements_count(v.value.to_s) if iteratable?(p)
       iter = v.value if p == :iterate_iterations
    end
-    return size*iter
+    return size * iter
   end
 
   def parameter_space_dimensions
