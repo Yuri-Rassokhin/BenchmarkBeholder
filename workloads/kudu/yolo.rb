@@ -11,9 +11,7 @@ $startup_dataset = "coco128.yaml"
 $startup_epochs = "200"
 $startup_image_size = "640"
 $startup_batch = "16"
-$startup_device = "0" 
+$startup_device = "0"
 
 $iterate_iterations = 1
 $iterate_schedulers = "none"
-
-$infra_platform = "oci"
