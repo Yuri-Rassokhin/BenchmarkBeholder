@@ -43,7 +43,7 @@ hosts = config.get(:infra_hosts)
 
 hosts.each do |host|
   logger.info("Checking SSH availability of benchmark node '#{host}'")
-  logger.error("'#{host}' is unavailable, #{agent.error}") if !agent.available?(host)
+  logger.error("#{agent.error}") if !agent.available?(host)
 end
 
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
@@ -59,7 +59,7 @@ end
 
 target = Target.new(agent, logger, config.get(:startup_target))
 
-logger.info("Checking target #{target.protocol}://'#{target.path}'")
+logger.info("Checking target '#{target.protocol}://#{target.path}'")
 hosts.each { |host| target.check(host) }
 
 if target.io_schedulers_apply?
