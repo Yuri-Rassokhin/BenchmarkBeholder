@@ -79,7 +79,7 @@ def table_create_generic
       infra_kernel VARCHAR(50) NOT NULL,
       infra_cpu VARCHAR(50) NOT NULL,
       infra_cores INT NOT NULL,
-      infra_ram INT NOT NULL,
+      infra_ram BIGINT NOT NULL,
 
       collect_error VARCHAR(500)
     )
