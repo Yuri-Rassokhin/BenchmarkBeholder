@@ -59,21 +59,24 @@ end
 
 target = Target.new(agent, logger, config.get(:startup_target))
 
-logger.info("Checking #{target.protocol} '#{target.path}'")
+logger.info("Checking target: #{target.protocol} '#{target.path}'")
 hosts.each { |host| target.check(host) }
 
-# enable all available kernel IO schedulers on the nodes
-logger.info("Checking available kernel IO schedulers")
-hosts.each do |host|
-  %w[mq-deadline kyber bfq none].each do |scheduler|
-    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} sudo modprobe -q #{scheduler}`
-  end
-end
+if target.io_schedulers_apply?
 
-logger.info("Checking specification of kernel IO schedulers")
-  config.get(:iterate_schedulers).each do |scheduler|
-    system_schedulers = `cat /sys/block/sda/queue/scheduler`.strip + " N/A"
-    logger.error("unknown IO scheduler '#{scheduler}'") unless system_schedulers.include?(scheduler)
+  # enable all available kernel IO schedulers on the nodes
+  logger.info("Checking available kernel IO schedulers")
+  hosts.each do |host|
+    %w[mq-deadline kyber bfq none].each do |scheduler|
+      `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} sudo modprobe -q #{scheduler}`
+    end
+  end
+
+  logger.info("Checking specification of kernel IO schedulers")
+    config.get(:iterate_schedulers).each do |scheduler|
+      system_schedulers = `cat /sys/block/sda/queue/scheduler`.strip + " N/A"
+      logger.error("unknown IO scheduler '#{scheduler}'") unless system_schedulers.include?(scheduler)
+  end
 end
 
 unless parser.mode == :space
@@ -126,7 +129,7 @@ full_config.set(:startup_target, target.path)
 # during creation, collector gathers all static data about its infrastructure
 mode = full_config.get(:infra_hosts).size > 1 ? "multiple" : "single"
 full_config.get(:infra_hosts).each do |host|
-  logger.info("Initializing hook for '#{class_needed.downcase}' on '#{host}'")
+  logger.info("Initializing workload '#{class_needed.downcase}' on '#{host}'")
   collector[host] = Object.const_get(class_needed).new(full_config, host, mode, logger, series, target)
 end
 
@@ -153,7 +156,7 @@ end
 
 full_config.get(:infra_hosts).each do |host|
   full_config.merge(collector[host].infra_static)
-  logger.info("Launching hook for '#{class_needed.downcase}' on '#{host}'")
+  logger.info("Launching workload '#{class_needed.downcase}' on '#{host}'")
   collector[host].detach(host, :launch, full_config)
 # `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
 end

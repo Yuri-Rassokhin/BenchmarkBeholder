@@ -67,6 +67,10 @@ def check(host)
   logger.error("unsupported filesystem on '#{host}'") if supports_fs? and !@agent.run(host, :get_filesystem, @path)
 end
 
+def io_schedulers_apply?
+  [ "file", "block" ].include?(@protocol)
+end
+
 private
 
 def protocol_get(target)
