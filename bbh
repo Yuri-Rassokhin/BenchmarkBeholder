@@ -118,7 +118,7 @@ end
 
 # create database table for the requested benchmark, if it doesn't exist yet
 load "./sources/hooks/#{class_needed.downcase}/output_parameters.rb"
-database.table_set(full_config.get(:series_benchmark), SCHEMA)
+database.table_set(full_config.get(:series_benchmark), OUTPUT_PARAMETERS)
 
 if target.io_schedulers_apply?
 
