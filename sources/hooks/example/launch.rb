@@ -58,15 +58,21 @@ def push!(query, config)
       infra_cores = '#{config[:cores]}',
       infra_ram = '#{config[:ram]}',
   SQL
-  mysql.query(generic_query << query << ";")
+
+  formatted_query = query.lines.map.with_index do |line, index|
+    index == query.lines.size - 1 ? line.strip : "#{line.strip},"
+  end.join("\n") << ";"
+
+  mysql.query(generic_query << formatted_query)
 end
 
 # construct workload-specific part of the output data for the database
 def push(config, collect, iterate, startup)
   query = ""
-  collect.each_key { |p| query << "collect_#{p} = '#{collect}[:#{p}]'" }
-  iterate.each_key { |p| query << "iterate_#{p} = '#{iterate}[:#{p}]'" }
-  startup.each_key { |p| query << "startup_#{p} = '#{startup}[:#{p}]'" }
+  collect.each_key { |p| query << "collect_#{p} = '#{collect[p]}'\n" }
+  iterate.each_key { |p| query << "iterate_#{p} = '#{iterate[p]}'\n" }
+  startup.each_key { |p| query << "startup_#{p} = '#{startup[p]}'\n" }
+  puts query
   push!(query, config)
 end
 
@@ -103,13 +109,9 @@ end
     command = "sleep 5 2>&1"
     raw_result = `#{command}`
 
-    # gather everything to push it to the database
-    # CUSTOMIZE: extract values from raw_result and any other infrastructure mettrics, if you defined any
-    collect = { }
-    iterate = { iteration: iteration }
+    collect = { } # CUSTOMIZE: gather your collectable parameters
+    iterate = { iteration: iteration } # CUSTOMIZE: add your iteratable parameters
     startup = { command: command.gsub("'", "''"), language: language }
-
-    # CUSTOMIZE: when you have prepared collectables, iteratables, and startup values above, uncomment push statement below to push it all to database
     push(config, collect, iterate, startup)
   end
 end
