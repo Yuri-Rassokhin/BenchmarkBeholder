@@ -45,12 +45,14 @@ class Agent < Object
         res_args = "#{res_args}, " unless index == args.size-1
       end
     end
+    dependencies = ""
+    
     res_args = res_args ? "(#{res_args})" : "()"
     code = "#{@utilities}" + self.method(method).source << "puts #{method}#{res_args}\n"
     execute_remote(host, code)
   end
  
-  def detach(host, method, *args)
+  def detach(host, method, *args, dependencies: [])
     raise "Remote URL not set" unless host
     raise "SSH user not set" unless user
     @error = nil
@@ -66,7 +68,10 @@ class Agent < Object
       end
     end
     res_args = res_args ? "(#{res_args})" : "()"
-    code = "#{@utilities}" + self.method(method).source << "puts #{method}#{res_args}\n"
+    code = "# BEGIN DEPENDENCIES\n"
+    dependencies.each { |dep| code << method(dep).source }
+    code << "# END DEPENDENCIES\n"
+    code << "#{@utilities}" + self.method(method).source << "puts #{method}#{res_args}\n"
     detach_remote(host, code)
   end
 

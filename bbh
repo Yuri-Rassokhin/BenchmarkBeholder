@@ -119,12 +119,17 @@ if parser.mode == :space
   exit 0
 end
 
+#unless Object.method_defined?(:invocation)
+logger.info("loading integration hook")
+load "./sources/hooks/#{hook}/invocation.rb"
+#end
+
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
 hosts.each do |host|
   config.merge(collector[host].infra_static)
   logger.info("Launching workload '#{hook}' on '#{host}'")
-  collector[host].detach(host, :launch, config)
+  collector[host].detach(host, :launch, config, dependencies: [:invocation, :dimensions, :dimension_naming])
 end
 
 logger.info("Workload '#{hook}' series #{series} has launched on '#{hosts.join(', ')}'")
