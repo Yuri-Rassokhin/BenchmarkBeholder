@@ -22,7 +22,7 @@ def initialize(logger, argv)
 end
 
 def check(hook)
-    @logger.info("Checking workload hook '#{hook}'")
+    @logger.info("Checking workload definition '#{hook}'")
     if !@hooks.include?(hook)
       @logger.error("unknown benchmark #{hook}")
     elsif @conf_file.nil?
