@@ -6,6 +6,7 @@ require 'tempfile'
 require 'date'
 require 'method_source'
 require 'mysql2'
+require 'net/http'
 
 require './sources/logger.rb'
 require './sources/basic/validation'
@@ -129,14 +130,15 @@ load "./sources/hooks/#{hook}/invocation.rb"
 config.merge( { startup_target_protocol: target.protocol } )
 
 # check if Telegram chat is configured and active
-def check_telegram_logging
-  return { token: nil, chat_id: nil } if not File.exist? "~/.bbh/telegram"
+def check_telegram_logging(logger)
+  token_file = File.expand_path("~/.bbh/telegram")
+  return { token: nil, chat_id: nil } if not File.exist?(token_file)
   
-  token = File.read(File.expand_path("~/.bbh/telegram_token")).chomp
+  token = File.read(token_file).chomp
   uri = URI("https://api.telegram.org/bot#{token}/getUpdates")
   response = Net::HTTP.get(uri)
   updates = JSON.parse(response)
-    @logger.error "telegram bot has gone inactive, please send something to it and re-run the benchmark" if updates["result"] == []
+    logger.error "telegram bot has gone inactive, please send something to it and re-run the benchmark" if updates["result"] == []
     updates["result"].each do |update|
       return { token: token, chat_id: update['message']['chat']['id'] }
     end
@@ -144,7 +146,8 @@ def check_telegram_logging
 end
 
 # set Telegram chat for the benchmarks nodes to report to, nil means there's no chat configured
-config.merge( { token: check_telegram_logging[:token], chat_id: check_telegram_logging[:chat_id] } )
+token, chat_id = check_telegram_logging(logger)
+config.merge( { token: token, chat_id: chat_id } )
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
