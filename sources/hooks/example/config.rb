@@ -15,6 +15,6 @@ def iterate_parameters
 end
 
   require_relative 'input_parameters'
-  include Parameters
+  include InputParameters
 
 end
