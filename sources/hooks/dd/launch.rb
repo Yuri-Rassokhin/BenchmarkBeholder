@@ -94,7 +94,7 @@ end
     when "write"
       flow = "if=/dev/zero of=#{config[:startup_media]}"
     end
-    command = "#{executable} #{flow} bs=#{size} count=1"
+    command = "#{executable} #{flow} bs=#{size}"
     #puts command
     # Commonly used: run the prepared command and capture its output
     stdout, stderr, status = Open3.capture3("#{command}")
