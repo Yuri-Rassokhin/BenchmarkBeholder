@@ -1,4 +1,5 @@
-def Dd < Collector
+
+class Dd < Collector
 
 def launch
 
@@ -102,10 +103,12 @@ end
       flow = "if=/dev/zero of=#{config[:startup_media]}"
     end
     command = "#{executable} #{flow} bs=#{size} count=1"
+    puts command
     # Commonly used: run the prepared command and capture its output
-    stdout, stderr, status = Open3.capture3("#{command}")
+    #stdout, stderr, status = Open3.capture3("#{command}")
     output = extract(stderr)
-    push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
+    puts output
+    #push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
     end
 end
 
