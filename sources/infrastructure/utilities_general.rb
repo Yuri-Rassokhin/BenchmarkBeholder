@@ -46,6 +46,10 @@ end
     File.exist?(`which #{file}`.strip)
   end
 
+  def bbh_running?
+    `ps ax | grep "ruby /tmp/remote_method_call.rb" | grep -v grep` != ""
+  end
+
   def block_device_exists?(file)
     File.blockdev?(`which #{file}`.strip)
   end
