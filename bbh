@@ -136,7 +136,7 @@ end
 config.merge({ debug: options.debug })
 
 #unless Object.method_defined?(:invocation)
-logger.info "loading integration hook"
+logger.info "loading #{hook} hook on central node"
 load "./sources/hooks/#{hook}/invocation.rb"
 #end
 
@@ -169,7 +169,7 @@ config.merge( { chat_id: chat_id } )
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
-logger.info "launching workload on benchmark node(s)"
+logger.info "launching workload #{hook} on benchmark node(s)"
 hosts.each do |host|
   config.merge(collector[host].infra_static)
   collector[host].detach(host, :launch, config, dependencies: [:invocation, :dimensions, :dimension_naming, :prepare, :debug])
