@@ -103,12 +103,12 @@ end
 
 def extract()
   file, line = caller_locations(1,1)[0].absolute_path, caller_locations(1,1)[0].lineno
-  logger.fatal("(#{file} line #{line}): method '#{__method__}' called must be implemented in benchmark-specific heir")
+  @logger.fatal("(#{file} line #{line}): method '#{__method__}' called must be implemented in benchmark-specific heir")
 end
 
 def push()
   file, line = caller_locations(1,1)[0].absolute_path, caller_locations(1,1)[0].lineno
-  logger.fatal("(#{file} line #{line}): method '#{__method__}' called must be implemented in benchmark-specific heir")
+  @logger.fatal("(#{file} line #{line}): method '#{__method__}' called must be implemented in benchmark-specific heir")
 end
 
 def launch(config)
@@ -117,18 +117,6 @@ require 'open3'
 require 'mysql2'
 require 'net/http'
 require 'json'
-
-def get_chat_id(token, user_name, user_surname)
-    uri = URI("https://api.telegram.org/bot#{token}/getUpdates")
-    response = Net::HTTP.get(uri)
-    updates = JSON.parse(response)
-    updates["result"].each do |update|
-      name = "#{update['message']['chat']['first_name']}"
-      surname = "#{update['message']['chat']['last_name']}"
-      return update['message']['chat']['id'] if name == user_name && surname == user_surname
-    end
-    raise "Chat ID not found for #{name} #{surname}"
-end
 
 at_exit do
   puts "\nExiting at #{$step/$total_steps}% finished"
@@ -142,10 +130,6 @@ end
   end
 end
 
-$token = '8103208089:AAEWSv3YSaFvWy38E1ucvpt_ikzoTKKO43c'
-$name = "Yuri"
-$surname = "Rassokhin"
-$chat_id = get_chat_id($token, $name, $surname)
 $total_steps = config[:parameter_space_size]
 
 def human_readable_time(seconds)
@@ -176,10 +160,11 @@ def message(format, body, config)
   puts result
 end
 
-def msg(token, chat_id, text)
-    uri = URI("https://api.telegram.org/bot#{token}/sendMessage")
+def msg(text)
+    return if not config[:chat_id]
+    uri = URI("https://api.telegram.org/bot#{config[:token]}/sendMessage")
     params = {
-      chat_id: chat_id,
+      chat_id: config[:chat_id],
       text: text
     }
     response = Net::HTTP.post_form(uri, params)
@@ -204,7 +189,7 @@ def capture
     # Start a thread to read and output data as it comes
     output_thread = Thread.new do
       while (line = combined_r.gets)
-          msg($token, $chat_id, line)
+          msg(line)
 #        File.open('output.log', 'a') { |file| file.write(line) }  # Write combined output to a file
       end
     end
