@@ -5,8 +5,11 @@ It will be highly useful if you regularly benchmark your workloads to explore ho
 BenchmarkBeholder makes benchmarking an efficient and comfortable process by implementing R.E.A.L. approach:
 
 **(R)EPRODUCIBLE:** Every benchmark result is stored with its configuration, as such can be reproduced.
+
 **(E)XTENSIBLE:** BenchmarkBeholder integrates with any application in any infrastructure.
+
 **(A)CCUMULATIVE:** All benchmark results are stored in a single database, so you can easily compare influence of your evolving HW and/or application version over years.
+
 **(L)UCID:** You application is benchmarked against any combination of any parameters that might infuence its performance, giving you completely transparent performance landscape of your workload.
 
 # What It Is
