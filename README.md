@@ -38,3 +38,23 @@ BBH is invoked as the following:
 3. ./bbh ./config/dummy.conf
 
 This will give you an idea of how it works. After that, read through ./config/example.conf and start modifying it for your needs. BTW, you are welcome to check out other benchmark configurations under ./config ;)
+
+# Installattion Guide
+
+BBH operates in a distributed environment that consists of three logical roles.
+**Central Host** is the host you're submitting benchmarks from. Usually, it's your local Linux machine or VM on the cloud you are going to use for benchmarking.
+**Database Host** is the host that stores the database of benchmark results. By default, it's the central host.
+**Benchmark Hosts** are the hosts you're running benchmarks on. As BBH is an agentless software, Benchmarks Hosts are actually ANY Linux hosts accessible via SSH.
+
+1. Install BBH on Central Host: git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
+
+2. To maximize the performance of BBH, it is recommended to reuse once-established SSH connections. To achieve this, run this code:
+
+mkdir -p ~/.ssh
+touch ~/.ssh/config
+echo "Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/%r@%h:%p
+    ControlPersist yes" >> ~/.ssh/config
+
+3. Ensure the connectivity across your nodes accoring to the table.
