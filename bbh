@@ -65,7 +65,7 @@ end
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
 if config.get(:startup_actor) == "self"
-  logger.info("checking actor: self specificed, actor in the hook will be used")
+  logger.info("checking actor: built-in actor in the hook")
 else
   logger.info "checking actor on benchmark node(s)"
   hosts.each do |host|
@@ -75,7 +75,7 @@ end
 
 target = Target.new(agent, logger, config.get(:startup_target))
 
-logger.info "checking target #{target.protocol}://#{target.path}"
+logger.info "checking target: #{target.protocol}://#{target.path}"
 hosts.each { |host| target.check(host) }
 
 unless options.mode == :space
