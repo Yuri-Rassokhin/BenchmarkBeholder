@@ -164,6 +164,7 @@ if parser.mode == :space
 #  logger.info("Parameter space consists of the following dimensions")
 #  full_config.parameter_space_dimensions
   logger.info("parameter space size is #{parameter_space_size} invocations")
+  full_config.parameter_space_dimensions
   exit 0
 end
 

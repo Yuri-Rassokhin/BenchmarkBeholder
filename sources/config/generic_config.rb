@@ -57,11 +57,13 @@ class GenericConfig < Object
   end
 
   def parameter_space_dimensions
-    @parameter_space_dimensions ||= ""
+    iter = 1
     @parameters.each do |parameter, value|
-      puts parameter if iteratable?(parameter)
-      @parameter_space_dimensions += "#{parameter}: #{value}" if iteratable?(parameter)
+      iter = value.value if parameter == :iterate_iterations
+      next if parameter == :iterate_iterations or parameter == :parameter_space_size
+      puts "#{parameter}: #{value}" if iteratable?(parameter)
     end
+    puts "iterate_iterations: #{iter}"
   end
 
   def merge(config_object)
