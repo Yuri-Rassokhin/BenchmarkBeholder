@@ -2,7 +2,7 @@
 
 This is a tool that integrates with any application and benchmarks performance for any combination of influential parameters both of the application and infrastructure.
 It will be highly useful if you regularly benchmark your workloads to explore how to reach highest performance.
-BenchmarkBeholder makes benchmarking an efficient and comfortable process by implementing R.E.A.L. approach:
+BenchmarkBeholder makes benchmarking an efficient and comfortable process as it follows R.E.A.L. approach:
 
 **R**eproducible: Every benchmark result is stored with its configuration, as such can be reproduced.
 
