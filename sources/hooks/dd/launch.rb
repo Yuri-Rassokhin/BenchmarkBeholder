@@ -51,6 +51,7 @@ def push(config, output, iterators)
       iterate_scheduler = '#{iterators[:scheduler]}',
       iterate_iteration = '#{iterators[:iteration]}',
       iterate_operation = '#{iterators[:operation]}',
+      iterate_size = '#{iterators[:size]}',
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '#{config[:filesystem]}', 
@@ -96,9 +97,8 @@ end
     count = (`stat --format=%s #{config[:startup_media]}`.to_i)/size
     command = "#{executable} #{flow} bs=#{size} count=#{count}"
     # Commonly used: run the prepared command and capture its output
-    raw = `#{command}`
-#    stdout, stderr, status = Open3.capture3("#{command}")
-    output = extract(raw)
+    stdout, stderr, status = Open3.capture3("#{command}")
+    output = extract(stderr)
     push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
     end
 end
