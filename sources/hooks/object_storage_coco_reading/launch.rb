@@ -14,6 +14,8 @@ def push(config, output, iterators)
     insert into #{config[:series_benchmark]} set
       collect_bandwidth = '#{output[:bandwidth]}',
       collect_error = '\"#{output[:error]}\"',
+      collect_time = '#{output[:time]}',
+      collect_size = '#{output[:size]}',
       project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
@@ -77,8 +79,8 @@ end
       elapsed_time = Time.now - start_time
       size = object_response.headers["content-length"].to_i
       bandwidth_mbps = (size / 1024.0 / 1024.0) / elapsed_time
-      puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
-      output = { bandwidth: bandwidth_mbps, error: "" }
+      #puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
+      output = { bandwidth: bandwidth_mbps, error: "", size: size, time: elapsed_time }
       language = "ruby"
       command = "object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
       push(config, output, {iteration: iteration, command: command.gsub("'", "''"), language: language, scheduler: "NA" , operation: "read" })
