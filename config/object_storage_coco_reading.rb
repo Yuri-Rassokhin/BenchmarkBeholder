@@ -1,5 +1,5 @@
 ### PROJECT: what project this benchmark is a part of
-$project_description = "BBH demo"
+$project_description = "OCI Object Storage"
 $project_code = "kudu"
 $project_tier = "test"
 
@@ -10,16 +10,14 @@ $series_description = '#{series_benchmark} on #{media} on #{mode} #{shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
-# STARTUP: app input to be able to start it up
-$startup_executable = "/usr/bin/dd" # Path to the benchmarked executable
-# NOTE: benchmark-specific parameter
-$startup_media = "/file.dump" # Media the benchmark executable will be using (a file, a block device ...)
+# STARTUP: how to create the workload?
+$startup_executable = "" # No external benchmark needed, we'll benchmark from within the hook
+$startup_media = "coco-2017-images" # data source
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
-$iterate_schedulers = "none, kyber, mq-deadline, bfq" # Linux IO schedulers: mq-deadline, bfq, kyber, none
-# NOTE: benchmark-specific parameter
-$iterate_sizes = "4096, 65536, 262144"
-$iterate_operations = "read, write"
+$iterate_schedulers = "none" # Linux IO schedulers don't make any difference
+# NOTE: benchmark-specific parameters
+$iterate_operations = "read"
 $iterate_iterations = 4
 
 # INFRASTRUCTURE: where to run the benchmark
