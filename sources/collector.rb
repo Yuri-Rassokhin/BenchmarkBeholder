@@ -161,10 +161,10 @@ def message(format, body, config)
 end
 
 def msg(text)
-    return if not config[:chat_id]
-    uri = URI("https://api.telegram.org/bot#{config[:token]}/sendMessage")
+    return if not $config[:chat_id]
+    uri = URI("https://api.telegram.org/bot#{$config[:token]}/sendMessage")
     params = {
-      chat_id: config[:chat_id],
+      chat_id: $config[:chat_id],
       text: text
     }
     response = Net::HTTP.post_form(uri, params)
@@ -240,7 +240,7 @@ def cartesian(dimensions)
 end
 
 def push!(query, config)
-  mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
+  mysql = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
   # consumption_cpu = '#{cpu_consumption}',
   # consumption_storage_tps = '#{storage_tps}',
   generic_query = <<-SQL
@@ -285,12 +285,13 @@ def dim(vector)
     Hash[dimension_naming.zip(vector)]
 end
   
+  $config = config
   $step = 1
   $start_time = Time.now
   $time_passed = 0
   prepare(config)
   capture do
-    message(:header, "#{config[:project_tier].upcase} series #{config[:series]}, #{config[:series_description]}, #{config[:infra_platform]} platform", config)
+    message(:header, "#{config[:project_tier].upcase} series #{config[:series]}, #{config[:series_description]}, #{config[:platform]} platform", config)
     cartesian(dimensions(config)) do |vector|
         start_time = Time.now
         iterator = dim(vector)
