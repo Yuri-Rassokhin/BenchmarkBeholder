@@ -60,10 +60,12 @@ class GenericConfig < Object
     size = 1
     iter = 1 
     @parameters.each do |p, v|
-      size = size * elements_count(v.value.to_s) if iteratable?(p)
-      iter = v.value if p == :iterate_iterations
+      if iteratable?(p)
+        size = size * elements_count(v)
+        size *= size * v.value if p == :iterate_iterations
+      end
    end
-    return size * iter
+    return size
   end
 
   def parameter_space_dimensions
@@ -86,8 +88,8 @@ class GenericConfig < Object
 
 private
 
-  def elements_count(value)
-    value.split(',').reject(&:empty?).count
+  def elements_count(v)
+    (v.value.is_a?(Array) ? v.value.size : 1)
   end
 
   def iteratable?(parameter)
