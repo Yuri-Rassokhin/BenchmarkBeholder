@@ -129,10 +129,10 @@ end
 
 logger.note("launch on the node(s)") do
   config.get(:infra_hosts).split.each do |host|
-    puts collector[host].run(host, :launch, full_config.merge({ iteratable_size: full_config.iteratable_size }))
+    collector[host].run(host, :launch, full_config.merge({ iteratable_size: full_config.iteratable_size }))
 #    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
   end
 end
 
-logger.info("#{config.get(:series_benchmark)} series #{series} has launched, check logs on #{config.get(:infra_hosts).split.join(', ')}")
+logger.info("#{config.get(:series_benchmark)} series #{series} has launched, check logs on '#{config.get(:infra_hosts).split.join(', ')}'")
 

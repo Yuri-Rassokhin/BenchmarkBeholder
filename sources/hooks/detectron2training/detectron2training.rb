@@ -7,10 +7,6 @@ def initialize(config, url, mode, logger, series)
   super(config, url, mode, logger, series)
 end
 
-def stub
-  puts "Stub HERE"
-end
-
 def push(config)
 # Explanation
 # Configuration Hash: The config hash contains all the variables that were previously set as environment variables in the Bash script.
