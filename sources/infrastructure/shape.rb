@@ -12,9 +12,9 @@ def guess_shape
 
   # Check if it's AWS
   shape = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
-  return shape.strip.gsub(/["",]/, '') if shape != "No such metadata item"
+  return shape.strip.gsub(/["",]/, '') if (shape != "No such metadata item" and shape != "")
   
-  "unknown"
+  "unknown shape"
 end
 
 def guess_platform
@@ -26,9 +26,9 @@ def guess_platform
   return "azure" if shape != ""
 
   shape = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
-  return "aws" if shape != "No such metadata item"
+  return "aws" if (shape != "No such metadata item" and shape != "")
 
-  "unknown" 
+  "unknown"
 end
 
 end
