@@ -83,7 +83,7 @@ collector = Hash.new
 class_needed = config.get(:series_benchmark).capitalize
 
 require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}.rb"
-require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}-config.rb"
+require "./sources/hooks/#{class_needed.downcase}/config.rb"
 
 # create benchmark-specific config and merge the general config into it
 full_config = Object.const_get("#{class_needed}config").new(ARGV[0])
