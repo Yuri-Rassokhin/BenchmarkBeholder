@@ -146,8 +146,10 @@ def check_telegram_logging(logger)
 end
 
 # set Telegram chat for the benchmarks nodes to report to, nil means there's no chat configured
-token, chat_id = check_telegram_logging(logger)
-config.merge( { token: token, chat_id: chat_id } )
+token = check_telegram_logging(logger)[:token]
+chat_id = check_telegram_logging(logger)[:chat_id]
+config.merge( { token: token} )
+config.merge( { chat_id: chat_id } )
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
