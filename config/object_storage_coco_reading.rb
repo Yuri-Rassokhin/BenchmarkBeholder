@@ -5,15 +5,15 @@ $project_tier = "test"
 
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
-$series_benchmark = "dd"
+$series_benchmark = "object_storage_coco_reading"
 $series_description = '#{series_benchmark} on #{target} on #{mode} #{shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
 # STARTUP: how to create the workload?
-$startup_actor = "TODO" # No external actor needed, we'll run from within the hook
+$startup_actor = "self" # No external actor needed, we'll run from within the hook
 $startup_target = "coco-2017-images" # name of the bucket
-$startup_type = "object" # type of the target
+$startup_type = "bucket" # type of the target
 $startup_namespace = "fr9qm01oq44x" # workload-specific parameter
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian

@@ -174,7 +174,7 @@ def launch(config)
   iteration=1
   scheduler=""
   iterations = config[:collect_iterations]
-  total_invocations = config[:iteratable_size]
+  total_invocations = config[:parameter_space_size]
   real_start_time = Time.now.to_i.to_s
 
   def total_solver_iterations(config, batch_per_gpu, gpus)

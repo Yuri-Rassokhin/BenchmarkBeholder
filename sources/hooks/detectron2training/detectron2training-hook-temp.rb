@@ -29,7 +29,7 @@ def launch
   scheduler=""
   iterations = config.get!(:iterations)
 
-  total_invocations = config.iteratable_size
+  total_invocations = config.parameter_space_size
 
   real_start_time = Time.now.to_i.to_s
 

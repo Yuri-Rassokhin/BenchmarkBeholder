@@ -110,7 +110,7 @@ def launch(config)
   iteration=1
   scheduler=""
   iterations = config[:collect_iterations]
-  total_invocations = config[:iteratable_size]
+  total_invocations = config[:parameter_space_size]
 
   dimensions = [
     (1..iterations).to_a,

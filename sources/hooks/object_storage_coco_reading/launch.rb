@@ -3,37 +3,13 @@ class Object_storage_coco_reading < Collector
 
 def launch(config)
 
-def extract(raw)
-
-  error = `echo "#{raw.gsub(/\s+/, ' ')}" | grep error`.strip
-  bandwidth = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
-  units = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
-
-  case units
-  when "kB/s"
-    bandwidth = bandwidth / 1024 / 1024
-  when "MB/s"
-    bandwidth = bandwidth / 1024
-  when "GB/s"
-    bandwidth = bandwidth
-  when "TB/s"
-    bandwidth = bandwidth * 1024
-  else
-    error += " failed to convert units"
-  end
-
-  {
-      error: error,
-      bandwidth: bandwidth
-  }
-end
-
 def push(config, output, iterators)
   mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
 
 #      consumption_cpu = '#{cpu_consumption}',
 #      consumption_storage_tps = '#{storage_tps}',
 
+# NOTE: workload-specific customizations: collect_bandwidth
   query = <<-SQL
     insert into #{config[:series_benchmark]} set
       collect_bandwidth = '#{output[:bandwidth]}',
@@ -73,32 +49,42 @@ end
   require 'open3'
   require 'mysql2'
 
-  total_invocations = config[:iteratable_size]
+  # NOTE: adding workload-specific modules
+  require 'oci'
+  require 'pathname'
+
+  total_invocations = config[:parameter_space_size]
   target = config[:startup_target]
   actor = config[:startup_actor]
+
+  # NOTE: adding workload-specific initialization of the target
+  oci_conf = OCI::ConfigFileLoader.load_config()
+  object_storage = OCI::ObjectStorage::ObjectStorageClient.new(config: oci_conf)
+  namespace = 'fr9qm01oq44x'
+  bucket_name = 'coco-2017-images'
+  response = object_storage.list_objects(namespace, bucket_name)
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over
   dimensions = [
     (1..config[:iterate_iterations]).to_a
   ]
 
-  # Main loop: iterate over parameter space
-  dimensions.inject(&:product).map(&:flatten).each do |iteration, scheduler, size, operation|
-    puts "Iteration"
-    switch_scheduler(config[:root_dev], config[:filesystem], scheduler, config[:raid_members], config[:aggregated])
-    case operation
-    when "read"
-      flow = "if=#{config[:startup_target]} of=/dev/null"
-    when "write"
-      flow = "if=/dev/zero of=#{config[:startup_target]}"
+  # NOTE: loop is a template, workload-specific iterators inherited from the 'dimensions' variable
+  dimensions.inject(&:product).map(&:flatten).each do |iteration|
+    response.data.objects.each do |object|
+      object_name = object.name
+      start_time = Time.now
+      object_response = object_storage.get_object(namespace, bucket_name, object_name)
+      File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }
+      elapsed_time = Time.now - start_time
+      size = object_response.headers["content-length"].to_i
+      bandwidth_mbps = (size / 1024.0 / 1024.0) / elapsed_time
+      puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
+      output = { bandwidth: bandwidth_mbps, error: "" }
+      command = "RUBY: object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
+      push(config, bandwidth, {iteration: iteration, command: command, scheduler: "N/A" , operation: "read" })
     end
-    count = (`stat --format=%s #{config[:startup_target]}`.to_i)/size
-    command = "#{actor} #{flow} bs=#{size} count=#{count}"
-    # Commonly used: run the prepared command and capture its output
-    stdout, stderr, status = Open3.capture3("#{command}")
-    output = extract(stderr)
-    push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
-    end
+  end
 end
 
 end

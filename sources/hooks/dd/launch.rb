@@ -73,7 +73,7 @@ end
   require 'open3'
   require 'mysql2'
 
-  total_invocations = config[:iteratable_size]
+  total_invocations = config[:parameter_space_size]
   target = config[:startup_target]
   actor = config[:startup_actor]
 

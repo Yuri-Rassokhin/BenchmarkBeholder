@@ -27,7 +27,11 @@ def initialize(config, url, mode_raw, logger, series)
 #  main_dev = File.basename(src) if main_dev == "udev"
 #  main_dev_name = File.basename(main_dev)
 #  filesystem = run!(:get_filesystem, src)
-  device_info = run!(:check_device, src)
+  if target_has_device?(config.get(:startup_type))
+    device_info = run!(:check_device, src)
+  else
+    device_info = { filesystem: "N/A", type: "N/A", members: "N/A", aggregated: false }
+  end
   filesystem = device_info[:filesystem]
   type = device_info[:type]
   members = device_info[:members].split

@@ -10,6 +10,7 @@ class GenericConfig < Object
 
   def initialize(conf_file)
     @parameters = nil
+    @parameter_space_dimensions = nil
     file, line = caller_locations(1,1)[0].absolute_path, caller_locations(1,1)[0].lineno
     raise "(#{file} line #{line}): '#{self.class.name} is a template class, must instantiate through subclasses"
   end
@@ -45,12 +46,20 @@ class GenericConfig < Object
 #      end
 #  end
 
-  def iteratable_size
+  def parameter_space_size
     size = 1
     @parameters.each do |parameter, value|
       size = size * elements_count(value.value.to_s) if iteratable?(parameter)
    end
     return size
+  end
+
+  def parameter_space_dimensions
+    @parameter_space_dimensions ||= ""
+    @parameters.each do |parameter, value|
+      puts parameter if iteratable?(parameter)
+      @parameter_space_dimensions += "#{parameter}: #{value}" if iteratable?(parameter)
+    end
   end
 
   def merge(config_object)
