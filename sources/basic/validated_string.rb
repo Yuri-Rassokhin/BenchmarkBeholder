@@ -11,8 +11,20 @@ class VStr
   end
 
   def value=(new_value)
-    validate!(new_value)
-    @value = new_value
+    if @checks[:comma_separated] && @checks[:natural]
+      # If the value is expected to be a comma-separated list of VNum objects
+      elements = new_value.split(',').map(&:strip)
+      vnums = elements.map do |element|
+        vnum = VNum.new(natural: @checks[:natural])
+        vnum.value = element.to_i  # Assuming the list contains integers
+        vnum
+      end
+      validate!(vnums)
+      @value = vnums
+    else
+      validate!(new_value)
+      @value = new_value
+    end
   end
 
   def checks=(new_checks)
@@ -22,14 +34,21 @@ class VStr
 
   def +(other)
     ensure_initialized!
-    VStr.new(@checks).tap do |vs|
-      vs.value = @value + extract_value(other)
+    if @value.is_a?(Array)
+      combined_value = @value + extract_value(other)
+      VStr.new(@checks).tap do |vs|
+        vs.value = combined_value.join(',')
+      end
+    else
+      VStr.new(@checks).tap do |vs|
+        vs.value = @value + extract_value(other)
+      end
     end
   end
 
   def to_s
     ensure_initialized!
-    @value.to_s
+    @value.is_a?(Array) ? @value.map(&:to_s).join(', ') : @value.to_s
   end
 
   private
@@ -39,35 +58,47 @@ class VStr
   end
 
   def validate!(value)
-    unless value.is_a?(String)
-      raise ArgumentError, "Value must be a string"
-    end
-
-    if @checks[:non_empty] && value.strip.empty?
-      raise ArgumentError, "Value cannot be empty"
-    end
-
-    if @checks[:comma_separated]
-      # comma-separated list can be, in particular, an empty string or a single word
-      unless (value.include?(',') or value == "" or value.split.size == 1)
-        raise ArgumentError, "Value must be a comma-separated list"
-      end
-
-      if @checks[:allowed_values]
-        invalid_values = value.split(',').map(&:strip) - @checks[:allowed_values]
-        unless invalid_values.empty?
-          raise ArgumentError, "Value contains invalid entries: #{invalid_values.join(', ')}"
+    if value.is_a?(Array)
+      value.each do |vnum|
+        unless vnum.is_a?(VNum)
+          raise ArgumentError, "All elements must be of type VNum"
         end
+        vnum.ensure_initialized!
       end
-    elsif @checks[:allowed_values]
-      unless @checks[:allowed_values].include?(value)
-        raise ArgumentError, "Value contains invalid entries: #{value}"
+    else
+      unless value.is_a?(String)
+        raise ArgumentError, "Value must be a string"
+      end
+
+      if @checks[:non_empty] && value.strip.empty?
+        raise ArgumentError, "Value cannot be empty"
+      end
+
+      if @checks[:comma_separated]
+        unless (value.include?(',') or value == "" or value.split.size == 1)
+          raise ArgumentError, "Value must be a comma-separated list"
+        end
+
+        if @checks[:allowed_values]
+          invalid_values = value.split(',').map(&:strip) - @checks[:allowed_values]
+          unless invalid_values.empty?
+            raise ArgumentError, "Value contains invalid entries: #{invalid_values.join(', ')}"
+          end
+        end
+      elsif @checks[:allowed_values]
+        unless @checks[:allowed_values].include?(value)
+          raise ArgumentError, "Value contains invalid entries: #{value}"
+        end
       end
     end
   end
 
   def extract_value(other)
-    other.is_a?(VStr) ? other.value : other
+    if other.is_a?(VStr)
+      other.value
+    else
+      other
+    end
   end
 
   def ensure_initialized!
@@ -77,39 +108,17 @@ end
 
 # Example usage
 #begin
-  # Create an object with initial validations
-#  project_code = VStr.new(non_empty: true)
-#  project_code.value = "code1"
-#  puts project_code  # Output: "code1"
+  # Create a VStr object that expects a comma-separated list of natural numbers
+#  vstr = VStr.new(non_empty: true, comma_separated: true, natural: true)
 
-  # Add more validations later, without wiping out the initial validation
-#  project_code.checks = { allowed_values: ["code1", "code2", "code3"], comma_separated: false }
+  # Assign a valid comma-separated list of natural numbers
+#  vstr.value = "1, 2, 3, 4"
+#  puts vstr  # Output: "1, 2, 3, 4"
 
-  # Try assigning a valid value
-#  project_code.value = "code2"
-#  puts project_code  # Output: "code2"
-
-  # Try assigning an invalid value
-#  project_code.value = "code4"  # This will raise an error: Value contains invalid entries: code4
+  # Attempt to assign an invalid value (not a natural number)
+#  vstr.value = "1, -2, 3, 4"  # This will raise an error
 #rescue => e
-#  puts e.message
+#  puts e.message  # Output: "Value must be a natural number (non-negative integer)"
 #end
 
-#begin
-  # Further extend the validations
-#  project_code.checks = { allowed_values: ["code1", "code2", "code3", "code4"] }
-
-  # Now this will work
-#  project_code.value = "code4"
-#  puts project_code  # Output: "code4"
-#rescue => e
-#  puts e.message
-#end
-
-#begin
-  # Assign a value that fails the non_empty check
-#  project_code.value = ""  # This will raise an error: Value cannot be empty
-#rescue => e
-#  puts e.message
-#end
 
