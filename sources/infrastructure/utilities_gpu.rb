@@ -81,16 +81,16 @@ def gpu?
 end
 
   if !gpu?
-    gds_supported = "N/A"
+    gds_supported = "no gpu"
   else
     gds_supported = if !%w[ext4 xfs beegfs].include?(filesystem)
-                    "No"
+                    "no"
                   elsif `lsmod | grep nvidia_fs | wc -l`.strip == "0"
-                    "No"
+                    "no"
                   elsif File.exist?('/usr/local/cuda/gds/tools/gdscheck') && `#{File.dirname(File.expand_path(__FILE__))}/gdscheck -p | grep Supported | grep -v "Driver Info" | wc -l`.strip == "0"
-                    "No"
+                    "no"
                   else
-                    "Yes"
+                    "yes"
                   end
   end
   puts gds_supported
