@@ -70,6 +70,7 @@ def push(config, output, iterators)
 end
 
   require 'open3'
+  require 'mysql2'
 
   total_invocations = config[:iteratable_size]
   media = config[:startup_media]
@@ -77,7 +78,7 @@ end
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over
   dimensions = [
-    (1..config[:collect_iterations]).to_a,
+    (1..config[:iterate_iterations]).to_a,
     config[:iterate_schedulers],
     config[:iterate_sizes],
     config[:iterate_operations]
@@ -93,12 +94,11 @@ end
       flow = "if=/dev/zero of=#{config[:startup_media]}"
     end
     command = "#{executable} #{flow} bs=#{size} count=1"
-    puts command
+    #puts command
     # Commonly used: run the prepared command and capture its output
-    #stdout, stderr, status = Open3.capture3("#{command}")
+    stdout, stderr, status = Open3.capture3("#{command}")
     output = extract(stderr)
-    puts output
-    #push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
+    push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
     end
 end
 
