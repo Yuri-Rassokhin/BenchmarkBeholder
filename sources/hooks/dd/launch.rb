@@ -35,13 +35,13 @@ def push(config, output, iterators)
 #      consumption_storage_tps = '#{storage_tps}',
 
   query = <<-SQL
-    insert into bbh.#{config[:benchmark]} set
+    insert into bbh.#{config[:series_benchmark]} set
       collect_bandwidth = '#{output[:bandwidth]}',
       collect_error = '\"#{output[:error]}\"',
       project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
-      series_id = '#{iterators[:series]}',
+      series_id = '#{config[:series]}',
       series_description = '\"#{config[:series_description]}\"',
       series_benchmark = '#{config[:benchmark]}',
       series_owner_name = '#{config[:series_owner_name]}',

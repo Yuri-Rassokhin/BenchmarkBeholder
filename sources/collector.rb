@@ -27,6 +27,7 @@ def initialize(config, url, mode_raw, logger, series)
   main_dev = File.basename(src) if main_dev == "udev"
   main_dev_name = File.basename(main_dev)
   filesystem = run!(:get_filesystem, src)
+  raid_info = run!(:check_raid, main_dev_name)
 
   @infra_static = {
     series: series,
@@ -45,7 +46,9 @@ def initialize(config, url, mode_raw, logger, series)
     main_dev: main_dev,
     main_dev_name: main_dev_name,
     filesystem: filesystem,
-    raid_info: run!(:check_raid, main_dev_name),
+    raid_members: raid_info[:raid_members],
+    raid_members_amount: raid_info[:raid_members_amount],
+    storage_type: raid_info[:storage_type],
     fs_block_size: run!(:get_filesystem_block_size, main_dev, filesystem),
     fs_mount_options: get_filesystem_mount_options(main_dev),
     shape: shape,
