@@ -132,7 +132,7 @@ def get_chat_id(token, user_name, user_surname)
 end
 
 at_exit do
-  puts "\nExiting, #{$step/$total_steps} of the benchmarks finished"
+  puts "\nExiting at #{$step/$total_steps}% finished"
 end
 
 # Trap common termination signals
