@@ -66,6 +66,7 @@ def options_parse(argv)
 end
 
 def projects_show
+  client = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
   begin
     results = client.query("SELECT * FROM projects")
     if results.any?
