@@ -79,8 +79,9 @@ end
       bandwidth_mbps = (size / 1024.0 / 1024.0) / elapsed_time
       puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
       output = { bandwidth: bandwidth_mbps, error: "" }
-      command = "RUBY: object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
-      push(config, output, {iteration: iteration, command: command.gsub("'", "''"), scheduler: "NA" , operation: "read" })
+      language = "ruby"
+      command = "object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
+      push(config, output, {iteration: iteration, command: command.gsub("'", "''"), language: language, scheduler: "NA" , operation: "read" })
     end
   end
 end

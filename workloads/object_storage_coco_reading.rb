@@ -6,7 +6,7 @@ $project_tier = "test"
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "object_storage_coco_reading"
-$series_description = '#{series_benchmark} on #{target} on #{mode} #{shape}'
+$series_description = 'Reading numerous images from OCI Object Storage on #{mode} #{shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
@@ -22,7 +22,7 @@ $iterate_iterations = 4
 $iterate_operations = "read" # workload-specific parameter: list of operations
 
 # INFRASTRUCTURE
-$infra_hosts = "79.76.118.63" # Benchmark Hosts
+$infra_hosts = "127.0.0.1" # Benchmark Hosts
 # User for passwordless ssh to the benchmark nodes
 $infra_user = "opc" # user for passwordless SSH to the benchmark nodes
 $infra_platform = "oci" # which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
