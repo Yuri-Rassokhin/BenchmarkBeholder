@@ -20,7 +20,7 @@ def launch(config)
   ]
 
   # Main loop: iterate over parameter space
-  dimensions.inject(&:product).each do |iteration, scheduler, size, operation|
+  dimensions.inject(&:product).map(&:flatten).each do |iteration, scheduler, size, operation|
     #switch_scheduler $scheduler
     case operation
     when "read"
