@@ -4,15 +4,15 @@ def dimensions(config)
   [
     (1..config[:iterate_iterations]).to_a,
     config[:iterate_processes].to_a,
-    config[:iterate_requests].to_a,
     config[:iterate_devices].to_a,
+    config[:iterate_requests].to_a,
     config[:iterate_images].to_a
   ]
 end
 
 # CUSTOMIZE: give names to the dimensions, as a comma-separated list
 def dimension_naming
-  [ :iteration, :processes, :requests, :device, :image ]
+  [ :iteration, :processes, :device, :requests, :image ]
 end
 
 # CUSTOMIZE: if you need one-time intitialization before traversal of the pararameter space started, it's here
@@ -29,7 +29,7 @@ def prepare(config = nil)
 
   # global number of server workers, to track if it's time to reload it with another number of workers
   $workers = 0
-  $device = "0"
+  $device = "something"
 end
 
 def invocation(config, iterator)
@@ -82,7 +82,7 @@ def invocation(config, iterator)
   time_start = Time.now
   raw_result = `#{command}`
   inference_time = Time.now - time_start
-  server_raw_output = reader.read
+  server_raw_output = "" #reader.read
 
   # extract benchmark results
   error = (`echo "#{server_raw_output}" | grep "CUDA run out of memory"` << `echo "#{server_raw_output}" | grep -i "error | grep -vi dictionary"`)[0..499]
@@ -90,7 +90,7 @@ def invocation(config, iterator)
   # collect result
   collect = { inference_time: inference_time, error: error, image_resolution: image_resolution, image_format: image_format, image_metadata: image_metadata }
   iterate = { iteration: iterator[:iteration], processes: processes, requests: requests, device: device }
-  startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(config[:startup_target_application]).gsub("'", "''") }
+  startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(config[:startup_target_application]).gsub("'", "''")}
 
   return { startup: startup, iterate: iterate, collect: collect }
 end
