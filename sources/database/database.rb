@@ -129,6 +129,7 @@ def table_create_generic
       iterate_iteration INT NOT NULL,
       
       infra_host VARCHAR(50) NOT NULL,
+      infra_platform VARCHAR(20) NOT NULL,
       infra_shape VARCHAR(50) NOT NULL,
       infra_filesystem VARCHAR(50) NOT NULL,
       infra_storage VARCHAR(50) NOT NULL,
@@ -139,7 +140,8 @@ def table_create_generic
       infra_kernel VARCHAR(50) NOT NULL,
       infra_cpu VARCHAR(50) NOT NULL,
       infra_cores INT NOT NULL,
-      infra_ram BIGINT NOT NULL
+      infra_ram BIGINT NOT NULL,
+      infra_gds_supported VARCHAR(10) NOT NULL
     )
   SQL
 end
