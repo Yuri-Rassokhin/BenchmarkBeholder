@@ -41,13 +41,14 @@ def helper(option, hooks)
       Usage:
       Show this help: bbh { -h, --help, help }
       Show supported benchmarks & environments: bbh { -v, --version, version }
-      Show registered projects: bbh -p
+      Show registered projects: bbh { -p, --projects, projects }
+      Calculate parameter space: bbh { -s, --space, space } <configuration_file>
       Launch benchmark: bbh <benchmark> <configuration_file>
     USAGE
     exit 0
   end
 
-  if option == "-p"
+  if ["-p", "projects", "--projects"].include?(option)
     puts "Available projects:"
     Open3.popen3("mysql -B -e \"select * from BENCHMARKING.projects;\"") do |stdin, stdout, stderr, wait_thr|
       puts stdout.read
