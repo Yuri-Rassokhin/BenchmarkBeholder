@@ -264,8 +264,7 @@ def push!(query, config)
   # consumption_storage_tps = '#{storage_tps}',
   generic_query = <<-SQL
       insert into #{config[:series_benchmark]} set
-      project_code = '#{config[:project_code]}',
-      project_tier = '\"#{config[:project_tier]}\"',
+      series_tier = '\"#{config[:series_tier]}\"',
       series_id = '#{config[:series]}',
       series_description = '\"#{config[:series_description]}\"',
       series_benchmark = '#{config[:series_benchmark]}',
@@ -324,7 +323,7 @@ end
   $time_passed = 0
   prepare(config)
   capture do
-    message(:header, "NEWSeries: #{config[:series]}NEWNEWTier: #{config[:project_tier].upcase}NEWNEWWorkload: #{config[:series_description]}NEWNEWPlatform: #{platform_title(config[:platform])}", config)
+    message(:header, "NEWSeries: #{config[:series]}NEWNEWTier: #{config[:series_tier].upcase}NEWNEWWorkload: #{config[:series_description]}NEWNEWPlatform: #{platform_title(config[:platform])}", config)
     cartesian(dimensions(config)) do |vector|
         start_time = Time.now
         iterator = dim(vector)

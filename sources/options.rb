@@ -37,10 +37,6 @@ def options_parse(argv)
       @debug = true
     end
 
-    opts.on('-p', '--projects', 'Show projects') do
-      options[:projects] = true
-    end
-
     opts.on('-s', '--space', 'calculate parameter space size of the workload on host(s)') do
       options[:space] = true
     end
@@ -54,10 +50,7 @@ def options_parse(argv)
   args = parser.parse(ARGV)
 
   # Handle cases based on parsed options
-  if options[:projects]
-    projects_show
-    exit
-  elsif options[:version]
+  if options[:version]
     version_show
     exit
   elsif options[:space]
@@ -76,48 +69,6 @@ def options_parse(argv)
     @workload = args.shift
     @hosts ||= args
   end
-end
-
-def projects_show
-  client = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
-  begin
-    results = client.query("SELECT * FROM projects")
-    if results.any?
-      # Extract headers and calculate column widths
-      headers = results.fields
-      rows = results.map(&:values)
-
-      column_widths = headers.map.with_index do |header, index|
-        [
-          header.length,
-          *rows.map { |row| row[index].to_s.length }
-        ].max
-      end
-
-      # Helper method to format rows
-      format_row = lambda do |row|
-        row.each_with_index.map { |value, index| value.to_s.ljust(column_widths[index]) }.join(" | ")
-      end
-
-      # Print header
-      @logger.info format_row.call(headers)
-
-      # Print a separator line
-      @logger.info column_widths.map { |width| "-" * width }.join("-+-")
-
-      # Print each row
-      rows.each do |row|
-        @logger.info format_row.call(row)
-      end
-    else
-      @logger.info "No projects available"
-    end
-  rescue Mysql2::Error => e
-    @logger.error "#{e.message}"
-  ensure
-    client.close if client
-  end
-  exit 0
 end
 
 def version_show

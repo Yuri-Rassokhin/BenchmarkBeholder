@@ -3,10 +3,10 @@ require './sources/config/generic_config.rb'
 class GeneralConfig < GenericConfig
 
 # load general parameters
-def initialize(conf_file, project_codes)
+def initialize(conf_file)
   @conf_file = conf_file
   @parameters = general_parameters
-  load_conf(conf_file, project_codes: project_codes)
+  load_conf(conf_file)
 end
 
 def delayed_init
@@ -37,8 +37,7 @@ private
 
 def general_parameters
 {
-    project_code: VStr.new(non_empty: true, comma_separated: false, allowed_values: []),
-    project_tier: VStr.new(non_empty: true, comma_separated: false, allowed_values: [ "test", "production" ]),
+    series_tier: VStr.new(non_empty: true, comma_separated: false, allowed_values: [ "test", "production" ]),
     series_description: VStr.new(non_empty: true),
     series_benchmark: VStr.new(non_empty: true),
     startup_actor: VStr.new(non_empty: true, comma_separated: false),

@@ -32,7 +32,7 @@ series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
 options = Options.new(logger, ARGV)
 database = Database.new(logger)
-config = GeneralConfig.new(options.workload, database.project_codes)
+config = GeneralConfig.new(options.workload)
 hook = config.get(:series_benchmark)
 hosts = options.hosts
 options.check_hook(hook) # check if hooks directory exists and contains mandatory files

@@ -11,10 +11,6 @@ def initialize(logger)
   @schema = nil
 end
 
-def project_codes
-  (`mysql -N -B -e "select code from projects;"`.split("\n"))
-end
-
 def table_set(hook)
   raise "Benchmark database table cannot be nil" unless hook
   @table = hook
@@ -59,24 +55,6 @@ end
 
 def create_triggers
   create_trigger_credentials
-  create_trigger_project
-end
-
-def create_trigger_project
-trigger_add_project_description = <<-SQL
-CREATE TRIGGER add_project_description_#{@table}
-BEFORE INSERT ON #{@table}
-FOR EACH ROW
-BEGIN
-    DECLARE project_description VARCHAR(500) DEFAULT 'undefined';
-    SELECT description INTO project_description
-    FROM projects
-    WHERE code = NEW.project_code
-    LIMIT 1;
-    SET NEW.project_description = project_description;
-END;
-SQL
-@client.query(trigger_add_project_description)
 end
 
 def create_trigger_credentials
@@ -101,7 +79,6 @@ SQL
 end
 
 # All configuration parameters and (extended) database columns are grouped as
-# PROJECT: Description of a project, which is a collection of related series, potentially different benchmarks in different setups
 # SERIES: Description of a series, which is a single invocation of BBH for a given benchmark in a given setup
 # STARTUP: Configuration of HOW to execute the series (actor, target, how to treat grace period if any, etc)
 # ITERATE: Parameters the benchmark iterates over
@@ -114,10 +91,8 @@ end
 def table_create_generic
   @client.query(<<~SQL)
     CREATE TABLE #{@table} (
-      project_description VARCHAR(500),
-      project_code VARCHAR(50),
-      project_tier VARCHAR(50),
-
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      series_tier VARCHAR(20) NOT NULL,
       series_id INT NOT NULL,
       series_benchmark VARCHAR(50) NOT NULL,
       series_description VARCHAR(500),
