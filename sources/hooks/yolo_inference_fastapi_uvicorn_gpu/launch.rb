@@ -108,7 +108,7 @@ end
 
     reader, writer = IO.pipe
     # launch the target: uvicorn+fastapi inference server
-    target = spawn("uvicorn #{app_name}:app --app-dir #{app_dir} --host 0.0.0.0 --port 5000 --workers #{processes}", out: writer, err: writer)
+    target = spawn("uvicorn #{app_name}:app --app-dir #{app_dir} --host 0.0.0.0 --port 5000 --workers #{processes} --reload", out: writer, err: writer)
     writer.close
     Process.detach(target)
     sleep(10)
@@ -131,7 +131,7 @@ end
     response_error = `server_raw_output | grep -i "error | grep -vi dictionary"`[0..499]
 
     # push benchmark results to the database
-    collect = { inference_time: inference_time, failed_requests: faile_requests, cuda_error: cuda_error, response_error: response_error }
+    collect = { inference_time: inference_time, failed_requests: failed_requests, cuda_error: cuda_error, response_error: response_error }
     iterate = { iteration: iteration, processes: processes, requests: requests }
     startup = { command: command.gsub("'", "''"), language: language }
     push(config, collect, iterate, startup)
