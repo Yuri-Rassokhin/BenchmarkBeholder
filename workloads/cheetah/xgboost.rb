@@ -9,7 +9,7 @@ $startup_target = "http://127.0.0.1:8080/predict" # protocols: file, device, htt
 $startup_target_application = "/tmp/target_fastapi.py"
 $startup_model_path = "/tmp/xgboost_credit_fraud.pkl"
 $startup_scaler_path = "/tmp/scaler.pkl"
-$startup_device = "cpu"
+$startup_device = "cuda"
 
 $iterate_iterations = 4
 $iterate_processes = "1, 2, 4, 8, 10, 20, 30, 40, 50, 60, 70, 80"
