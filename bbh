@@ -111,8 +111,19 @@ full_config.set(:series_description, str)
 # TODO: This parameter is benchmark-specific and may not be need for other benchmarks?..
 # check if a media the benchmark is going to read from/write to exists on the nodes
 full_config.get(:infra_hosts).each do |host|
-  logger.info("Checking media '#{full_config.get(:startup_media)}' on '#{host}'")
-    logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_media))
+  logger.info("Checking #{full_config.get(:startup_type)} '#{full_config.get(:startup_media)}' on '#{host}'")
+    case full_config.get(:startup_type)
+    when "file"
+      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_media))
+    when "device"
+      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_media))
+    when "bucket"
+      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_bucket_exists?, full_config.get(:startup_media))
+    when "object"
+      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_object_exists?, full_config.get(:startup_media), full_config.get(:sstartup_namespace))
+    else
+      logger.error("unknown media type '#{full_config.get(:startup_type)}'")
+    end
 end
 
 # TODO: this should execute in parallel, if explicitly mentioned

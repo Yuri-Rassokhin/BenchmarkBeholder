@@ -5,8 +5,11 @@ mkdir -p "$HOME/.ssh"
 touch $SSH_CONFIG
 
 path=$(pwd)/sources/misc/ssh_shared
-if ! grep -q "Include $path" "$SSH_CONFIG" 2>/dev/null; then
-    echo "Include $path" >> "$SSH_CONFIG"
+if ! -f "$HOME/.ssh/ssh_shared" 2>/dev/null; then
+    cp $path $HOME/.ssh/
+    echo "Include ./ssh_shared" >> "$SSH_CONFIG"
+
 fi
-chmod 600 "$SSH_CONFIG"
+chmod 600 $HOME/.ssh/ssh_shared
+chown $(whoami):$(whoami) $HOME/.ssh/ssh_shared
 
