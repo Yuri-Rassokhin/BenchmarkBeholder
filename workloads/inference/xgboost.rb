@@ -7,22 +7,13 @@ $startup_target = "http://127.0.0.1:8080/predict" # protocols: file, device, htt
 $startup_target_application = "/tmp/target_fastapi.py"
 $startup_model_path = "/tmp/xgboost_credit_fraud.pkl"
 $startup_scaler_path = "/tmp/scaler.pkl"
-$startup_device = "cuda"
+$startup_device = "cpu"
 
 $iterate_iterations = 4
-$iterate_processes = "10, 20, 30, 40, 50, 60"
-$iterate_requests = "10, 20, 30, 40, 50, 60"
+$iterate_processes = "70, 80, 90, 100, 110, 120"
+$iterate_requests = "70, 80, 90, 100, 110, 120"
 
 
 
-# How to install XGBoost for inference in RPM-based Linux:
-#
-# sudo yum install -y pip 
-# pip install gunicorn fastapi uvicorn xgboost python-multipart kaggle scikit-learn imblearn
-#
-# cp ./sources/hooks/xgboost_inference/prepare_and_train.py /tmp
-# cp ./sources/hooks/xgboost_inference/target_fastapi.py /tmp
-# cd /tmp
-# kaggle datasets download -d mlg-ulb/creditcardfraud
-# unzip creditcardfraud.zip
-# python ./prepare_and_train.py
+# How to install XGBoost for inference in RPM-based Linux: ./source/hooks/xgboost_inference/configure.sh
+
