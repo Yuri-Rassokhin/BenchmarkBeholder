@@ -135,7 +135,7 @@ load "./sources/hooks/#{hook}/invocation.rb"
 hosts.each do |host|
   config.merge(collector[host].infra_static)
   logger.info("Launching workload '#{hook}' on '#{host}'")
-  collector[host].detach(host, :launch, config, dependencies: [:invocation, :dimensions, :dimension_naming])
+  collector[host].detach(host, :launch, config, dependencies: [:invocation, :dimensions, :dimension_naming, :prepare])
 end
 
 logger.info("Workload '#{hook}' series #{series} has launched on '#{hosts.join(', ')}'")

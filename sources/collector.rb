@@ -184,7 +184,6 @@ def push(config, collect, iterate, startup)
   collect.each_key { |p| query << "collect_#{p} = '#{collect[p]}'\n" }
   iterate.each_key { |p| query << "iterate_#{p} = '#{iterate[p]}'\n" }
   startup.each_key { |p| query << "startup_#{p} = '#{startup[p]}'\n" }
-  puts query
   push!(query, config)
 end
 
@@ -192,6 +191,7 @@ def dim(vector)
     Hash[dimension_naming.zip(vector)]
 end
 
+  prepare(config)
   cartesian(dimensions(config)) do |vector|
     iterator = dim(vector)
     result = invocation(config, iterator)

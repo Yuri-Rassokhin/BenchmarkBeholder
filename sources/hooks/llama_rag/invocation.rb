@@ -12,17 +12,23 @@ def dimension_naming
   [ :iteration, :requests ]
 end
 
-def invocation(config, iterator)
-  require 'oci'
-  require 'pathname'
+# CUSTOMIZE: if you need one-time intitialization before traversal of the pararameter space started, it's here
+def prepare(config = nil)
+  require 'tempfile'
+  result = Tempfile.new
+  result.write "question=What is the main topic of the documents?&max_tokens=300&temperature=0.7"
+  return result.path
+end
 
+def invocation(config, iterator)
+    
     # execute the benchmark and capture its raw output
-    command = "ulimit -n 65535; ab -n #{requests} -c #{requests} -p /home/ubuntu/payload.txt -T \"application/x-www-form-urlencoded\" http://localhost:3000/llama/qa 2>&1"
+    command = "ulimit -n 65535; ab -n #{iterator[:requests]} -c #{iterator[:requests]} -p #{prepare} -T \"application/x-www-form-urlencoded\" http://localhost:3000/llama/qa 2>&1"
     raw_result = `#{command}`
 
     # extract benchmark results
-    inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`
-    request_error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`
+    inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`.strip
+    request_error_count = `echo "#{raw_result}" | grep "Failed requests" | awk '{print $3}'`.strip
     failed_requests = ( request_error_count == 0 ? "" : request_error_count )
 
     collect = { inference_time: inference_time, failed_requests: failed_requests, cuda_error: "", response_error: ""}

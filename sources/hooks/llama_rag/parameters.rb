@@ -20,7 +20,7 @@ end
 # ADD YOUR DEFINITIONS OF WORKLOAD-SPECIFIC ITERATABLE PARAMETERS
 def iterate_parameters
   {
-    iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true)
+    iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true),
     iterate_requests: VStr.new(non_empty: true, comma_separated: true, natural: true, iteratable: true)
   }
 end
