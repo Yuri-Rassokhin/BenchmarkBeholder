@@ -6,6 +6,7 @@ require 'io/console'
 def initialize(logger)
   @logger = logger
   @table = nil
+  @logger.info "checking connection to the database"
   @client = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
   @schema = nil
 end
