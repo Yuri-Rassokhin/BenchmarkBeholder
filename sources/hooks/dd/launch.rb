@@ -1,7 +1,7 @@
 
 class Dd < Collector
 
-def launch
+def launch(config)
 
 def extract(raw)
 
