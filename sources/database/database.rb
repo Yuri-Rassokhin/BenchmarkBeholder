@@ -11,10 +11,6 @@ def project_codes
     return `mysql -N -B -e "select code from projects;"`.split("\n").join.tr("\"",'')
 end
 
-def projects
-  warning("this yet to be implemented")
-end
-
 def table_set(name, schema)
   raise "Benchmark database table cannot be nil" unless name
   raise "Benchmark database table schema cannot be nil" unless schema
