@@ -24,6 +24,11 @@ def table_set(name, schema)
   table_create if !table?
 end
 
+def table_add_io_schedulers
+  puts "alter table #{@table} add iterate_scheduler varchar(50) not null;"
+  @client.query("alter table #{@table} add iterate_scheduler varchar(50) not null;")
+end
+
 private
 
 def table?
@@ -47,10 +52,6 @@ end
 
 def table_add_specific
   @client.query("alter table #{@table} #{@schema}")
-end
-
-def table_add_io_schedulers
-  @client.query("alter table #{@table} iterate_scheduler VARCHAR(50)")
 end
 
 def table_create_generic

@@ -25,12 +25,12 @@ def initialize(agent, logger, target, health = nil)
 
   # determine protocol of the target
   @protocol = protocol_get(target)
-  logger.error "protocol is missing for the target '#{@name}'" unless @protocol
-  logger.error "target protocol '#{@protocol}' is not supported" unless supported?(@protocol)
+  @logger.error "protocol is missing for the target '#{@name}'" unless @protocol
+  @logger.error "target protocol '#{@protocol}' is not supported" unless supported?(@protocol)
 
   # determine path to the target
   @path = path_get(target)
-  logger.error "target path is undefined" unless @path
+  @logger.error "target path is undefined" unless @path
 end
 
 def output_supported
@@ -52,7 +52,7 @@ def available?(host)
   when "http" then true
   when "bucket" then @agent.run(host, :oci_bucket_exists?, @path)
   when "object" then @agent.run(host, :oci_object_exists?, @path)
-  else logger.error "unknown target protocol '#{@protocol}'"
+  else @logger.error "unknown target protocol '#{@protocol}'"
   end
 #    `curl -o /dev/null -s -w "%{http_code}" #{target_health}` == "200"
 end
@@ -61,10 +61,10 @@ end
 def check(host)
 
   # check if the target is available from the host
-  logger.error("target '#{@name}' is unavailable on '#{host}'") if !available?(host)
+  @logger.error("target '#{@name}' is unavailable on '#{host}'") if !available?(host)
 
   # check if the target supports filesystem, and we can determine the filesystem
-  logger.error("unsupported filesystem on '#{host}'") if supports_fs? and !@agent.run(host, :get_filesystem, @path)
+  @logger.error("unsupported filesystem on '#{host}'") if supports_fs? and !@agent.run(host, :get_filesystem, @path)
 end
 
 def io_schedulers_apply?
