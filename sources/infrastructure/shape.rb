@@ -3,20 +3,15 @@ module Shape
 def guess_shape(platform)
   case platform
   when "oci"
-    shape = `curl -s --connect-timeout 3 http://169.254.169.254/opc/v1/instance/ | grep \"shape\" | awk '{ print $2}'`
+    shape = `curl -s --connect-timeout 3 http://169.254.169.254/opc/v1/instance/ | grep "shape" | awk '{ print $2 }'`
   when "azure"
-    shape = `curl -s --connect-timeout 3 http://169.254.169.254/metadata/instance?api-version=2021-02-01 | grep \"vmSize\" | awk '{ print $2}'`
+    shape = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
   when "aws"
     shape = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
   else
     shape = "unknown"
   end
-  shape.gsub(/["",]/, '') 
-#  require 'oci'
-#  return 'BM.GPU.L40S.4'
-#  return `oci-metadata 2>&1 | grep "Instance shape:" | awk '{print $3}'`
-#else
-#  return "unknown compute shape"
+  shape.strip.gsub(/["",]/, '') # Ensure leading/trailing whitespace is removed
 end
 
 # obsolete - maybe it's worth just to get distinction of intra-node interconnections, and GPU-subshapes
@@ -129,8 +124,6 @@ end
   else
     [ shape, subshape ]
   end
-
-end
 
 end
 
