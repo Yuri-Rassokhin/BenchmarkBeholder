@@ -30,11 +30,9 @@ def push(config, output, iterators)
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '\"#{config[:filesystem]}\"', 
-      infra_filesystem_block_size = '\"#{config[:fs_block_size]}\"',
-      infra_filesystem_mount_options = '\"#{config[:fs_mount_options]}\"',
       infra_storage = '\"#{config[:storage_type]}\"',
       infra_device = '\"#{config[:device]}\"',
-      infra_drives = '\"#{config[:raid_members_amount]}\"',
+      infra_drives = '#{config[:raid_members_amount]}',
       infra_architecture = '\"#{config[:arch]}\"',
       infra_os = '\"#{config[:release]}\"',
       infra_kernel = '\"#{config[:kernel]}\"',
@@ -70,7 +68,7 @@ end
   ]
 
   # NOTE: loop is a template, workload-specific iterators inherited from the 'dimensions' variable
-  dimensions.inject(&:product).map(&:flatten).each do |iteration|
+  dimensions.inject(&:product).map(&:flatten).each do |iteration, operation|
     response.data.objects.each do |object|
       object_name = object.name
       start_time = Time.now
