@@ -112,15 +112,12 @@ end
     raw_result = `#{command}`
 
     # gather everything to push it to the database
-    # CUSTOMIZE: extract values from raw_result and any other infrastructure mett
-rics, if you defined any
-    collect = { inference_time: "", failed_requests: "", cuda_error: "", responss
-e_error: "" }
+    # CUSTOMIZE: extract values from raw_result and any other infrastructure mettrics, if you defined any
+    collect = { inference_time: "", failed_requests: "", cuda_error: "", response_error: "" }
     iterate = { iteration: iteration }
     startup = { command: command.gsub("'", "''"), language: language }
 
-    # CUSTOMIZE: when you have prepared collectables, iteratables, and startup vv
-alues above, uncomment push statement below to push it all to database
+    # CUSTOMIZE: when you have prepared collectables, iteratables, and startup values above, uncomment push statement below to push it all to database
     #push(config, collect, iterate, startup)
   end
 end

@@ -16,6 +16,7 @@ $startup_target = "file:///etc/hosts" # protocols: file, device, http, object, b
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_iterations = 4 # MODIFY ME
+$iterate_schedulers = "none, bfq, kyber, mq-deadline"
 
 # INFRASTRUCTURE
 $infra_hosts = "127.0.0.1" # ADDME: benchmark hosts
