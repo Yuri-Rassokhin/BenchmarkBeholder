@@ -48,10 +48,12 @@ class GenericConfig < Object
 
   def parameter_space_size
     size = 1
-    @parameters.each do |parameter, value|
-      size = size * elements_count(value.value.to_s) if iteratable?(parameter)
+    iter = 1 
+    @parameters.each do |p, v|
+      size = size * elements_count(v.value.to_s) if iteratable?(p)
+      iter = v.value if p == :iterate_iterations
    end
-    return size
+    return size*iter
   end
 
   def parameter_space_dimensions
