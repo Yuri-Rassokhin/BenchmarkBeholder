@@ -71,6 +71,8 @@ def initialize(config, url, mode_raw, logger, series, target)
     series_description: ""
   }
   @infra_static[:series_description] = description_eval(config.get(:series_description))
+
+  launch_set
 end
 
 def launch
@@ -88,6 +90,15 @@ end
   #File.delete(conf_file)
 
 private
+
+# instantiate 'launch' method from the specificed hook
+def launch_set
+  hook = self.get(:series_benchmark)
+  input = File.expand_path("../hooks/#{hook}/input_parameters.rb", __dir__)
+  require input
+  mod = Object.const_get(:InputParameters)
+  include mod # adds as instance method
+end
 
 # gets root device name for a given partiion; NOTE: it doesn't work with RAID/LVM
 def get_root_dev(main_dev)
