@@ -61,8 +61,6 @@ def invocation(config, iterator)
    ]
    env = { "DEVICE" => device }
 
-   puts target_array.join(" ")
-
    target_command = "DEVICE=#{device} MODEL_PATH=#{model_path} SCALER_PATH=#{scaler_path} #{target_array.join(' ')}"
    puts target_command
 
