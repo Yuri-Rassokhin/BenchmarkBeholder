@@ -43,7 +43,7 @@ def general_parameters
     series_benchmark: VStr.new(non_empty: true),
     startup_actor: VStr.new(non_empty: true, comma_separated: false),
     startup_target: VStr.new(non_empty: true),
-    iterate_iterations: VNum.new(non_empty: true, natural: true, iteratable: true),
+    iterate_iterations: VNum.new(non_empty: true, natural: true, iteratable: true)
     # How often to fetch data from the application during training, seconds (can be a fraction, 0.1 or greater)
 # TODO: THIS MUST BE APPLICATION-SPECIFIC
 #    collect_frequency: VNum.new(positive: true, greater: 0.1),

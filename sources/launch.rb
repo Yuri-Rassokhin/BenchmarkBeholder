@@ -73,6 +73,7 @@ def push!(query, config)
       series_benchmark = '#{config[:series_benchmark]}',
       startup_actor = '#{config[:startup_actor]}',
       infra_host = '#{config[:host]}',
+      infra_platform = '#{config[:platform]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '\"#{config[:filesystem]}\"',
       infra_storage = '\"#{config[:storage_type]}\"',
@@ -84,6 +85,7 @@ def push!(query, config)
       infra_cpu = '\"#{config[:cpu]}\"',
       infra_cores = '#{config[:cores]}',
       infra_ram = '#{config[:ram]}',
+      infra_gds_supported = '#{config[:gds_supported]}'
   SQL
 
   formatted_query = query.lines.map.with_index do |line, index|
