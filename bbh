@@ -64,6 +64,8 @@ hosts.each { |host| target.check(host) }
 
 if target.io_schedulers_apply?
 
+  database.table_add_io_schedulers
+
   # enable all available kernel IO schedulers on the nodes
   logger.info("Checking available kernel IO schedulers")
   hosts.each do |host|

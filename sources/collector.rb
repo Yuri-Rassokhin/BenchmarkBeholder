@@ -6,16 +6,6 @@ class Collector < Agent
 
   attr_reader :infra_static
 
-# Common parameters from the server node
-#series = ARGV[0]
-#host = ARGV[1]
-#mode = ARGV[2]
-#benchmark = ARGV[3]
-#agenthook = ARGV[5]
-#schedulers = ARGV[6]
-#warning_log = ARGV[7]
-#hook_database = ARGV[8]
-
 def initialize(config, url, mode_raw, logger, series, target)
   user = config.get(:infra_user)
   super(user, url)

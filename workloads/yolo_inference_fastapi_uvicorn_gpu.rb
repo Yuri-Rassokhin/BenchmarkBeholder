@@ -16,7 +16,6 @@ $startup_target = "http://127.0.0.1:5000/predict" # protocols: file, device, htt
 $startup_health = "http://127.0.0.1:5000/health" # how to check if the target is available
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
-$iterate_schedulers = "none" # Linux IO schedulers don't make any difference
 $iterate_iterations = 4
 
 # INFRASTRUCTURE

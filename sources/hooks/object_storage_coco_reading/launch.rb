@@ -3,19 +3,12 @@ class Object_storage_coco_reading < Collector
 
 def launch(config)
 
-def push(config, output, iterators)
+def push!(query, config)
   mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
-
-#      consumption_cpu = '#{cpu_consumption}',
-#      consumption_storage_tps = '#{storage_tps}',
-
-# NOTE: workload-specific customizations: collect_bandwidth
-  query = <<-SQL
-    insert into #{config[:series_benchmark]} set
-      collect_bandwidth = '#{output[:bandwidth]}',
-      collect_error = '\"#{output[:error]}\"',
-      collect_time = '#{output[:time]}',
-      collect_size = '#{output[:size]}',
+  # consumption_cpu = '#{cpu_consumption}',
+  # consumption_storage_tps = '#{storage_tps}',
+  generic_query = <<-SQL
+      insert into #{config[:series_benchmark]} set
       project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
@@ -25,10 +18,6 @@ def push(config, output, iterators)
       series_owner_name = '#{config[:series_owner_name]}',
       series_owner_email = '#{config[:series_owner_email]}',
       startup_actor = '#{config[:startup_actor]}',
-      startup_command = '\"#{iterators[:command]}\"',
-      iterate_scheduler = '#{iterators[:scheduler]}',
-      iterate_iteration = '#{iterators[:iteration]}',
-      iterate_operation = '#{iterators[:operation]}',
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '\"#{config[:filesystem]}\"', 
@@ -40,15 +29,27 @@ def push(config, output, iterators)
       infra_kernel = '\"#{config[:kernel]}\"',
       infra_cpu = '\"#{config[:cpu]}\"',
       infra_cores = '#{config[:cores]}',
-      infra_ram = '#{config[:ram]}'
+      infra_ram = '#{config[:ram]}',
   SQL
-  mysql.query(query)
+  mysql.query(generic_query << query << ";")
+end
+
+# CUSTOMIZE: add your "collect" and "iterate" parameters in query
+def push(config, output, iterators)
+  query = <<-SQL
+      collect_bandwidth = '#{output[:bandwidth]}',
+      collect_time = '#{output[:time]}',
+      collect_size = '#{output[:size]}',
+      startup_command = '\"#{iterators[:command]}\"',
+      iterate_iteration = '#{iterators[:iteration]}'
+  SQL
+  push!(query)
 end
 
   require 'open3'
   require 'mysql2'
 
-  # NOTE: adding workload-specific modules
+  # CUSTOMIZE: add the modules required for your hook
   require 'oci'
   require 'pathname'
 
@@ -65,12 +66,12 @@ end
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over
   dimensions = [
-    (1..config[:iterate_iterations]).to_a,
-    config[:iterate_operations].to_a
+    (1..config[:iterate_iterations]).to_a
+#    config[:iterate_operations].to_a
   ]
 
   # NOTE: loop is a template, workload-specific iterators inherited from the 'dimensions' variable
-  dimensions.inject(&:product).map(&:flatten).each do |iteration, operation|
+  dimensions.inject(&:product).map(&:flatten).each do |iteration|
     response.data.objects.each do |object|
       object_name = object.name
       start_time = Time.now
@@ -80,10 +81,10 @@ end
       size = object_response.headers["content-length"].to_i
       bandwidth_mbps = (size / 1024.0 / 1024.0) / elapsed_time
       #puts "Read #{object_name}: #{bandwidth_mbps} MB/sec"
-      output = { bandwidth: bandwidth_mbps, error: "", size: size, time: elapsed_time }
+      output = { bandwidth: bandwidth_mbps, size: size, time: elapsed_time }
       language = "ruby"
       command = "object_response = object_storage.get_object(namespace, bucket_name, object_name) File.open('/dev/null', 'wb') { |null_file| null_file.write(object_response.data) }"
-      push(config, output, {iteration: iteration, command: command.gsub("'", "''"), language: language, scheduler: "NA" , operation: "read" })
+      push(config, output, {iteration: iteration, command: command.gsub("'", "''"), language: language })
     end
   end
 end

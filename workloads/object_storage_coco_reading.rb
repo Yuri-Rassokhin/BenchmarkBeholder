@@ -16,9 +16,8 @@ $startup_target = "bucket://coco-2017-images" # name of the bucket
 $startup_namespace = "fr9qm01oq44x" # workload-specific parameter
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
-$iterate_schedulers = "none" # Linux IO schedulers don't make any difference
 $iterate_iterations = 4
-$iterate_operations = "read" # workload-specific parameter: list of operations
+#$iterate_operations = "read" # workload-specific parameter: list of operations
 
 # INFRASTRUCTURE
 $infra_hosts = "127.0.0.1" # Benchmark Hosts

@@ -49,6 +49,10 @@ def table_add_specific
   @client.query("alter table #{@table} #{@schema}")
 end
 
+def table_add_io_schedulers
+  @client.query("alter table #{@table} iterate_scheduler VARCHAR(50)")
+end
+
 def table_create_generic
   @client.query(<<~SQL)
     CREATE TABLE #{@table} (
@@ -65,7 +69,6 @@ def table_create_generic
       startup_actor VARCHAR(100) NOT NULL,
       startup_command VARCHAR(500) NOT NULL,
 
-      iterate_scheduler VARCHAR(50),
       iterate_iteration INT NOT NULL,
       
       infra_host VARCHAR(50) NOT NULL,
