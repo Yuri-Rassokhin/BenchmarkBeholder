@@ -6,7 +6,7 @@ attr_reader :mode, :hosts, :workload, :debug, :user
 
 def initialize(logger, argv)
   @logger = logger
-  @hosts = [ "127.0.0.1" ]
+  @hosts = nil
   @mode = "launch"
   @workload = nil
   @hooks = Dir.entries("./sources/hooks") - %w[. ..]
@@ -65,7 +65,7 @@ def options_parse(argv)
     end
     @mode = "space"
     @workload = args.shift
-    @hosts ||= args
+    @hosts = args
   elsif options[:user]
     if args.empty? then @logger.error "-u requires user action, add or delete" end
     case args[0]
@@ -90,7 +90,7 @@ def options_parse(argv)
       exit 1
     end
     @workload = args.shift
-    @hosts ||= args
+    @hosts = args
   end
 end
 
