@@ -52,7 +52,7 @@ def invocation(config, iterator)
   app_dir = File.dirname(app)
   app_name = File.basename(app)
   target_command = ""
-  device = iterator[:device]
+  device = config[:startup_device]
 
   reader, writer = IO.pipe
   # reload the inference server if the iterator has updated its parameters: device or workers
@@ -71,9 +71,9 @@ def invocation(config, iterator)
 
    target_command = "DEVICE=#{device} #{target_array.join(' ')}"
 
-    target = spawn(env, *target_array, out: writer, err: writer)
+    target_process = spawn(env, *target_array, out: writer, err: writer)
     writer.close
-    Process.detach(target)
+    Process.detach(target_process)
     sleep(10)
     $workers = processes
   end
