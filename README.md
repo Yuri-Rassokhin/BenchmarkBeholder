@@ -37,4 +37,4 @@ BBH is invoked as the following:
 2. cd ./BenchmarkBeholder
 3. ./bbh ./config/dummy.conf
 
-This will give you an idea of how it works. After that, read through ./config/example.conf and start modifying it for your needs. BTW, you are welcome to check out other benchmark configurations unde ./config ;)
+This will give you an idea of how it works. After that, read through ./config/example.conf and start modifying it for your needs. BTW, you are welcome to check out other benchmark configurations under ./config ;)
