@@ -144,14 +144,16 @@ def human_readable_time(seconds)
 end
 
 def iterator_format(iterator, config)
-  seconds_left = ( $time_passed == 0 ? "TBD time" : human_readable_time((($time_passed)/$step)*(config[:parameter_space_size]-$step).to_i) )
-  "Run #{$step} of #{config[:parameter_space_size]}NEW#{iterator.to_s.gsub(':', '').gsub('=>', ': ').gsub('"', '')}NEW#{seconds_left} left"
+  seconds_left = ( $time_passed == 0 ? "TBD" : human_readable_time((($time_passed)/$step)*(config[:parameter_space_size]-$step).to_i) )
+  iter = ""
+  iterator.each { |it, val| iter << "   #{it.to_s.gsub(':', '')} #{val}NEW" }
+  "Run #{$step} of #{config[:parameter_space_size]}NEWTime left: #{seconds_left}NEWInvocation:NEW#{iter}"
 end
 
 def message(format, body, config)
   case format
   when :header
-    result = "Starting #{body}"
+    result = "Starting benchmarkNEW#{body}"
   when :footer
     result = "Completed #{body}"
   when :iterator
@@ -299,6 +301,18 @@ def push(config, collect, iterate, startup)
   push!(query, config)
 end
 
+def platform_title(platform_name)
+  case platform_name
+  when "oci"
+    "OCI"
+  when "azure"
+    "MS Azure"
+  when "aws"
+    "AWS"
+  else "unknown" 
+  end
+end
+
 def dim(vector)
     Hash[dimension_naming.zip(vector)]
 end
@@ -309,7 +323,7 @@ end
   $time_passed = 0
   prepare(config)
   capture do
-    message(:header, "series #{config[:series]}NEWNEWTier: #{config[:project_tier].upcase}NEWNEWWorkload: #{config[:series_description]}NEWNEWPlatform: #{config[:platform]}", config)
+    message(:header, "NEWSeries: #{config[:series]}NEWNEWTier: #{config[:project_tier].upcase}NEWNEWWorkload: #{config[:series_description]}NEWNEWPlatform: #{platform_title(config[:platform])}", config)
     cartesian(dimensions(config)) do |vector|
         start_time = Time.now
         iterator = dim(vector)
