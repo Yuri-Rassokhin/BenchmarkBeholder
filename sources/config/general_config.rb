@@ -8,7 +8,6 @@ require './sources/config/generic_config.rb'
 def initialize(conf_file, project_codes)
   @parameters = {
 
-    project_description: VStr.new(non_empty: true, comma_separated: false),
     project_code: VStr.new(non_empty: true, comma_separated: false, allowed_values: []),
     project_tier: VStr.new(non_empty: true, comma_separated: false, allowed_values: [ "test", "production" ]),
 

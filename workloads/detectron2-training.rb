@@ -1,5 +1,4 @@
 ### PROJECT: what project this benchmark is a part of
-$project_description = "Research of Detectron2 Training"
 $project_code = "kudu"
 $project_tier = "test"
 

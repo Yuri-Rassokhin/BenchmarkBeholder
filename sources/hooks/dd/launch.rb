@@ -38,7 +38,6 @@ def push(config, output, iterators)
     insert into #{config[:series_benchmark]} set
       collect_bandwidth = '#{output[:bandwidth]}',
       collect_error = '\"#{output[:error]}\"',
-      project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
       series_id = '#{config[:series]}',

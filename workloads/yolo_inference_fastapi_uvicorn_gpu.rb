@@ -1,5 +1,4 @@
 ### PROJECT: what project this benchmark is a part of
-$project_description = "GPU Inference"
 $project_code = "cheetah"
 $project_tier = "test"
 

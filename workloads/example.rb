@@ -1,12 +1,16 @@
 ### PROJECT: what project this benchmark is a part of
-$project_description = "Testing workload integration"
+
 $project_code = "test"
+
+# TODO: rename it as series_tier
 $project_tier = "test"
 
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "example"
 $series_description = 'sleep on #{$startup_target} on #{mode} #{shape}'
+
+# TODO: remove these two
 $series_owner_name = "John Doe"
 $series_owner_email = "john.doe@acme.com"
 

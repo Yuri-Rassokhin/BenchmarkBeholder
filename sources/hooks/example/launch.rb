@@ -37,7 +37,6 @@ def push!(query, config)
   # consumption_storage_tps = '#{storage_tps}',
   generic_query = <<-SQL
       insert into #{config[:series_benchmark]} set
-      project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
       series_id = '#{config[:series]}',

@@ -9,7 +9,7 @@ nvidia_cuda_version = `nvidia-smi | grep NVIDIA-SMI | awk '{print $9}'`.strip
 def push_sql(
   series:, desc:, host:, shape:, filesystem:, storage_type:, raid_members_amount:, operation:, jobs:, gpu_mode:, block_size:, scheduler:, iops:, bw:, lat:,
   gpu_consumptions:, gpu_ram_consumptions:, gpu_ram_per_device:, cpu_consumption:, storage_tps:, iteration:, arch:, release:, kernel:, cpu:, cores:, ram:, 
-  benchmark:, line:, device:, error_content:, operations:, gpu_modes:, block_sizes:, jobs_from:, jobs_to:, increment:, schedulers:, hosts:, project_description:, 
+  benchmark:, line:, device:, error_content:, operations:, gpu_modes:, block_sizes:, jobs_from:, jobs_to:, increment:, schedulers:, hosts:, 
   series_owner_name:, series_owner_email:, project_code:, project_tier:, debug_scheduler:, debug_ops:, duration:, fs_block_size:, nvidia_cuda_version:, nvidia_driver_version:, fs_mount_options:, sql_log_file:
 )
   sql = <<~SQL
@@ -19,7 +19,7 @@ def push_sql(
       '#{gpu_consumptions[5]}', '#{gpu_consumptions[6]}', '#{gpu_consumptions[7]}', '#{gpu_ram_consumptions[0]}', '#{gpu_ram_consumptions[1]}', '#{gpu_ram_consumptions[2]}', 
       '#{gpu_ram_consumptions[3]}', '#{gpu_ram_consumptions[4]}', '#{gpu_ram_consumptions[5]}', '#{gpu_ram_consumptions[6]}', '#{gpu_ram_consumptions[7]}', '#{gpu_ram_per_device}', 
       '#{cpu_consumption}', '#{storage_tps}', '#{iteration}', '#{arch}', '#{release}', '#{kernel}', '#{cpu}', '#{cores}', '#{ram}', '#{benchmark}', '#{line}', '#{device}', 
-      '#{error_content}', '#{operations}', '#{gpu_modes}', '#{block_sizes}', '#{jobs_from}', '#{jobs_to}', '#{increment}', '#{schedulers}', '#{hosts}', '#{project_description}', 
+      '#{error_content}', '#{operations}', '#{gpu_modes}', '#{block_sizes}', '#{jobs_from}', '#{jobs_to}', '#{increment}', '#{schedulers}', '#{hosts}', 
       '#{series_owner_name}', '#{series_owner_email}', '#{project_code}', '#{project_tier}', '#{debug_scheduler}', '#{debug_ops}', '#{duration}', '#{fs_block_size}', 
       '#{nvidia_cuda_version}', '#{nvidia_driver_version}', '#{fs_mount_options}'
     )
@@ -73,7 +73,6 @@ cores = ENV['CORES']
 ram = ENV['RAM']
 benchmark = ENV['BENCHMARK']
 device = ENV['DEVICE']
-project_description = ENV['PROJECT_DESCRIPTION']
 series_owner_name = ENV['SERIES_OWNER_NAME']
 series_owner_email = ENV['SERIES_OWNER_EMAIL']
 project_code = ENV['PROJECT_CODE']
@@ -125,7 +124,7 @@ while iteration <= ENV['ITERATIONS'].to_i
               gpu_consumptions: gpu_consumptions, gpu_ram_consumptions: gpu_ram_consumptions, gpu_ram_per_device: gpu_ram_per_device, cpu_consumption: cpu_consumption,
               storage_tps: storage_tps, iteration: iteration, arch: arch, release: release, kernel: kernel, cpu: cpu, cores: cores, ram: ram, benchmark: benchmark,
               line: line, device: device, error_content: File.read(error_file.path), operations: operations, gpu_modes: gpu_modes, block_sizes: block_sizes,
-              jobs_from: jobs_from, jobs_to: jobs_to, increment: increment, schedulers: schedulers, hosts: hosts, project_description: project_description,
+              jobs_from: jobs_from, jobs_to: jobs_to, increment: increment, schedulers: schedulers, hosts: hosts,
               series_owner_name: series_owner_name, series_owner_email: series_owner_email, project_code: project_code, project_tier: project_tier,
               debug_scheduler: debug_scheduler, debug_ops: debug_ops, duration: duration, fs_block_size: fs_block_size, nvidia_cuda_version: nvidia_cuda_version,
               nvidia_driver_version: nvidia_driver_version, fs_mount_options: fs_mount_options, sql_log_file: sql_log_file

@@ -41,7 +41,6 @@ def push(config)
   iteration = config[:iteration]
   schedulers = config[:schedulers]
   hosts = config[:hosts]
-  project_description = config[:project_description]
   project_code = config[:project_code]
   project_tier = config[:project_tier]
   series_owner_name = config[:series_owner_name]
@@ -89,7 +88,6 @@ def push(config)
       invocation_iteration = '#{iteration}',
       config_schedulers = '#{schedulers}',
       config_hosts = '#{hosts}',
-      project_description = '\"#{project_description}\"',
       project_code = '\"#{project_code}\"',
       project_tier = '\"#{project_tier}\"',
       owner_name = '#{series_owner_name}',

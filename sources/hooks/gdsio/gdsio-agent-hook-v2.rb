@@ -20,7 +20,7 @@ def push_sql(params)
       '#{params[:cpu]}', '#{params[:cores]}', '#{params[:ram]}', '#{params[:benchmark]}', '#{params[:line]}', '#{params[:device]}', 
       '#{params[:error_content]}', '#{params[:operations]}', '#{params[:gpu_modes]}', '#{params[:block_sizes]}', 
       '#{params[:jobs_from]}', '#{params[:jobs_to]}', '#{params[:increment]}', '#{params[:schedulers]}', '#{params[:hosts]}', 
-      '#{params[:project_description]}', '#{params[:series_owner_name]}', '#{params[:series_owner_email]}', '#{params[:project_code]}', 
+      '#{params[:series_owner_name]}', '#{params[:series_owner_email]}', '#{params[:project_code]}', 
       '#{params[:project_tier]}', '#{params[:debug_scheduler]}', '#{params[:debug_ops]}', '#{params[:duration]}', '#{params[:fs_block_size]}', 
       '#{params[:nvidia_cuda_version]}', '#{params[:nvidia_driver_version]}', '#{params[:fs_mount_options]}'
     )
@@ -68,7 +68,6 @@ config = {
   ram: ENV['RAM'],
   benchmark: ENV['BENCHMARK'],
   device: ENV['DEVICE'],
-  project_description: ENV['PROJECT_DESCRIPTION'],
   series_owner_name: ENV['SERIES_OWNER_NAME'],
   series_owner_email: ENV['SERIES_OWNER_EMAIL'],
   project_code: ENV['PROJECT_CODE'],
