@@ -55,7 +55,34 @@ To deploy BBH on a distributed environment, follow these steps.
 
 1. Install BBH on Central Host: git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
 
-2. To maximize the performance of BBH, it is recommended to reuse once-established SSH connections. To achieve this, run this code:
+2. To maximize the performance of BBH, it is recommended to reuse once-established SSH connections. To achieve this, run this code on the Central Host from the user that will be submitting benchmarks:
+
+#!/bin/bash
+
+SSH_CONFIG="$HOME/.ssh/config"
+mkdir -p "$HOME/.ssh"
+CONFIG_BLOCK="
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/control-%r@%h:%p
+    ControlPersist 10m
+"
+
+# Check if the configuration block already exists
+if grep -q "Host \*" "$SSH_CONFIG" 2>/dev/null; then
+    echo "Configuration block already exists in $SSH_CONFIG."
+else
+    # Append the configuration block to the SSH config file
+    echo "$CONFIG_BLOCK" >> "$SSH_CONFIG"
+    echo "Configuration block added to $SSH_CONFIG."
+fi
+
+# Set proper permissions on the SSH config file
+chmod 600 "$SSH_CONFIG"
+
+echo "Done."
+
+
 
 mkdir -p ~/.ssh
 touch ~/.ssh/config
