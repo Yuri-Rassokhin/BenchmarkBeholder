@@ -22,7 +22,7 @@ $iterate_iterations = 4
 $iterate_operations = "read" # workload-specific parameter: list of operations
 
 # INFRASTRUCTURE
-$infra_hosts = "dev" # Benchmark Hosts
+$infra_hosts = "79.76.118.63" # Benchmark Hosts
 # User for passwordless ssh to the benchmark nodes
-$infra_user = "yuri" # user for passwordless SSH to the benchmark nodes
+$infra_user = "opc" # user for passwordless SSH to the benchmark nodes
 $infra_platform = "oci" # which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
