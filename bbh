@@ -38,45 +38,45 @@ hosts = options.hosts
 options.check_hook(hook) # check if hooks directory exists and contains mandatory files
 agent = Agent.new(nil, nil)
 
-logger.info("Checking SSH persistance on the central node") # maximize SSH performance
+logger.info "checking SSH persistance on central node" # maximize SSH performance
 ssh_sharing_enable
 
+logger.info "checking SSH availability of benchmark node(s)"
 hosts.each do |host|
-  logger.info("Checking SSH availability of benchmark node '#{host}'")
   logger.error("#{agent.error}") if !agent.available?(host)
 end
 
+logger.info "checking if another BBH instance is running on benchmark node(s)")
 hosts.each do |host|
-  logger.info("Checking if another BBH instance is running on benchmark node '#{host}'")
   logger.error("another instance of BBH is running on '#{host}'") if agent.run(host, :bbh_running?) == "true"
 end
 
+logger.info "checking dependencies on benchmark node(s)")
 hosts.each do |host|
-  logger.info("Checking CLI dependencies on benchmark node '#{host}'")
   [ "ruby", "curl", "mpstat", "iostat" ].each { |tool| logger.error("'#{tool}' is missing ") if !agent.run(host, :file_exists?, "#{tool}") }
 end
 
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
 if config.get(:startup_actor) == "self"
-  logger.info("Checking actor: 'self' specificed, actor in the hook will be used")
+  logger.info("checking actor: 'self' specificed, actor in the hook will be used")
 else
+  logger.info "checking actor on benchmark node(s)"
   hosts.each do |host|
-    logger.info("Checking actor on the benchmark nodes")
     logger.error("actor '#{config.get(:startup_actor)}' is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
   end
 end
 
 target = Target.new(agent, logger, config.get(:startup_target))
 
-logger.info("Checking target '#{target.protocol}://#{target.path}'")
+logger.info "checking target '#{target.protocol}://#{target.path}'"
 hosts.each { |host| target.check(host) }
 
 unless options.mode == :space
   hosts.each do |host|
-    logger.info("Checking if CPU is idle on '#{host}'")
+    logger.info "checking if CPU is idle on '#{host}'"
       logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
-    logger.info("Checking if storage is idle on '#{host}'")
+    logger.info "checking if storage is idle on '#{host}'"
       logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host,:io_idle) < 90
   end
 end
@@ -91,8 +91,8 @@ config.set(:startup_target, target.path)
 # collector is a permanent agent assigned to each node to store its infrastructure information and perform actions on it
 collector = Hash.new
 mode = hosts.size > 1 ? "multiple" : "single"
+logger.info "initializing workload #{hook} on benchmark node(s)"
 hosts.each do |host|
-  logger.info("Initializing workload '#{hook}' on '#{host}'")
   collector[host] = Collector.new(config, host, mode, logger, series, target)
 end
 
@@ -128,7 +128,7 @@ if options.mode == :space
 end
 
 #unless Object.method_defined?(:invocation)
-logger.info("loading integration hook")
+logger.info "loading integration hook"
 load "./sources/hooks/#{hook}/invocation.rb"
 #end
 
@@ -161,11 +161,11 @@ config.merge( { chat_id: chat_id } )
 
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 
+logger.info "launching workload on benchmark node(s)"
 hosts.each do |host|
   config.merge(collector[host].infra_static)
-  logger.info("Launching workload '#{hook}' on '#{host}'")
   collector[host].detach(host, :launch, config, dependencies: [:invocation, :dimensions, :dimension_naming, :prepare])
 end
 
-logger.info("Workload '#{hook}' series #{series} has launched on '#{hosts.join(', ')}'")
+logger.info "workload #{hook} series #{series} has launched on #{hosts.join(', ')}")
 
