@@ -1,5 +1,5 @@
 
-class Database
+class Database < Object
 
 def initialize
   @table = nil

@@ -16,6 +16,11 @@ require './sources/parser.rb'
 require './sources/database/database.rb'
 require './sources/collector.rb'
 require './sources/distributed/transfer.rb'
+require './profiling/profiler.rb'
+
+class Object
+  prepend MethodLogger
+end
 
 series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
@@ -134,6 +139,7 @@ end
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 #TODO: extension is badly required.
 #TODO: Also, it's good to get rid of intermediate remote file for storing of the agent's code - how does SSH can directly run a given code with a proper special symbolism?
+#TODO: in Collector.initialize, move run! to detach! (and make the detach! truly reenterable)
 
 full_config.get(:infra_hosts).each do |host|
   full_config.merge(collector[host].infra_static)

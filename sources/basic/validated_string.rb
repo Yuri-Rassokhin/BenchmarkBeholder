@@ -1,4 +1,4 @@
-class VStr
+class VStr < Object
   attr_reader :value, :checks
 
   def initialize(checks = {})

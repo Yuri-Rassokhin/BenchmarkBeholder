@@ -1,4 +1,4 @@
-class CustomLogger
+class CustomLogger < Object
   SEVERITY_LEVELS = {
     debug: 1,
     info: 2,

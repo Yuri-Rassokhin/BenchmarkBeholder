@@ -1,4 +1,4 @@
-class VNum
+class VNum < Object
   attr_reader :value, :checks
 
   def initialize(checks = {})

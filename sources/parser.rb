@@ -1,4 +1,4 @@
-class Parser
+class Parser < Object
 
   attr_reader :mode, :conf_file
 

@@ -5,8 +5,6 @@ def initialize(config, url, mode, logger, series)
 end
 
 require_relative 'launch'
-#require_relative 'extract'
-#require_relative 'push'
 
 def get_dynamic_metrics
   get_gpu_consumption
