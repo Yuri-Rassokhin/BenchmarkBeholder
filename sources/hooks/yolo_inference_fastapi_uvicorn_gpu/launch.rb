@@ -1,21 +1,38 @@
 
-class Object_storage_coco_reading < Collector
+class Yolo_inference_fastapi_uvicorn_gpu < Collector
 
 def launch(config)
 
-def push(config, output, iterators)
+require 'open3'
+require 'mysql2'
+
+def cartesian(dimensions)
+  filtered_dimensions = dimensions.reject(&:empty?)
+
+  # Handle special case: single dimension
+  if filtered_dimensions.size == 1
+    return filtered_dimensions.first.to_enum unless block_given?
+    return filtered_dimensions.first.each { |e| yield(e) }
+  end
+
+  # Handle multiple dimensions
+  cartesian = filtered_dimensions.inject(&:product).map(&:flatten)
+
+  # Return an enumerator if no block is given
+  return cartesian.to_enum unless block_given?
+
+  # Yield each combination if a block is given
+  cartesian.each do |combination|
+    yield(*combination)
+  end
+end
+
+def push!(query, config)
   mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
-
-#      consumption_cpu = '#{cpu_consumption}',
-#      consumption_storage_tps = '#{storage_tps}',
-
-# NOTE: workload-specific customizations: collect_bandwidth
-  query = <<-SQL
-    insert into #{config[:series_benchmark]} set
-      collect_bandwidth = '#{output[:bandwidth]}',
-      collect_error = '\"#{output[:error]}\"',
-      collect_time = '#{output[:time]}',
-      collect_size = '#{output[:size]}',
+  # consumption_cpu = '#{cpu_consumption}',
+  # consumption_storage_tps = '#{storage_tps}',
+  generic_query = <<-SQL
+      insert into #{config[:series_benchmark]} set
       project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
@@ -25,10 +42,6 @@ def push(config, output, iterators)
       series_owner_name = '#{config[:series_owner_name]}',
       series_owner_email = '#{config[:series_owner_email]}',
       startup_actor = '#{config[:startup_actor]}',
-      startup_command = '\"#{iterators[:command]}\"',
-      iterate_scheduler = '#{iterators[:scheduler]}',
-      iterate_iteration = '#{iterators[:iteration]}',
-      iterate_operation = '#{iterators[:operation]}',
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '\"#{config[:filesystem]}\"', 
@@ -40,35 +53,46 @@ def push(config, output, iterators)
       infra_kernel = '\"#{config[:kernel]}\"',
       infra_cpu = '\"#{config[:cpu]}\"',
       infra_cores = '#{config[:cores]}',
-      infra_ram = '#{config[:ram]}'
+      infra_ram = '#{config[:ram]}',
   SQL
-  mysql.query(query)
+  mysql.query(generic_query << query << ";")
 end
 
-  require 'open3'
-  require 'mysql2'
-
-  # NOTE: adding workload-specific modules
-  require 'oci'
-  require 'pathname'
+# CUSTOMIZE: add your "collect" and "iterate" parameters in query
+def push(config, collect, iterate)
+  query = <<-SQL
+      collect_inference_time = '#{collect[:inference_time]}',
+      collect_error = '#{collect[:error]}',
+      iterate_iteration = '#{iterate[:iteration]}',
+      iterate_processes = '#{iterate[:processes]}',
+      iterate_requests = '#{iterate[:requests]}',
+      startup_command = '\"#{iterate[:command]}\"',
+      startup_language = '\"#{iterate[:language]}\"'
+  SQL
+  push!(query, config)
+end
 
   total_invocations = config[:parameter_space_size]
   target = config[:startup_target]
   actor = config[:startup_actor]
 
-  # NOTE: adding workload-specific initialization of the target
-  target_initialize()
+  # CUSTOMIZE: add the modules required for your hook
+  require 'oci'
+  require 'pathname'
 
-  # Define parameter space, a Cartesian of those parameters we want to iterate over
+  # CUSTOMIZE: add initialization of the variables relevant to your target
+  language = "bash"
+
+  # CUSTOMIZE: add your dimensions here in the form config[:my_option].to_a
   dimensions = [
     (1..config[:iterate_iterations]).to_a,
     config[:iterate_processes].to_a,
     config[:iterate_requests].to_a
   ]
 
-  language = "bash"
-  # NOTE: loop is a template, workload-specific iterators inherited from the 'dimensions' variable
-  dimensions.inject(&:product).map(&:flatten).each do |iteration, processes, requests|
+  # CUSTOMIZE: add your iterator names
+  cartesian(dimensions).each do |iteration, processes, requests|
+    # CUSTOMIZE: add your semantics of the benchmark invocation
 
     # launch the target: uvicorn+fastapi inference server
     target = spawn("uvicorn yolo_fastapi_binary_inference_server:app --host 0.0.0.0 --port 5000 --workers #{iterate_processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
@@ -76,8 +100,8 @@ end
     sleep(5)
 
     # execute the benchmark and capture its raw output
-    command = "ab -n 3000 -c 300 -p post_data.txt -T "application/octet-stream" http://localhost:5000/predict/ 2>&1 | grep "Requests per second" | awk '{print $4}'"
-    raw_result = `ab -n 3000 -c 300 -p post_data.txt -T "application/octet-stream" http://localhost:5000/predict/ 2>&1`
+    command = "ab -n #{requests*10} -c #{requests} -p post_data.txt -T "application/octet-stream" http://localhost:5000/predict/ 2>&1"
+    raw_result = `#{command}`
 
     # kill the inference server
     Process.kill("TERM", target)
@@ -85,13 +109,14 @@ end
     # extract benchmark results
     inference_time = `echo #{raw_result} | grep "Requests per second" | awk '{print $4}'`
     error_count = `echo #{raw_result} | grep "Failed requests" | awk '{print $3}'`
-    error = ( error_count == "0" ? "" : error_count )
+    error = ( error_count == "0" ? "" : "#{error_count} requests failed" )
 
     # push benchmark results to the database
-    output = { inference_time: inference_time, error: error }
-    iterators = { iteration: iteration, processes: processes, requests: requests, scheduler: "NA" }
-    push(config, output, iterators, {command: command.gsub("'", "''"), language: language})
-    end
+    collect = { inference_time: inference_time, error: error }
+    iterate = { iteration: iteration, processes: processes, requests: requests }
+    startup = { command: command.gsub("'", "''"), language: language }
+    push(config, output, iterators, startup)
+
   end
 end
 
