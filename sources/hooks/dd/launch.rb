@@ -50,6 +50,7 @@ def push(config, output, iterators)
       startup_command = '#{iterators[:command]}',
       iterate_scheduler = '#{iterators[:scheduler]}',
       iterate_iteration = '#{iterators[:iteration]}',
+      iterate_operation = '#{iterators[:operation]}',
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '#{config[:filesystem]}', 
