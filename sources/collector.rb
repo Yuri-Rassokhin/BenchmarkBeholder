@@ -139,7 +139,8 @@ def human_readable_time(seconds)
   readable = []
   readable << "#{days} days" if days > 0
   readable << "#{hours} hours" if hours > 0
-  readable << "#{minutes} minutes" if minutes > 0
+  readable << "#{minutes} minutes" if minutes > 1
+  readable << "#{minutes} minute" if minutes == 1
   readable.empty? ? "less than a minute" : readable.join(" ")
 end
 

@@ -14,7 +14,7 @@ def dimension_naming
 end
 
 def debug(config, comment, text)
-  puts "**DEBUG** #{comment.capitalize}: #{text}" if config[:debug]
+  puts "DEBUG: #{comment.capitalize}: #{text}" if config[:debug]
 end
 
 # CUSTOMIZE: if you need one-time intitialization before traversal of the pararameter space started, it's here
