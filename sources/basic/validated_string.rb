@@ -6,6 +6,11 @@ class VStr
     @value = nil  # Start with a nil value to signify uninitialized state
   end
 
+  # NOTE: use cautiosly, this method doesn't apply value checks
+  def set!(value)
+    @value = value
+  end
+
   def size
     @value.size
   end

@@ -66,8 +66,9 @@ def initialize(config, url, mode_raw, logger, series)
     mode: mode_raw == "single" ? "a single" : mode_raw,
     media: filesystem == "N/A" ? "raw device #{src}" : filesystem,
     get_nvidia_versions: run!(:get_nvidia_versions),
-    desc: eval('"' + config.get(:series_description) + '"')
+    series_description: ""
   }
+  @infra_static[:series_description] = description_eval(config.get(:series_description))
 end
 
 def launch
@@ -85,6 +86,13 @@ end
   #File.delete(conf_file)
 
 private
+
+def description_eval(description)
+  media = @infra_static[:media]
+  mode = @infra_static[:mode]
+  shape = @infra_static[:shape]
+  eval("\"" + description + "\"")
+end
 
 def extract()
   file, line = caller_locations(1,1)[0].absolute_path, caller_locations(1,1)[0].lineno

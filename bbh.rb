@@ -89,6 +89,17 @@ require "./sources/hooks/#{class_needed.downcase}/config.rb"
 full_config = Object.const_get("#{class_needed}config").new(ARGV[0])
 full_config.merge(config)
 
+# first phase of description substituion - here we substitute all the variables from the config file
+str = full_config.get(:series_description).gsub(/\#\{([^}]+)\}/) do |match|
+  v = match[2..-2]
+  if full_config.get?(v.to_sym)
+    full_config.get(v.to_sym)
+  else
+    "\#\{" + "#{v}" + "}"
+  end
+end
+full_config.set(:series_description, str)
+
 # TODO: This parameter is benchmark-specific and may not be need for other benchmarks?..
 # check if a media the benchmark is going to read from/write to exists on the nodes
 full_config.get(:infra_hosts).each do |host|
@@ -123,7 +134,6 @@ full_config.merge({ iteratable_size: full_config.iteratable_size })
 logger.note("launch on the node(s)") do
   full_config.get(:infra_hosts).each do |host|
     full_config.merge(collector[host].infra_static)
-#    puts full_config.parameters
     collector[host].run(host, :launch, full_config)
 #    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
   end

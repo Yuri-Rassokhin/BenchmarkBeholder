@@ -24,12 +24,16 @@ class GenericConfig
   end
 
   def set(parameter, value)
-    @parameters[parameter] = value
+    @parameters[parameter].set!(value)
   end
 
   def get(parameter)
     raise "unknown parameter '#{parameter}' in config requested" unless parameter and @parameters[parameter]
     return @parameters[parameter].value
+  end
+
+  def get?(parameter)
+    (parameter and @parameters[parameter]) ? @parameters[parameter].value : nil
   end
 
 #  def get!(*keys)

@@ -6,7 +6,7 @@ $project_tier = "test"
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "dd"
-$series_description = '#{$series_benchmark} on #{$media} on #{$mode} #{$shape}'
+$series_description = '#{series_benchmark} on #{media} on #{mode} #{shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
@@ -18,7 +18,7 @@ $startup_media = "/shared/file.dump" # Media the benchmark executable will be us
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_schedulers = "none, kyber, mq-deadline,  bfq" # Linux IO schedulers: mq-deadline, bfq, kyber, none
 # NOTE: benchmark-specific parameter
-$iterate_sizes = "4096, 65536, 262144, 1048576, 4194304, 1073741824"
+$iterate_sizes = "4096, 65536, 262144"
 $iterate_operations = "read, write"
 $iterate_iterations = 4
 

@@ -5,7 +5,7 @@ def launch(config)
 
 def extract(raw)
 
-  error = `echo "#{raw}" | grep error`.strip
+  error = `echo "#{raw.gsub(/\s+/, ' ')}" | grep error`.strip
   bandwidth = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
   units = `echo "#{raw}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
 
@@ -66,7 +66,6 @@ def push(config, output, iterators)
       infra_cores = #{config[:cores]},
       infra_ram = #{config[:ram]}
   SQL
-
   mysql.query(query)
 end
 
@@ -94,10 +93,12 @@ end
     when "write"
       flow = "if=/dev/zero of=#{config[:startup_media]}"
     end
-    command = "#{executable} #{flow} bs=#{size} count=(`stat --format=%s #{config[:startup_media]}`.to_i/#{size})"
+    count = (`stat --format=%s #{config[:startup_media]}`.to_i)/size
+    command = "#{executable} #{flow} bs=#{size} count=#{count}"
     # Commonly used: run the prepared command and capture its output
-    stdout, stderr, status = Open3.capture3("#{command}")
-    output = extract(stderr)
+    raw = `#{command} 2>&1`
+#    stdout, stderr, status = Open3.capture3("#{command}")
+    output = extract(raw)
     push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
     end
 end
