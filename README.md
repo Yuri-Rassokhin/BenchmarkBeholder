@@ -31,16 +31,17 @@ BBH is invoked as the following:
 * During the runs, BBH collects specified application metrics, enriches them with infrastructure metrics, and pushes everything to a database
 * Finally, the database of benchmark grows as a single, centralized table structured in accordance with your projects and/or user teams
 
-# Quick Start
+# Quick Start (Single Node)
 
-```bash
+```
 git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
 cd ./BenchmarkBeholder
 ./bbh ./config/dummy.conf
+```
 
-This will give you an idea of how it works. After that, read through ./config/example.conf and start modifying it for your needs. BTW, you are welcome to check out other benchmark configurations under ./config ;)
+This will give you an idea of how it works. After that, read through `./config/dummy.conf` and other benchmark files, and modify them for your needs.
 
-# Detailed Installation Guide
+# Detailed Configuration (Multiple Nodes)
 
 BBH operates in a distributed environment that consists of three logical roles.
 
@@ -50,8 +51,22 @@ BBH operates in a distributed environment that consists of three logical roles.
 
 * **Benchmark Nodes** are the hosts you're running benchmarks on. As BBH is an agentless software, Benchmarks Nodes are actually ANY Linux hosts accessible via SSH.
 
+By default, all the three nodes are the host where you cloned the repo. If you want to specify other benchmark nodes and/or database node, please read the following section.
+
 ** Network Settings**
 
-1. Ensure passwordless SSH access is enabled from the Central Node to Benchmark Nodes for the user that will be submitting benchmarks.
+1. In your benchmark file, specify the hosts where you want to run benchmark. For example:
 
-2. Ensure HTTP port 3306 is accessible from Benchmark Nodes to Database Node (which is the Central Node by default). This is required to push benchmarking results to the database.
+```
+$infra_nodes = "node01 node02"
+```
+
+Note that this parameter doesn't specify whether your benchmark will run separate instances of the workload on each of these nodes or one distributed workload on all the nodes.
+All this parameter does is pass the host URLs to BBH.
+BBH will check availability and sanity of the nodes, and be reading infrastructure metrics from the nodes during the benchmarking.
+If you want to specify an array of multi-node workloads or a single distributed workload, you can do this with a custom hook.
+
+2. To make Central Node reach out to Benchmark Nodes, ensure that passwordless SSH access is enabled from the Central Node to Benchmark Nodes for the user that will be submitting benchmarks.
+
+3. To make Benchmark Nodes store benchmark results in the database, ensure that HTTP port 3306 is accessible from Benchmark Nodes to Database Node.
+
