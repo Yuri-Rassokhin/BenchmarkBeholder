@@ -74,7 +74,7 @@ end
   require 'mysql2'
 
   total_invocations = config[:iteratable_size]
-  media = config[:startup_media]
+  target = config[:startup_target]
   actor = config[:startup_actor]
 
   # Define parameter space, a Cartesian of those parameters we want to iterate over
@@ -88,11 +88,11 @@ end
     switch_scheduler(config[:root_dev], config[:filesystem], scheduler, config[:raid_members], config[:aggregated])
     case operation
     when "read"
-      flow = "if=#{config[:startup_media]} of=/dev/null"
+      flow = "if=#{config[:startup_target]} of=/dev/null"
     when "write"
-      flow = "if=/dev/zero of=#{config[:startup_media]}"
+      flow = "if=/dev/zero of=#{config[:startup_target]}"
     end
-    count = (`stat --format=%s #{config[:startup_media]}`.to_i)/size
+    count = (`stat --format=%s #{config[:startup_target]}`.to_i)/size
     command = "#{actor} #{flow} bs=#{size} count=#{count}"
     # Commonly used: run the prepared command and capture its output
     stdout, stderr, status = Open3.capture3("#{command}")

@@ -22,7 +22,7 @@ def initialize(config, url, mode_raw, logger, series)
   @logger = logger
 
   shape, subshape = run!(:guess_shape)
-  src = config.get(:startup_media)
+  src = config.get(:startup_target)
   main_dev = run!(:main_device, src)
 #  main_dev = File.basename(src) if main_dev == "udev"
 #  main_dev_name = File.basename(main_dev)
@@ -71,7 +71,7 @@ def initialize(config, url, mode_raw, logger, series)
 #   @cpu_consumption = run!(:get_cpu_consumption)
 #   @storage_consumption = run!(:get_storage_consumption, @device, @main_dev)
     mode: mode_raw == "single" ? "a single" : mode_raw,
-    media: filesystem == "N/A" ? "raw device #{src}" : filesystem,
+    target: filesystem == "N/A" ? "raw device #{src}" : filesystem,
     get_nvidia_versions: run!(:get_nvidia_versions),
     series_description: ""
   }
@@ -104,7 +104,7 @@ def get_aggregated_root_dev(main_dev)
 end
 
 def description_eval(description)
-  media = @infra_static[:media]
+  target = @infra_static[:target]
   mode = @infra_static[:mode]
   shape = @infra_static[:shape]
   eval("\"" + description + "\"")

@@ -5,7 +5,7 @@ $project_tier = "test"
 
 ### SERIES: identification of this benchmark series
 $series_benchmark = "dummy"
-$series_description = '#{$series_benchmark}, a simple BBH demo, running on #{$media} on #{$mode} #{$shape}'
+$series_description = '#{$series_benchmark}, a simple BBH demo, running on #{$target} on #{$mode} #{$shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 

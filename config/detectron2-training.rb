@@ -5,7 +5,7 @@ $project_tier = "test"
 
 ### SERIES: identification of this benchmark series
 $series_benchmark = "detectron2training"
-$series_description = '#{benchmark} on #{media} on #{mode} #{shape} | 1 epoch | #{number_of_gpus}xGPU | #{images_batch_per_gpu} images/GPU | #{dataloader_threads_per_gpu} threads/GPU | #{solver_initial_lr_per_gpu} LR'
+$series_description = '#{benchmark} on #{target} on #{mode} #{shape} | 1 epoch | #{number_of_gpus}xGPU | #{images_batch_per_gpu} images/GPU | #{dataloader_threads_per_gpu} threads/GPU | #{solver_initial_lr_per_gpu} LR'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@oracle.com"
 

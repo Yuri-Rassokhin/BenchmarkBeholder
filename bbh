@@ -109,28 +109,28 @@ end
 full_config.set(:series_description, str)
 
 # TODO: This parameter is benchmark-specific and may not be need for other benchmarks?..
-# check if a media the benchmark is going to read from/write to exists on the nodes
+# check if the target the benchmark is available on all the nodes
 full_config.get(:infra_hosts).each do |host|
-  logger.info("Checking #{full_config.get(:startup_type)} '#{full_config.get(:startup_media)}' on '#{host}'")
+  logger.info("Checking #{full_config.get(:startup_type)} '#{full_config.get(:startup_target)}' on '#{host}'")
     case full_config.get(:startup_type)
     when "file"
-      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_media))
+      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_target))
     when "device"
-      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_media))
+      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_target))
     when "bucket"
-      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_bucket_exists?, full_config.get(:startup_media))
+      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :oci_bucket_exists?, full_config.get(:startup_target))
     when "object"
-      logger.error("#{full_config.get(:startup_media)} is missing on '#{host}'") if !agent.run(host, :oci_object_exists?, full_config.get(:startup_media), full_config.get(:startup_namespace))
+      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :oci_object_exists?, full_config.get(:startup_target), full_config.get(:startup_namespace))
     else
-      logger.error("unknown media type '#{full_config.get(:startup_type)}'")
+      logger.error("unknown target '#{full_config.get(:startup_type)}'")
     end
 end
 
 # TODO: this should execute in parallel, if explicitly mentioned
 # check if filesystem is known on the nodes
 full_config.get(:infra_hosts).each do |host|
-  logger.error("can't determine filesystem on '#{full_config.get(:startup_media)}'") if !agent.run(host, :get_filesystem, 
-full_config.get(:startup_media))
+  logger.error("can't determine filesystem on '#{full_config.get(:startup_target)}'") if !agent.run(host, :get_filesystem, 
+full_config.get(:startup_target))
 end
 
 # assign collector, aka permanent agent, for each node
@@ -156,7 +156,7 @@ end
 #TODO: enable scheduler switching in the launcher. The problem is that switching method is out of launcher's method, and doesn't transfer to the remote host automatically.
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
 #TODO: extension is badly required.
-#TODO: Also, it's good to get rid of intermediate remote file for storing of the agent's code - how does SSH can directly run a given code with a proper special symbolism?
+#TODO: Also, it's good to get rid of tmp remote file for storing of the agent's code - how does SSH can directly run a given code with a proper special symbolism?
 #TODO: in Collector.initialize, move run! to detach! (and make the detach! truly reenterable)
 
 full_config.get(:infra_hosts).each do |host|

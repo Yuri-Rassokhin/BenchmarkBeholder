@@ -6,14 +6,14 @@ $project_tier = "test"
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "dd"
-$series_description = '#{series_benchmark} on #{media} on #{mode} #{shape}'
+$series_description = '#{series_benchmark} on #{target} on #{mode} #{shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
 # STARTUP: app input to be able to start it up
 $startup_actor = "/usr/bin/dd" # Path to the actor
 # NOTE: benchmark-specific parameter
-$startup_media = "/file.dump" # Media the actor will be using (a file, a block device ...)
+$startup_target = "/file.dump" # target the actor will be using (a file, a block device ...)
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_schedulers = "none, kyber, mq-deadline, bfq" # Linux IO schedulers: mq-deadline, bfq, kyber, none

@@ -6,13 +6,13 @@ $project_tier = "test"
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "dd"
-$series_description = '#{series_benchmark} on #{media} on #{mode} #{shape}'
+$series_description = '#{series_benchmark} on #{target} on #{mode} #{shape}'
 $series_owner_name = "Yuri Rassokhin"
 $series_owner_email = "yuri.rassokhin@gmail.com"
 
 # STARTUP: how to create the workload?
 $startup_actor = "TODO" # No external actor needed, we'll run from within the hook
-$startup_media = "coco-2017-images" # name of the bucket
+$startup_target = "coco-2017-images" # name of the bucket
 $startup_type = "object"
 $startup_namespace = "fr9qm01oq44x"
 
