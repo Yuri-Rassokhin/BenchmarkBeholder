@@ -137,7 +137,7 @@ def human_readable_time(seconds)
   hours = (seconds % (24 * 3600) / 3600).to_i
   minutes = (seconds % 3600 / 60).to_i
   readable = []
-  readable << "#{days} daysd" if days > 0
+  readable << "#{days} days" if days > 0
   readable << "#{hours} hours" if hours > 0
   readable << "#{minutes} minutes" if minutes > 0
   readable.empty? ? "less than a minute" : readable.join(" ")
@@ -145,7 +145,7 @@ end
 
 def iterator_format(iterator, config)
   seconds_left = ( $time_passed == 0 ? "TBD time" : human_readable_time((($time_passed)/$step)*(config[:parameter_space_size]-$step).to_i) )
-  "Running #{$step} of #{config[:parameter_space_size]}\n\n#{iterator.to_s.gsub(':', '').gsub('=>', ': ').gsub('"', '')}\n\n#{seconds_left} left"
+  "**Run #{$step} of #{config[:parameter_space_size]}\n\n#{iterator.to_s.gsub(':', '').gsub('=>', ': ').gsub('"', '')}\n\n#{seconds_left} left**"
 end
 
 def message(format, body, config)
