@@ -22,7 +22,7 @@ def initialize(logger, argv)
 end
 
 def check(hook)
-    @logger.note("benchmark '#{hook}'") do
+    @logger.info("Checking integration of benchmark '#{hook}'")
     if !@hooks.include?(hook)
       @logger.error("unknown benchmark #{hook}")
     elsif @conf_file.nil?
@@ -30,7 +30,6 @@ def check(hook)
     elsif !File.exist?(@conf_file)
       @logger.error("configuration file is missing")
     end
-  end
 end
 
 private
