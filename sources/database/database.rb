@@ -46,7 +46,7 @@ end
 # COLLECT: Metrics collected during the benchmark
 
 def table_add_specific
-  @client.query("alter table bbh.#{@table} add column #{@schema}")
+  @client.query("alter table bbh.#{@table} #{@schema}")
 end
 
 def table_create_generic

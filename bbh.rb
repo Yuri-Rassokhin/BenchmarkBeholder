@@ -114,15 +114,17 @@ logger.note("agent on each node") do
 end
 
 # create database table for the requested benchmark, if it doesn't exist yet
-schema = load "./sources/hooks/#{class_needed.downcase}/schema.rb"
-database.table_set(full_config.get(:series_benchmark), schema)
+load "./sources/hooks/#{class_needed.downcase}/schema.rb"
+database.table_set(full_config.get(:series_benchmark), SCHEMA)
 
 # Calculate size of the parameter space, and add it to the config for reporting purposes
 full_config.merge({ iteratable_size: full_config.iteratable_size })
 
 logger.note("launch on the node(s)") do
   full_config.get(:infra_hosts).each do |host|
-    collector[host].run(host, :launch, full_config.merge(collector[host].infra_static))
+    full_config.merge(collector[host].infra_static)
+#    puts full_config.parameters
+    collector[host].run(host, :launch, full_config)
 #    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
   end
 end

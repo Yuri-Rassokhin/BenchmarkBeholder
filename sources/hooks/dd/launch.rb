@@ -37,28 +37,22 @@ def push(config, output, iterators)
   query = <<-SQL
     insert into bbh.#{config[:benchmark]} set
       collect_bandwidth = '#{output[:bandwidth]}',
-
+      collect_error = '\"#{output[:error]}\"',
       project_description = '\"#{config[:project_description]}\"',
       project_code = '\"#{config[:project_code]}\"',
       project_tier = '\"#{config[:project_tier]}\"',
-
-      collect_error = '\"#{output[:error]}\"',
-
       series_id = '#{iterators[:series]}',
       series_description = '\"#{config[:series_description]}\"',
       series_benchmark = '#{config[:benchmark]}',
       series_owner_name = '#{config[:series_owner_name]}',
       series_owner_email = '#{config[:series_owner_email]}',
-
       startup_executable = '#{config[:executable]}',
       startup_command = '#{iterators[:command]}',
-
       iterate_scheduler = '#{iterators[:scheduler]}',
       iterate_iteration = '#{iterators[:iteration]}',
-
       infra_host = '#{config[:host]}',
       infra_shape = '#{config[:shape]}',
-      infra_filesystem = '#{config[:filesystem]}',
+      infra_filesystem = '#{config[:filesystem]}', 
       infra_filesystem_block_size = '#{config[:fs_block_size]}',
       infra_filesystem_mount_options = '\"#{config[:fs_mount_options]}\"',
       infra_storage = '#{config[:storage_type]}',
@@ -69,11 +63,7 @@ def push(config, output, iterators)
       infra_kernel = '\"#{config[:kernel]}\"',
       infra_cpu = '\"#{config[:cpu]}\"',
       infra_cores = #{config[:cores]},
-      infra_ram = #{config[:ram]},
-
-      project_description = '\"#{config[:project_description]}\"',
-      project_code = '\"#{config[:project_code]}\"',
-      project_tier = '\"#{config[:project_tier]}\"'
+      infra_ram = #{config[:ram]}
   SQL
 
   mysql.query(query)
