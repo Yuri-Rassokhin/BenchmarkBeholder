@@ -13,12 +13,13 @@ $series_owner_email = "yuri.rassokhin@gmail.com"
 # STARTUP: how to create the workload?
 $startup_actor = "ab" # No external actor needed, we'll run from within the hook
 $startup_target = "http://127.0.0.1:5000/predict" # protocols: file, device, http, object, bucket, ram
-$startup_health = "http://127.0.0.1:5000/health" # how to check if the target is available
+$startup_target_application = "/home/opc/yolo_server.py"
+#$startup_health = "http://127.0.0.1:5000/health" # how to check if the target is available
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_iterations = 4
-$iterate_processes = "30 60"
-$iterate_requests = "30 60"
+$iterate_processes = "30, 60"
+$iterate_requests = "30, 60"
 
 # INFRASTRUCTURE
 $infra_hosts = "127.0.0.1" # Benchmark Hosts

@@ -73,7 +73,8 @@ def push(config, collect, iterate)
       iterate_processes = '#{iterate[:processes]}',
       iterate_requests = '#{iterate[:requests]}',
       startup_command = '\"#{iterate[:command]}\"',
-      startup_language = '\"#{iterate[:language]}\"'
+      startup_language = '\"#{iterate[:language]}\"',
+      startup_target_application = '\"#{iterate[:target_application]}\"'
   SQL
   push!(query, config)
 end
@@ -101,7 +102,7 @@ end
     # CUSTOMIZE: add your semantics of the benchmark invocation
 
     # launch the target: uvicorn+fastapi inference server
-    target = spawn("uvicorn yolo_fastapi_binary_inference_server:app --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
+    target = spawn("uvicorn yolo_server:app --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: "/dev/null", err: "/dev/null")
     Process.detach(target)
     sleep(5)
 
