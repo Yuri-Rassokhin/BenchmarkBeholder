@@ -39,8 +39,8 @@ def push(config, output, iterators)
       infra_os = '\"#{config[:release]}\"',
       infra_kernel = '\"#{config[:kernel]}\"',
       infra_cpu = '\"#{config[:cpu]}\"',
-      infra_cores = #{config[:cores]},
-      infra_ram = #{config[:ram]}
+      infra_cores = '#{config[:cores]}',
+      infra_ram = '#{config[:ram]}'
   SQL
   mysql.query(query)
 end
