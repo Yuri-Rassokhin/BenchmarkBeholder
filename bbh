@@ -53,7 +53,7 @@ if config.get(:startup_actor) == "self"
 else
   hosts.each do |host|
     logger.info("Checking actor on the benchmark nodes")
-    logger.error("#{config.get(:startup_actor)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
+    logger.error("actor '#{config.get(:startup_actor)}' is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
   end
 end
 
