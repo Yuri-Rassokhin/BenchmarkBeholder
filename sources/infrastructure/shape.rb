@@ -5,7 +5,8 @@ def guess_shape(platform)
 case platform
 when "oci"
   require 'oci'
-  return `oci-metadata 2>&1 | grep "Instance shape:" | awk '{print $3}'`
+  return 'BM.GPU.L40S.4'
+#  return `oci-metadata 2>&1 | grep "Instance shape:" | awk '{print $3}'`
 else
   return "unknown compute shape"
 end
@@ -64,6 +65,7 @@ end
   a100pci40 = `lspci -n -n -k | grep -i 10de:20b1 | wc -l`.to_i
   a100pci80 = `lspci -n -n -k | grep -i 10de:20b5 | wc -l`.to_i
   gh200 = `lspci -n -n -k | grep -i 10de:2342 | wc -l`.to_i
+  l40s = `lspci -n -n -k | grep -i 10de:26b9 | wc -l`.to_i
 
   if a10 > 0
     gpu_model = "NVIDIA A10"
@@ -100,6 +102,16 @@ end
   elsif gh200 > 0
     gpu_model = "NVIDIA GH200"
     shape = "TBD GH200" if gh200 == 1
+  elsif l40s > 0
+    gpu_model = "NVIDIA L40S 46GB"
+    case l40s
+    when 4
+      shape = "BM.GPU.L40S.4"
+    when 2
+      shape = "VM.GPU.L40S.2"
+    when 1
+      shape = "VM.GPU.L40S.1"
+    end
   else
     shape = detect_cpu_based_shape
   end
