@@ -16,10 +16,12 @@ require './sources/parser.rb'
 require './sources/database/database.rb'
 require './sources/collector.rb'
 require './sources/distributed/transfer.rb'
-require './profiling/profiler.rb'
 
-class Object
-  prepend MethodLogger
+if false
+  require './profiling/profiler.rb'
+  class Object
+    prepend MethodLogger
+  end
 end
 
 series = Time.now.to_i.to_s
