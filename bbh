@@ -137,5 +137,5 @@ full_config.get(:infra_hosts).each do |host|
 # `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
 end
 
-logger.info("#{full_config.get(:series_benchmark)} series #{series} has launched, check logs on '#{full_config.get(:infra_hosts).join(', ')}'")
+logger.info("Benchmark '#{full_config.get(:series_benchmark)}' series #{series} has launched, check logs on '#{full_config.get(:infra_hosts).join(', ')}'")
 
