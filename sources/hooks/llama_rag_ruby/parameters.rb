@@ -39,7 +39,7 @@ def database_parameters
     add column iterate_tokens int not null,
     add column iterate_temperature double(20,16) not null,
     add column startup_question varchar(500) not null,
-    add column collect_answer varchar(500) not null
+    add column collect_answer varchar(8192) not null
   "
 end
 
