@@ -71,12 +71,6 @@ unless parser.mode == :space
   end
 end
 
-#$hosts.each do |host|
-#  $logger.note("benchmark agent on the node '#{host}'") do
-#    `scp -q #{generic_launcher} #{local_hook} #{conf_file} #{warning_log.path} #{hook_database} #{$user}@#{host}:/tmp/`
-#  end
-#end
-
 collector = Hash.new
 # depending on benchmark, load a proper config and define its class for the use later
 # TODO: this has to be a formuale where class_needed = uppercase variable
@@ -88,12 +82,19 @@ collector = Hash.new
 
 class_needed = config.get(:series_benchmark).capitalize
 
-require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}.rb"
-require "./sources/hooks/#{class_needed.downcase}/config.rb"
+#require "./sources/hooks/#{class_needed.downcase}/#{class_needed.downcase}.rb"
+#require "./sources/hooks/#{class_needed.downcase}/config.rb"
+
+puts config.inspect
+
+config.delayed_init
+
+puts config.inspect
+exit
 
 # create workload-specific config and merge the general config into it
-full_config = Object.const_get("#{class_needed}config").new(parser.conf_file)
-full_config.merge(config)
+#full_config = Object.const_get("#{class_needed}config").new(parser.conf_file)
+#full_config.merge(config)
 
 # first phase of description substituion - here we substitute all the variables from the config file
 str = full_config.get(:series_description).gsub(/\#\{([^}]+)\}/) do |match|

@@ -15,12 +15,22 @@ class GenericConfig < Object
     raise "(#{file} line #{line}): '#{self.class.name} is a template class, must instantiate through subclasses"
   end
 
-  def load_conf(conf_file, codes = {}, &project_codes)
+  # given hash of parameters, fulfills their values from a given file
+  def load_conf(file, codes = {}, parameters: nil, &project_codes)
     # from config file, assign all the values to internal config object, and validate their correctness
-    load conf_file
-    @parameters.each do |p,v|
-      project_codes&.call(p,v)
-      v.value = eval("$#{p}")
+    load file
+    if parameters == nil
+      @parameters.each do |p,v|
+        project_codes&.call(p,v)
+        v.value = eval("$#{p}")
+      end
+    else
+      res = parameters
+      res.each do |p,v|
+        project_codes&.call(p,v)
+        v.value = eval("$#{p}")
+      end
+      return res
     end
   end
 
