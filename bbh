@@ -130,6 +130,11 @@ if parser.mode == :space
   exit 0
 end
 
+#TODO: enable scheduler switching in the launcher. The problem is that switching method is out of launcher's method, and doesn't transfer to the remote host automatically.
+#TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
+#TODO: extension is badly required.
+#TODO: Also, it's good to get rid of intermediate remote file for storing of the agent's code - how does SSH can directly run a given code with a proper special symbolism?
+
 full_config.get(:infra_hosts).each do |host|
   full_config.merge(collector[host].infra_static)
   logger.info("Launching agent on '#{host}'")
