@@ -43,19 +43,19 @@ This will give you an idea of how it works. After that, read through ./config/ex
 
 BBH operates in a distributed environment that consists of three logical roles.
 
-* **Central Host** is the host you're submitting benchmarks from. Usually, it's your local Linux machine or VM on the cloud you are going to use for benchmarking.
+* **Central Node** is the host you're submitting benchmarks from. Usually, it's your local Linux machine or VM on the cloud you are going to use for benchmarking.
 
-* **Database Host** is the host that stores the database of benchmark results. By default, it's the central host.
+* **Database Node** is the host that stores the database of benchmark results. By default, it's the central host.
 
-* **Benchmark Hosts** are the hosts you're running benchmarks on. As BBH is an agentless software, Benchmarks Hosts are actually ANY Linux hosts accessible via SSH.
+* **Benchmark Nodes** are the hosts you're running benchmarks on. As BBH is an agentless software, Benchmarks Nodes are actually ANY Linux hosts accessible via SSH.
 
 To deploy BBH on a distributed environment, follow these steps.
 
-**On your Central Host**
+**On your Central Node**
 
-1. Install BBH on Central Host: git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
+1. Install BBH on Central Node: git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
 
-2. To maximize the performance of BBH, it is recommended to reuse once-established SSH connections. To achieve this, run this code on the Central Host from the user that will be submitting benchmarks:
+2. To maximize the performance of BBH, it is recommended to reuse once-established SSH connections. To achieve this, run this code on the Central Node from the user that will be submitting benchmarks:
 
 #!/bin/bash
 
@@ -93,6 +93,6 @@ echo "Host *
 
 ** Network Settings**
 
-1. Ensure passwordless SSH access is enabled from the Central Host to Benchmark Hosts for the user that will be submitting benchmarks.
+1. Ensure passwordless SSH access is enabled from the Central Node to Benchmark Nodes for the user that will be submitting benchmarks.
 
-2. Ensure HTTP port 3306 is accessible from Benchmark Hosts to Database Host (which is the Central Host by default). This is required to push benchmarking results to the database.
+2. Ensure HTTP port 3306 is accessible from Benchmark Nodes to Database Node (which is the Central Node by default). This is required to push benchmarking results to the database.

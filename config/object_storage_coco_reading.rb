@@ -13,19 +13,16 @@ $series_owner_email = "yuri.rassokhin@gmail.com"
 # STARTUP: how to create the workload?
 $startup_actor = "TODO" # No external actor needed, we'll run from within the hook
 $startup_target = "coco-2017-images" # name of the bucket
-$startup_type = "object"
-$startup_namespace = "fr9qm01oq44x"
+$startup_type = "object" # type of the target
+$startup_namespace = "fr9qm01oq44x" # workload-specific parameter
 
 # ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_schedulers = "none" # Linux IO schedulers don't make any difference
-# NOTE: benchmark-specific parameters
-$iterate_operations = "read"
 $iterate_iterations = 4
+$iterate_operations = "read" # workload-specific parameter: list of operations
 
-# INFRASTRUCTURE: where to run the benchmark
-# Hosts to run the benchmark on
-$infra_hosts = "dev"
+# INFRASTRUCTURE
+$infra_hosts = "dev" # Benchmark Hosts
 # User for passwordless ssh to the benchmark nodes
-$infra_user = "yuri"
-$infra_platform = "oci"
-
+$infra_user = "yuri" # user for passwordless SSH to the benchmark nodes
+$infra_platform = "oci" # which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
