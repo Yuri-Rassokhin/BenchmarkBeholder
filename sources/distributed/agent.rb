@@ -117,7 +117,13 @@ class Agent < Object
     elsif float?(out)
       return out.to_f
     else
-      return out.to_s
+      begin
+        res = eval(out)
+        return res
+      rescue SyntaxError, NameError => e
+        return out.to_s
+      end
+#      return out.to_s
     end
   end
 
