@@ -56,7 +56,7 @@ end
 config.get(:infra_hosts).each do |host|
   logger.info("Checking actor on '#{host}'")
     if config.get(:startup_actor) == "self"
-      logger.info("actor placeholder 'self' specificed, actor in the hook will be used")
+      logger.info("Checking actor: placeholder 'self' specificed, actor in the hook will be used")
     else
       logger.error("#{config.get(:startup_actor)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
     end
