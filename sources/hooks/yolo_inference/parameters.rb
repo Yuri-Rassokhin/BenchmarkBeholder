@@ -39,8 +39,9 @@ def database_parameters
     add column iterate_device varchar(20) not null,
     add column collect_image_resolution varchar(20) not null,
     add column collect_image_format varchar(20) not null,
-    add column collect_image_metadata varchar(200) not null,
-    add column collect_
+    add column collect_image_metadata varchar(500) not null,
+    add column startup_target_app_command varchar(500) not null,
+    add column startup_target_app_code varchar(8192)
   "
 end
 

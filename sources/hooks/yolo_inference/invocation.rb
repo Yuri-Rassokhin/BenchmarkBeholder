@@ -53,20 +53,32 @@ def invocation(config, iterator)
   app_dir = File.dirname(app)
   app_name = File.basename(app)
   target_command = ""
+  device = iterator[:device]
 
+  reader, writer = IO.pipe
   # reload the inference server if the iterator has updated its parameters: device or workers
-  if $workers != iterator[:processes] or $device != iterator[:device]
-    reader, writer = IO.pipe
-    target_command = "DEVICE=#{iterator[:device]} gunicorn -k uvicorn.workers.UvicornWorker -w #{processes} -b 0.0.0.0:8080 --pid gunicorn.pid --chdir #{app_dir} #{app_name}:app"
-    target = spawn(`#{target_command}`, out: writer, err: writer)
+  if $workers != processes or $device != device
+   target_array = [
+      "gunicorn",
+      "-k", "uvicorn.workers.UvicornWorker",
+      "-w", processes.to_s,
+      "-b", "0.0.0.0:8080",
+      "--pid", "gunicorn.pid",
+      "--chdir", app_dir,
+      "#{app_name}:app"
+   ]
+   env = { "DEVICE" => device }
+
+   target_command = "DEVICE=#{device} #{target_array.join(' ')}"
+
+    target = spawn(env, *target_array, out: writer, err: writer)
     writer.close
     Process.detach(target)
-    sleep(15)
-    $workers = iterator[:processes]
+    sleep(10)
+    $workers = processes
   end
-
   # run request to the inference server
-  command = "seq 1 #{requests} | xargs -P #{requests} -I {} curl -X POST "http://localhost:8080/predict/" -H "Content-Type: application/octet-stream" --data-binary @#{iterator[:image]} 2>&1"
+  command = "seq 1 #{requests} | xargs -P #{requests} -I {} curl -X POST 'http://localhost:8080/predict/' -H 'Content-Type: application/octet-stream' --data-binary @#{iterator[:image]} 2>&1"
   time_start = Time.now
   raw_result = `#{command}`
   inference_time = Time.now - time_start
@@ -78,8 +90,7 @@ def invocation(config, iterator)
   # collect result
   collect = { inference_time: inference_time, error: error, image_resolution: image_resolution, image_format: image_format, image_metadata: image_metadata }
   iterate = { iteration: iterator[:iteration], processes: processes, requests: requests, device: device }
-  startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(app).gsub("'", "''") }
+  startup = { command: command.gsub("'", "''"), target_app_command: target_command, target_app_code: File.read(config[:startup_target_application]).gsub("'", "''") }
 
   return { startup: startup, iterate: iterate, collect: collect }
 end
-
