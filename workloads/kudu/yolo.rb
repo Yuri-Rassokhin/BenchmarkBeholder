@@ -5,17 +5,15 @@ $series_benchmark = "yolo_training"
 $series_description = 'time to complete the training of YOLO on #{mode} #{shape}'
 
 $startup_actor = "self"
-$startup_target = "file:///home/ubuntu/.local/bin/yolo" # protocols: file, device, http, object, bucket, ram
-$startup_model = "yolov5n.pt"
+$startup_target = "yolo" # must be full path to "yolo" (v8) or "train.py" (v5), example: file:///home/john/yolov5/train.py or file:///home/john/.local/bin/yolo
+$startup_model = "yolov5n"
 $startup_dataset = "coco128.yaml"
 $startup_epochs = "200"
 $startup_image_size = "640"
 $startup_batch = "16"
-$startup_device = "cuda:0" # cuda or cpu
+$startup_device = "0" 
 
 $iterate_iterations = 1
 $iterate_schedulers = "none"
 
-$infra_hosts = "140.238.42.37"
-$infra_user = "ubuntu"
-$infra_platform = "oci" # allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
+$infra_platform = "oci"
