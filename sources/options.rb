@@ -6,7 +6,7 @@ attr_reader :mode, :hosts, :workload
 
 def initialize(logger, argv)
   @logger = logger
-  @hosts = "127.0.0.1"
+  @hosts = [ "127.0.0.1" ]
   @mode = "launch"
   @workload = nil
   @hooks = Dir.entries("./sources/hooks") - %w[. ..]
@@ -62,14 +62,14 @@ def options_parse(argv)
     end
     @mode = "space"
     @workload = args.shift
-    @hosts = args
+    @hosts ||= args
   else
     if args.empty?
       @logger.error "missing arguments, use -h for help"
       exit 1
     end
     @workload = args.shift
-    @hosts = args
+    @hosts ||= args
   end
 end
 
