@@ -98,7 +98,7 @@ class VStr
       end
     else
       unless value.is_a?(String)
-        raise ArgumentError, "Value must be a string"
+        raise ArgumentError, "Value '#{value}' must be a string"
       end
 
       if @checks[:non_empty] && value.strip.empty?

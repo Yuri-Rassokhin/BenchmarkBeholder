@@ -51,7 +51,30 @@ class Agent < Object
     code = self.method(method).source << "puts #{method}#{res_args}\n"
     execute_remote(host, code)
   end
-  
+ 
+  def detach(host, method, *args)
+    raise "Remote URL not set" unless host
+    raise "SSH user not set" unless user
+    @error = nil
+#    res_args = args.map { |arg| arg.is_a?(String) ? "\"#{arg}\"" : arg }
+#    code = self.method(method).source << "puts #{method}(#{res_args.join(',')})\n"
+    case args.size
+    when 0 then res_args = nil
+    when 1 then
+      res_args = transfer(args[0])
+    else
+      res_args = ""
+      args.each_with_index do |arg,index|
+        res_args << "#{transfer(arg)}"
+        res_args = "#{res_args}, " unless index == args.size-1
+      end
+#      res_args = "[ #{res_args} "
+    end
+    res_args = res_args ? "(#{res_args})" : "()"
+    code = self.method(method).source << "puts #{method}#{res_args}\n"
+    detach_remote(host, code)
+  end
+
   # syntactic sugar for when you run lots of consequitive methods on the same host
   def run!(method, *args)
     raise "url is undefined in the agent" unless @url
@@ -127,13 +150,29 @@ class Agent < Object
     end
   end
 
+  # NOTE: only one instance of this method can run at a time, otherwise they'll compete for temp file and output variable
+  def detach_remote(host, code)
+    # convert the code from raw text to Base64 to avoid any modification of $1, $2, etc, if any in the code
+    code64 = Base64.encode64(code)
+    Net::SSH.start(host, @user, password: @password) do |ssh|
+      ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
+      ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
+      ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1 &")
+      output("")
+#      ssh.exec!("rm /tmp/remote_method_call.{rb,64}")
+    end
+  rescue => e
+    @error = "remote detaching failed at '#{host}': #{e.message}"
+    nil
+  end
+
   def execute_remote(host, code)
     # convert the code from raw text to Base64 to avoid any modification of $1, $2, etc, if any in the code
     code64 = Base64.encode64(code)
     Net::SSH.start(host, @user, password: @password) do |ssh|
       ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
       ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
-      output(ssh.exec!("ruby /tmp/remote_method_call.rb"))
+      output(ssh.exec!("ruby /tmp/remote_method_call.rb 2>&1"))
 #      ssh.exec!("rm /tmp/remote_method_call.{rb,64}")
     end
   rescue => e

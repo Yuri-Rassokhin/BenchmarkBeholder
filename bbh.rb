@@ -134,7 +134,7 @@ full_config.merge({ iteratable_size: full_config.iteratable_size })
 logger.note("launch on the node(s)") do
   full_config.get(:infra_hosts).each do |host|
     full_config.merge(collector[host].infra_static)
-    collector[host].run(host, :launch, full_config)
+    collector[host].detach(host, :launch, full_config)
 #    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
   end
 end

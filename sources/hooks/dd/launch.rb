@@ -96,7 +96,7 @@ end
     count = (`stat --format=%s #{config[:startup_media]}`.to_i)/size
     command = "#{executable} #{flow} bs=#{size} count=#{count}"
     # Commonly used: run the prepared command and capture its output
-    raw = `#{command} 2>&1`
+    raw = `#{command}`
 #    stdout, stderr, status = Open3.capture3("#{command}")
     output = extract(raw)
     push(config, output, {iteration: iteration, scheduler: scheduler, size: size, operation: operation, command: command})
