@@ -56,7 +56,7 @@ VALUES ('#{options[:user]}', '#{options[:name]}', '#{options[:email]}');
 SQL
 
 query_grant = <<-SQL
-GRANT SELECT, INSERT ON BENCHMARKING.* TO '#{options[:user]}'@'%';
+GRANT SELECT, INSERT ON *.* TO '#{options[:user]}'@'%';
 SQL
 
 # Ask for ADMIN explicitly

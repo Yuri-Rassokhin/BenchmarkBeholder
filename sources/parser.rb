@@ -1,5 +1,7 @@
 class Parser < Object
 
+require 'mysql2'
+
   attr_reader :mode, :conf_file
 
 def initialize(logger, argv)
@@ -50,10 +52,48 @@ def helper(option, hooks)
 
   if ["-p", "projects", "--projects"].include?(option)
     puts "Available projects:"
-    Open3.popen3("mysql -B -e \"select * from BENCHMARKING.projects;\"") do |stdin, stdout, stderr, wait_thr|
-      puts stdout.read
+    client = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
+
+ begin
+    results = client.query("SELECT * FROM projects")
+
+    # Check if there are results
+    if results.any?
+      # Extract headers and calculate column widths
+      headers = results.fields
+      rows = results.map(&:values)
+
+      column_widths = headers.map.with_index do |header, index|
+        [
+          header.length,
+          *rows.map { |row| row[index].to_s.length }
+        ].max
+      end
+
+      # Helper method to format rows
+      format_row = lambda do |row|
+        row.each_with_index.map { |value, index| value.to_s.ljust(column_widths[index]) }.join(" | ")
+      end
+
+      # Print header
+      puts format_row.call(headers)
+
+      # Print a separator line
+      puts column_widths.map { |width| "-" * width }.join("-+-")
+
+      # Print each row
+      rows.each do |row|
+        puts format_row.call(row)
+      end
+    else
+      puts "No projects available."
     end
-    exit 0
+  rescue Mysql2::Error => e
+    puts "Error executing query: #{e.message}"
+  ensure
+    client.close if client
+  end
+  exit 0
   end
 
   if [ "space", "-s", "--space" ].include?(option)

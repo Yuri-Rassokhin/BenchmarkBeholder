@@ -33,7 +33,8 @@ private
 
 def table?
   raise "Database table has not been specified" unless @table
-  result = @client.query("select count(*) as table_exists from information_schema.tables where table_schema = 'BENCHMARKING' and table_name = '#{@table}';")
+  current_db = @client.query("SELECT DATABASE()").first["DATABASE()"]
+  result = @client.query("select count(*) as table_exists from information_schema.tables where table_schema = '#{current_db}' and table_name = '#{@table}';")
   (result.first['table_exists'] > 0) ? true : false
 end
 
