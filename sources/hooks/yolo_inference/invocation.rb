@@ -4,7 +4,6 @@ def dimensions(config)
   [
     (1..config[:iterate_iterations]).to_a,
     config[:iterate_processes].to_a,
-    config[:iterate_devices].to_a,
     config[:iterate_requests].to_a,
     config[:iterate_images].to_a
   ]
@@ -12,7 +11,7 @@ end
 
 # CUSTOMIZE: give names to the dimensions, as a comma-separated list
 def dimension_naming
-  [ :iteration, :processes, :device, :requests, :image ]
+  [ :iteration, :processes, :requests, :image ]
 end
 
 # CUSTOMIZE: if you need one-time intitialization before traversal of the pararameter space started, it's here

@@ -14,7 +14,8 @@ module Parameters
 # ADD DEFINITIONS OF WORKLOAD-SPECIFIC STARTUP PARAMETERS
 def startup_parameters
   {
-      startup_target_application: VStr.new(non_empty: true)
+      startup_target_application: VStr.new(non_empty: true),
+      startup_device: VStr.new(non_empty: true, allowed_values: [ "0", "1", "2", "3", "4", "5", "6", "7", "cuda", "cpu" ] )
   }
 end
 
@@ -23,7 +24,6 @@ def iterate_parameters
   {
       iterate_processes: VStr.new(non_empty: true, comma_separated: true, natural: true, iteratable: true),
       iterate_requests: VStr.new(non_empty: true, comma_separated: true, natural: true, iteratable: true),
-      iterate_devices: VStr.new(non_empty: true, comma_separated: true, allowed_values: [ "cpu", "cuda"], iteratable: true),
       iterate_images: VStr.new(non_empty: true, comma_separated: true, iteratable: true)
   }
 end
