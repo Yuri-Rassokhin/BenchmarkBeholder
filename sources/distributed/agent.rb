@@ -81,10 +81,10 @@ class Agent < Object
     run(@url, method, *args)
   end
 
-  # @param [symbol] 
-#  def add(args, &block)
-#    define_singleton_method(args, &block)
-#  end
+  def detach!(method, *args)
+    raise "url is undefined in the agent" unless @url
+    detach(@url, methos, *args)
+  end
 
   def available?(host)
     test = `ssh -o StrictHostKeyChecking=no #{@user}@#{host} sudo ls / 2>&1`
@@ -98,11 +98,7 @@ class Agent < Object
     return true
   end
 
-  private
-
-  def pack(*args)
-    TODO
-  end
+private
 
   def to_bool(value)
     return value == "true"
@@ -155,9 +151,11 @@ class Agent < Object
     # convert the code from raw text to Base64 to avoid any modification of $1, $2, etc, if any in the code
     code64 = Base64.encode64(code)
     Net::SSH.start(host, @user, password: @password) do |ssh|
-      ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
-      ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
-      ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1 &")
+#      ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
+#      ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
+#      ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1 &")
+#        `echo '#{code}' > /tmp/remote.log`
+          ssh.exec!("echo '#{code64}' | base64 --decode | ruby &> /dev/null &")
       output("")
 #      ssh.exec!("rm /tmp/remote_method_call.{rb,64}")
     end
