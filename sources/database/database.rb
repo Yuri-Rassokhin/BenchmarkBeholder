@@ -60,7 +60,7 @@ end
 
 def create_trigger_project
 trigger_add_project_description = <<-SQL
-CREATE TRIGGER add_project_description
+CREATE TRIGGER add_project_description_#{@table}
 BEFORE INSERT ON #{@table}
 FOR EACH ROW
 BEGIN
@@ -77,7 +77,7 @@ end
 
 def create_trigger_credentials
 trigger_add_credentials = <<-SQL
-CREATE TRIGGER add_credentials
+CREATE TRIGGER add_credentials_#{@table}
 BEFORE INSERT ON #{@table}
 FOR EACH ROW
 BEGIN
