@@ -3,9 +3,8 @@ require 'net/http'
 require 'uri'
 require 'json'
 
-class TelegramBot
+class TelegramUI
 
-  attr_reader :chat_id
 def initialize(name: , surname: , token: , log: $STDOUT)
     @token = token
     @name = name
@@ -50,7 +49,7 @@ end
 
 bot = TelegramBot.new(name: "Yuri", surname: "Rassokhin", token: '8103208089:AAEWSv3YSaFvWy38E1ucvpt_ikzoTKKO43c')
 
-puts bot.chat_id
-bot.msg "Hi"
+#puts bot.chat_id
+#bot.msg "Hi"
 #bot.run
 

@@ -1,6 +1,6 @@
 require 'logger'
 
-class UILogger < Logger
+class UI < Logger
   def initialize(*args)
     super(*args)
   end
@@ -10,15 +10,13 @@ class UILogger < Logger
     formatted_message = formatter.call(format_severity(severity), Time.now, progname, message || block&.call)
 
     # Send the fully constructed message to your custom method
-    output(formatted_message)
+    msg(formatted_message)
 
     # Write the message to the logger's destination
     super(severity, message, progname, &block)
   end
 
-private
-
-  def output(formatted_message)
+  def msg(formatted_message)
     raise "This method must be instantiated in a UI subclass"
   end
 
@@ -33,20 +31,3 @@ end
 #logger.info("This is an info message")
 #logger.error("This is an error message")
 
-class UI < UILogger
-
-  def initialize(*args)
-    super(*args)
-    # 'bbh.log', 1, 1_024_000
-  end
-
-  # output message to UI
-  def output(message)
-  # This method is called from the logger automatically
-  end
-
-  # capture message from UI
-  def input(message)
-  end
-
-end

@@ -157,7 +157,8 @@ def detach_remote(host, code)
       Net::SSH.start(host, @user, password: @password) do |ssh|
         ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
         ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
-        ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1")
+        ssh.exec!("nohup ruby /tmp/remote_method_call.rb")
+        #ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1")
         output("")
       end
     rescue => e
