@@ -64,14 +64,12 @@ end
   bucket_name = config[:startup_target]
   response = object_storage.list_objects(namespace, bucket_name)
 
-  # Define parameter space, a Cartesian of those parameters we want to iterate over
+  # CUSTOMIZE: add your dimensions here in the form config[:my_option].to_a
   dimensions = [
     (1..config[:iterate_iterations]).to_a
-#    config[:iterate_operations].to_a
-  ]
-
-  # NOTE: loop is a template, workload-specific iterators inherited from the 'dimensions' variable
-  dimensions.inject(&:product).map(&:flatten).each do |iteration|
+  ].reject(&:empty?)
+  cartesian = dimensions.size > 1 ? dimensions.inject(&:product) : dimensions.first.map { |e| [e] }
+  cartesian.map(&:flatten).each do |iteration|
     response.data.objects.each do |object|
       object_name = object.name
       start_time = Time.now
