@@ -2,8 +2,28 @@
 require 'open3'
 require 'fileutils'
 require 'tempfile'
+require 'oci'
 
 module UtilitiesGeneral
+
+  # Given OCI user OCID, return the user's compartment OCID, or root tenancy if the user has no a particular compartment
+  def oci_get_compartment_id(user_ocid)
+    config = OCI::ConfigFileLoader.load_config
+    identity_client = OCI::Identity::IdentityClient.new(config: config)
+    tenancy_id = config.tenancy
+    compartments = identity_client.list_compartments(tenancy_id, compartment_id_in_subtree: true).data
+    user_compartment = compartments.find { |comp| comp.id == tenancy_id }
+    user_compartment ? user_compartment.id : nil
+  end
+
+  # In a given OCI compartment, check if a given string denotes an existing Object Storage bucket
+  def oci_object_storage_bucket?(bucket_name, compartment)
+    object_storage_client = OCI::ObjectStorage::ObjectStorageClient.new
+    namespace = object_storage_client.get_namespace.data
+    response = object_storage_client.list_buckets(namespace, compartment)
+    bucket_names = response.data.map(&:name)
+    bucket_names.include?(bucket_name)
+end
 
   def args_show(args)
     puts args

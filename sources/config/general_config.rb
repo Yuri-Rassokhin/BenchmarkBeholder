@@ -28,6 +28,7 @@ def initialize(conf_file, project_codes)
 #    collect_frequency: VNum.new(positive: true, greater: 0.1),
 #    collect_grace_period: VNum.new(natural: true, positive: true),
 
+    infra_platform: Vstr.new(non_empty: true, allowed_values: [ "oci" ]),
     infra_hosts: VStr.new(non_empty: true, comma_separated: true),
     infra_user: VStr.new(non_empty: true, comma_separated: false),
   }
