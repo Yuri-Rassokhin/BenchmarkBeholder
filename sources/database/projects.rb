@@ -2,7 +2,7 @@
 class Projects
 
 def codes
-    return `mysql -N -B -e "select code from BENCHMARKING.projects;"`.split("\n").join.tr("\"",'')
+    return `mysql -N -B -e "select code from bbh.projects;"`.split("\n").join.tr("\"",'')
 end
 
 def projects

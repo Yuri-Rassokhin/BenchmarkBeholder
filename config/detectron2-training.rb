@@ -43,7 +43,7 @@ $collect_grace_period = 300
 
 # INFRASTRUCTURE: where to run the benchmark
 # Hosts to run the benchmark on
-$infra_hosts = "ai"
+$infra_hosts = "dev"
 # User for passwordless ssh to the benchmark nodes
-$infra_user = "ubuntu"
+$infra_user = "yuri"
 

@@ -32,7 +32,7 @@ agent = Agent.new(config.get(:infra_user), nil)
 
 config.get(:infra_hosts).split.each do |host|
   logger.note("availability of the node '#{host}'") do
-    logger.error("'#{host}' is unavailable") if !agent.available?(host)
+    logger.error("'#{host}' is unavailable, #{agent.error}") if !agent.available?(host)
   end
 end
 
@@ -46,7 +46,7 @@ end
 # check if config path exists on the nodes
 config.get(:infra_hosts).split.each do |host|
   logger.note("path on '#{host}'") do
-    logger.error("#{config.get(:path)} is missing on '#{host}'") if !agent.run(host, :dir_exists?, config.get(:startup_path))
+    logger.error("#{config.get(:startup_path)} is missing on '#{host}'") if !agent.run(host, :dir_exists?, config.get(:startup_path))
     end
 end
 

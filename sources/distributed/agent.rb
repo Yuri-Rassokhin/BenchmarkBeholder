@@ -16,6 +16,7 @@ class Agent < Object
   include Shape
 
   attr_accessor :user, :password, :url
+  attr_reader :error
 
   def initialize(user, url = nil)
     @user = user
@@ -65,10 +66,10 @@ class Agent < Object
   def available?(host)
     test = `ssh -o StrictHostKeyChecking=no #{@user}@#{host} sudo ls / 2>&1`
     if test.include?("terminal")
-      output("passwordless sudo required on '#{host}'")
+      set_error("passwordless sudo required on '#{host}'")
       return false
     elsif !test.include?("root")
-      output("host #{host}:22 is unreachable via SSH")
+      set_error("host #{host}:22 is unreachable via SSH")
       return false
     end
     return true
@@ -94,6 +95,10 @@ class Agent < Object
     Integer(value) ? true : false
     rescue
       false
+  end
+
+  def set_error(raw_output)
+    @error = raw_output
   end
 
   def output(raw_output)
