@@ -15,15 +15,12 @@ $startup_executable = "/usr/bin/dd" # Path to the benchmarked executable
 # NOTE: benchmark-specific parameter
 $startup_media = "/shared/file.dump" # Media the benchmark executable will be using (a file, a block device ...)
 
-# ITERATE: what parameters to benchmark
+# ITERATE: what parameters to benchmark? These parameters form the parameter namespace as a Cartesian
 $iterate_schedulers = "none, kyber, mq-deadline,  bfq" # Linux IO schedulers: mq-deadline, bfq, kyber, none
 # NOTE: benchmark-specific parameter
 $iterate_sizes = "4096, 65536, 262144, 1048576, 4194304, 1073741824"
-$iterate_operations = "read"
-
-# COLLECT: How to collect benchmark numbers
-# How many times to repeat every individual invocation (to accumulate statistics)
-$collect_iterations = 4
+$iterate_operations = "read, write"
+$iterate_iterations = 4
 
 # INFRASTRUCTURE: where to run the benchmark
 # Hosts to run the benchmark on

@@ -8,7 +8,7 @@ class Ddconfig < GenericConfig
       # NOTE: benchmark-specific configuration parameter
       startup_media: VStr.new(non_empty: true),
       # NOTE: benchmark-specific list of operations
-      iterate_operations: VStr.new(non_empty: true, comma_separated: true, allowed_values: ["read", "write"], iteratable: true)
+      iterate_operations: VStr.new(non_empty: true, comma_separated: true, allowed_values: ["read", "write"], iteratable: true),
     }
     load_conf(conf_file)
   end
