@@ -143,24 +143,17 @@ end
 parameter_space_size = full_config.parameter_space_size
 full_config.merge({ parameter_space_size: parameter_space_size })
 if parser.mode == :space
-#  logger.info("Parameter space consists of the following dimensions")
-#  full_config.parameter_space_dimensions
   logger.info("parameter space size is #{parameter_space_size} invocations")
   full_config.parameter_space_dimensions
   exit 0
 end
 
-#TODO: enable scheduler switching in the launcher. The problem is that switching method is out of launcher's method, and doesn't transfer to the remote host automatically.
 #TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
-#TODO: extension is badly required.
-#TODO: Also, it's good to get rid of tmp remote file for storing of the agent's code - how does SSH can directly run a given code with a proper special symbolism?
-#TODO: in Collector.initialize, move run! to detach! (and make the detach! truly reenterable)
 
 full_config.get(:infra_hosts).each do |host|
   full_config.merge(collector[host].infra_static)
   logger.info("Launching workload '#{class_needed.downcase}' on '#{host}'")
   collector[host].detach(host, :launch, full_config)
-# `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} #{remote_generic_launcher} #{series} #{host} "#{mode}" "#{hook}" "#{remote_conf_file}" #{remote_hook} "#{$schedulers}" #{warning_log.path} #{remote_hook_database} #{log_dir}`
 end
 
 logger.info("Workload '#{full_config.get(:series_benchmark)}' series #{series} has launched on '#{full_config.get(:infra_hosts).join(', ')}'")
