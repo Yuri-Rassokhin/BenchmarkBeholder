@@ -5,7 +5,7 @@ def guess_shape(platform)
 case platform
 when "oci"
   require 'oci'
-  return `oci-metadata | grep "Instance shape:" | awk '{print $3}'`
+  return `oci-metadata 2>&1 | grep "Instance shape:" | awk '{print $3}'`
 else
   return "unknown compute shape"
 end
