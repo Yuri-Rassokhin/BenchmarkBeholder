@@ -108,7 +108,7 @@ end
 
     reader, writer = IO.pipe
     # launch the target: uvicorn+fastapi inference server
-    target = spawn("uvicorn #{app_name}:app --app-dir #{app_dir} --host 0.0.0.0 --port 5000 --workers #{processes} --log-level critical --no-access-log", out: writer, err: writer)
+    target = spawn("uvicorn #{app_name}:app --app-dir #{app_dir} --host 0.0.0.0 --port 5000 --workers #{processes}", out: writer, err: writer)
     writer.close
     Process.detach(target)
     sleep(10)
@@ -120,7 +120,7 @@ end
     server_raw_output = reader.read
 
     # kill the inference server
-    Process.kill("TERM", target)
+    Process.kill("TERM", target) rescue nil
 
     # extract benchmark results
     inference_time = `echo "#{raw_result}" | grep "Requests per second" | awk '{print $4}'`
