@@ -142,19 +142,31 @@ end
     end
   end
 
+
+
   # NOTE: only one instance of this method can run at a time, otherwise they'll compete for temp file and output variable
-  def detach_remote(host, code)
-    code64 = Base64.encode64(code)
-    Net::SSH.start(host, @user, password: @password) do |ssh|
-      ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
-      ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
-      ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1 &")
-      output("")
+def detach_remote(host, code)
+  code64 = Base64.encode64(code)
+  pid = fork do
+    begin
+      Net::SSH.start(host, @user, password: @password) do |ssh|
+        puts "STARTING"
+        ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
+        ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
+        ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1")
+        output("")
+        puts "DONE"
+      end
+    rescue => e
+      # TODO: message error to TG
+      # You could add a mechanism to log or send a message here
+    ensure
+      puts "COMPLETED"
+      # TODO: report completion in detached mode
     end
-  rescue => e
-    @error = "remote detaching failed at '#{host}': #{e.message}"
-    nil
   end
+  Process.detach(pid)
+end
 
   def execute_remote(host, code)
     # convert the code from raw text to Base64 to avoid any modification of $1, $2, etc, if any in the code
