@@ -37,7 +37,7 @@ hosts = config.get(:infra_hosts)
 
 parser.check(hook)
 
-agent = Agent.new(config.get(:infra_user), nil)
+agent = Agent.new(nil, nil)
 
 # First and foremost, we check and enable (if needed) SSH persistance
 # This will maximize the performance of inter-host communication
@@ -105,7 +105,7 @@ if target.io_schedulers_apply?
   logger.info("Checking available kernel IO schedulers")
   hosts.each do |host|
     %w[mq-deadline kyber bfq none].each do |scheduler|
-      `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} sudo modprobe -q #{scheduler}`
+      `ssh -o StrictHostKeyChecking=no #{host} sudo modprobe -q #{scheduler}`
     end
   end
 
