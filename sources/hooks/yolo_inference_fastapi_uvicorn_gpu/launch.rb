@@ -73,7 +73,7 @@ def push(config, collect, iterate, startup)
       iterate_processes = '#{iterate[:processes]}',
       iterate_requests = '#{iterate[:requests]}',
       startup_command = '\"#{startup[:command]}\"',
-      startup_language = '\"#{startup[:language]}\"',
+      startup_language = '\"#{startup[:language]}\"'
   SQL
   push!(query, config)
 end
