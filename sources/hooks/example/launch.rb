@@ -76,22 +76,10 @@ def push(config, collect, iterate, startup)
 end
 
 
-  total_invocations = config[:parameter_space_size]
-  target = config[:startup_target]
-  actor = config[:startup_actor]
-
   # CUSTOMIZE: add 'require' for the modules required for your hook
 
-  # CUSTOMIZE: add initialization of the variables relevant to your target
-  language = "bash"
-
-  # CUSTOMIZE: add dimensions for your iteratable parameters in the form config[:my_option].to_a, for instance: config[:iterate_requests].to_a, comma-separated
-  dimensions = [
-    (1..config[:iterate_iterations]).to_a
-  ]
-
   # CUSTOMIZE: add names of your iteratables
-  cartesian(dimensions).each do |iteration|
+  cartesian(dimension_space_create(config)).each do |iteration|
 
     # CUSTOMIZE: this is the main part, add your semantics of the benchmark invocation
     command = "sleep 5 2>&1"
@@ -103,9 +91,16 @@ end
     # CUSTOMIZE: add your iteratable parameters
     iterate = { iteration: iteration }
 
-    startup = { command: command.gsub("'", "''"), language: language }
+    startup = { command: command.gsub("'", "''"), language: "bash" }
     push(config, collect, iterate, startup)
   end
+end
+
+# CUSTOMIZE: add dimensions for your iteratable parameters in the form config[:my_option].to_a, for instance: config[:iterate_requests].to_a, comma-separated
+def dimension_space_create(config)
+  [
+    (1..config[:iterate_iterations]).to_a
+  ]
 end
 
 end
