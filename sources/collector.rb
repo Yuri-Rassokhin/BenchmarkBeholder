@@ -21,7 +21,7 @@ def initialize(config, url, mode_raw, logger, series)
   @error_counter = 0
   @series = series
   @user = config.get(:infra_user)
-  @src = config.get(:startup_src)
+  @src = config.get(:startup_media)
   super(@user, url)
   @logger = logger
   @url = url

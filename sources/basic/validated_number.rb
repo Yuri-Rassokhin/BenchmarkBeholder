@@ -79,15 +79,16 @@ class VNum
 
   end
 
+  def ensure_initialized!
+    raise "Value not initialized" if @value.nil?
+  end
+
   private
 
   def extract_value(other)
     other.is_a?(VNum) ? other.value : other
   end
 
-  def ensure_initialized!
-    raise "Value not initialized" if @value.nil?
-  end
 end
 
 # Example usage
