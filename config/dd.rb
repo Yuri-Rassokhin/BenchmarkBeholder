@@ -27,4 +27,6 @@ $iterate_iterations = 4
 $infra_hosts = "dev"
 # User for passwordless ssh to the benchmark nodes
 $infra_user = "yuri"
+# Which infrastructure platform we're running on, allowed values: "oci" (TODO: "azure", "aws", "gcp", "nvidia", "misc")
+$infra_platform = "oci"
 
