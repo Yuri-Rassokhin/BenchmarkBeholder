@@ -87,7 +87,7 @@ end
 
   # Main loop: iterate over parameter space
   dimensions.inject(&:product).map(&:flatten).each do |iteration, scheduler, size, operation|
-    #switch_scheduler $scheduler
+    switch_scheduler(scheduler)
     case operation
     when "read"
       flow = "if=#{config[:startup_media]} of=/dev/null"

@@ -24,6 +24,7 @@ class Agent < Object
     # if .run returns nil, @error may store explanation of the error
     @error = nil
     @url = url
+    @utilities = utilities_set
   end
 
   # @param method [symbol] symbolic name of a method to execute on remote host, included in utilities
@@ -33,8 +34,6 @@ class Agent < Object
     raise "Remote URL not set" unless host
     raise "SSH user not set" unless user
     @error = nil
-#    res_args = args.map { |arg| arg.is_a?(String) ? "\"#{arg}\"" : arg }
-#    code = self.method(method).source << "puts #{method}(#{res_args.join(',')})\n"
     case args.size
     when 0 then res_args = nil
     when 1 then
@@ -45,10 +44,9 @@ class Agent < Object
         res_args << "#{transfer(arg)}"
         res_args = "#{res_args}, " unless index == args.size-1
       end
-#      res_args = "[ #{res_args} "
     end
     res_args = res_args ? "(#{res_args})" : "()"
-    code = self.method(method).source << "puts #{method}#{res_args}\n"
+    code = "#{@utilities}" + self.method(method).source << "puts #{method}#{res_args}\n"
     execute_remote(host, code)
   end
  
@@ -56,8 +54,6 @@ class Agent < Object
     raise "Remote URL not set" unless host
     raise "SSH user not set" unless user
     @error = nil
-#    res_args = args.map { |arg| arg.is_a?(String) ? "\"#{arg}\"" : arg }
-#    code = self.method(method).source << "puts #{method}(#{res_args.join(',')})\n"
     case args.size
     when 0 then res_args = nil
     when 1 then
@@ -68,10 +64,9 @@ class Agent < Object
         res_args << "#{transfer(arg)}"
         res_args = "#{res_args}, " unless index == args.size-1
       end
-#      res_args = "[ #{res_args} "
     end
     res_args = res_args ? "(#{res_args})" : "()"
-    code = self.method(method).source << "puts #{method}#{res_args}\n"
+    code = "#{@utilities}" + self.method(method).source << "puts #{method}#{res_args}\n"
     detach_remote(host, code)
   end
 
@@ -100,6 +95,13 @@ class Agent < Object
 
 private
 
+def utilities_set
+  utilities = File.read("./sources/infrastructure/utilities_general.rb")
+  utilities = File.read("./sources/infrastructure/utilities_gpu.rb") + utilities
+  utilities = File.read("./sources/infrastructure/shape.rb") + utilities
+  return utilities + "include UtilitiesGeneral\n" + "include UtilitiesGPU\n" + "include Shape\n"
+end
+
   def to_bool(value)
     return value == "true"
   end
@@ -123,12 +125,6 @@ private
   def output(raw_output)
     out = raw_output.downcase.strip
 
-#    puts "OUTPUT: #{raw_output}"
-#    if out.include?("error:")
-#      @error = out
-#      return nil
-#    end
-
     if [ "true", "false" ].include?(out)
       return to_bool(out)
     elsif integer?(out)
@@ -148,16 +144,12 @@ private
 
   # NOTE: only one instance of this method can run at a time, otherwise they'll compete for temp file and output variable
   def detach_remote(host, code)
-    # convert the code from raw text to Base64 to avoid any modification of $1, $2, etc, if any in the code
     code64 = Base64.encode64(code)
     Net::SSH.start(host, @user, password: @password) do |ssh|
-#      ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
-#      ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
-#      ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1 &")
-#        `echo '#{code}' > /tmp/remote.log`
-          ssh.exec!("echo '#{code64}' | base64 --decode | ruby &> /dev/null &")
+      ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
+      ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
+      ssh.exec!("nohup ruby /tmp/remote_method_call.rb > /dev/null 2>&1 &")
       output("")
-#      ssh.exec!("rm /tmp/remote_method_call.{rb,64}")
     end
   rescue => e
     @error = "remote detaching failed at '#{host}': #{e.message}"
@@ -199,13 +191,6 @@ def transfer(value, depth = 0)
     res = "#{indent}{"
     value.each_with_index do |(key, val), index|
       res << "#{indent}  #{key}:"
-#      if val.is_a?(Hash) || (val.is_a?(Array) && val.any? { |v| v.is_a?(Hash) })
-#        puts "#{indent}  #{key}:"
-#        print_nested_value(val, depth + 1)
-#      else
-#        puts "#{indent}  #{key}: #{val.inspect}"
-#      end
-      # here, newline should be
       res << transfer(val, depth +1)
       res << "," unless index == value.size - 1  # Print comma unless it's the last pair
     end
