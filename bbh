@@ -24,14 +24,6 @@ if false
   end
 end
 
-def target_supports_filesystem?(target_type)
-  target_type == "file" or target_type == "mount point" or target_type == "cpu ram"
-end
-
-def target_has_device?(target_type)
-  target_type == "file" or target_type == "device" or target_type == "cpu ram"
-end
-
 series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
 parser = Parser.new(logger, ARGV)
@@ -61,6 +53,12 @@ config.get(:infra_hosts).each do |host|
       logger.error("#{config.get(:startup_actor)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
     end
 end
+
+target = Target.new(config.get[:startup_target])
+logger.info("Checking if target '#{target.name}' is available")
+  config.get(:infra_hosts).each do |host|
+    logger.error("target '#{target.name}' is unavailable on '#{host}'") if !target.availalbe?
+  end
 
 # enable all available kernel IO schedulers on the nodes
 logger.info("Checking available kernel IO schedulers")
