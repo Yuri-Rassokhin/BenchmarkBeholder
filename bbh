@@ -32,6 +32,12 @@ series = Time.now.to_i.to_s
 logger = CustomLogger.new(series)
 options = Options.new(logger, ARGV)
 database = Database.new(logger)
+
+if options.mode == "user"
+  database.user_manage(options.user)
+  exit 0
+end
+
 config = GeneralConfig.new(options.workload)
 hook = config.get(:series_benchmark)
 hosts = options.hosts

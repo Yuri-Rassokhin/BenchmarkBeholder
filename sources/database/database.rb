@@ -11,6 +11,24 @@ def initialize(logger)
   @schema = nil
 end
 
+def user_manage(data)
+  case data[:operation]
+  when :add
+    full_name = data[:full_name]
+    email = data[:email]
+    if full_name.empty? then @logger.error "please provide full name of the user" end
+    if email.empty? then @logger.error "please provide user email" end
+    username = email.split('@').first
+    user_add(full_name: full_name, email: email, username: username)
+  when :delete
+    username = data[:username]
+    if username.empty? then @logger.error "please provide username" end
+    user_delete(username)
+  else
+    @logger.error "unknown user operation '#{action}'"
+  end
+end
+
 def table_set(hook)
   raise "Benchmark database table cannot be nil" unless hook
   @table = hook
@@ -43,7 +61,7 @@ end
 
 def table_create
   raise "Database table has not been specified" unless @table
-  db_admin("creation") do
+  db_admin("create table #{@table}") do
     @logger.info "creating common properties in the table"
     table_create_generic
     @logger.info "creating workload-specific properties in the table"
@@ -124,7 +142,7 @@ end
 
 def db_admin(operation, &block)
   regular_client = @client
-  @logger.info("Admin rights requested for the #{operation} of the table '#{@table}'")
+  @logger.info("Admin rights requested to #{operation}")
   # Ask for ADMIN explicitly
   print "Enter ADMIN username: "
   username = IO.console.gets.chomp
@@ -143,6 +161,96 @@ def db_admin(operation, &block)
     @logger.error("Can't access database as admin: #{e.message}")
   ensure
     @client = regular_client
+  end
+end
+
+def user_add(full_name:, email:, username:)
+  @logger.info "creating user for #{full_name}"
+  
+  db_admin("create user #{username}") do
+
+    # create users table if it doesn’t exist
+    create_table_sql = <<-SQL
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        username VARCHAR(100) UNIQUE NOT NULL
+      );
+    SQL
+    @client.query(create_table_sql)
+
+    # check if the username already exists
+    check_user_sql = <<-SQL
+      SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '#{username}') AS user_exists;
+    SQL
+    result = @client.query(check_user_sql).first
+    if result['user_exists'] == 1
+      @logger.warning "user #{username} already exists, updating it"
+    end
+
+    # create users table if it doesn’t exist
+    create_table_sql = <<-SQL
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        username VARCHAR(100) UNIQUE NOT NULL
+      );
+    SQL
+    @client.query(create_table_sql)
+
+    # Insert user into the users table
+    insert_user_sql = <<-SQL
+      INSERT INTO users (name, email, username)
+      VALUES ('#{full_name}', '#{email}', '#{username}')
+      ON DUPLICATE KEY UPDATE name=VALUES(name);
+    SQL
+    @client.query(insert_user_sql)
+
+    print "Enter password for the new user #{username}: "
+    password = IO.console.noecho(&:gets).chomp
+    puts # Move to the next line after password input
+
+    # Create MySQL user if not exists
+    create_user_sql = <<-SQL
+      CREATE USER IF NOT EXISTS '#{username}'@'%' IDENTIFIED BY '#{password}';
+    SQL
+    @client.query(create_user_sql)
+
+
+    # Grant privileges on all the tables, except for users table
+    database_name = @client.query("SELECT DATABASE()").first.values.first
+    grant_privileges_sql = <<-SQL
+      GRANT SELECT, INSERT ON #{database_name}.* TO '#{username}'@'%';
+    SQL
+    @client.query(grant_privileges_sql)
+  end
+
+  @logger.info "user #{username} has been created successfully"
+end
+
+def user_delete(username)
+
+  db_admin "delete user #{username}" do
+    # Check if the user exists in the users table
+    check_user_sql = <<-SQL
+      SELECT COUNT(*) AS user_count FROM users WHERE username = '#{username}';
+    SQL
+    result = @client.query(check_user_sql).first
+
+    if result['user_count'] == 0
+      @logger.warning "user #{username} does not exist, no changes were made"
+      return
+    end
+
+    # Delete the user from the users table
+    delete_user_sql = <<-SQL
+      DELETE FROM users WHERE username = '#{username}';
+    SQL
+    @client.query(delete_user_sql)
+
+    @logger.info "user #{username} has been deleted successfully"
   end
 end
 
