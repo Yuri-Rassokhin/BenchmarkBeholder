@@ -1,6 +1,6 @@
 
 # This class implements common logic for a configuration processor
-class GenericConfig
+class GenericConfig < Object
 
   attr_accessor :parameters
 
