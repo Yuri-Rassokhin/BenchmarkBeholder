@@ -41,7 +41,7 @@ def supports_fs?
   [ "file", "mount", "ram" ].include?(@protocol)
 end
 
-def has_device?(target_protocol)
+def has_device?
   [ "file", "ram", "block" ].include?(@protocol)
 end
 

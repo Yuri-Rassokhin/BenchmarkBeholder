@@ -125,7 +125,7 @@ full_config.set(:series_description, str)
 mode = full_config.get(:infra_hosts).size > 1 ? "multiple" : "single"
 full_config.get(:infra_hosts).each do |host|
   logger.info("Initializing hook for '#{class_needed.downcase}' on '#{host}'")
-  collector[host] = Object.const_get(class_needed).new(full_config, host, mode, logger, series)
+  collector[host] = Object.const_get(class_needed).new(full_config, host, mode, logger, series, target)
 end
 
 # create database table for the requested benchmark, if it doesn't exist yet

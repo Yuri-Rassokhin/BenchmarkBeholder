@@ -16,7 +16,7 @@ class Collector < Agent
 #warning_log = ARGV[7]
 #hook_database = ARGV[8]
 
-def initialize(config, url, mode_raw, logger, series)
+def initialize(config, url, mode_raw, logger, series, target)
   user = config.get(:infra_user)
   super(user, url)
   @logger = logger
@@ -28,7 +28,7 @@ def initialize(config, url, mode_raw, logger, series)
 #  main_dev = File.basename(src) if main_dev == "udev"
 #  main_dev_name = File.basename(main_dev)
 #  filesystem = run!(:get_filesystem, src)
-  if target_has_device?(config.get(:startup_type))
+  if target.has_device?
     device_info = run!(:check_device, src)
   else
     device_info = { filesystem: "NA", type: "NA", members: "NA", aggregated: false }
