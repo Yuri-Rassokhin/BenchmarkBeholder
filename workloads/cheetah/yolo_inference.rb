@@ -10,13 +10,13 @@ $startup_target_application = "/tmp/target_fastapi.py"
 $startup_device = "cpu"
 
 $iterate_iterations = 4
-$iterate_processes = "1, 2, 4, 8, 16, 32, 64"
+$iterate_processes = "1, 2, 4, 8, 10, 20, 30, 40, 50, 60, 70, 80"
 $iterate_requests = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100"
 $iterate_images = "/tmp/300.jpg"
 
 # How to install YOLO for inference in RPM-based Linux:
 # sudo yum install -y pip mesa-libGL
-# pip install yolo
+# pip install gunicorn fastapi uvicorn yolo ultralytics
 # which yolo
-# pip install gunicorn fastapi
 # cp ./sources/hooks/yolo_inference/target_fastapi.py /tmp/
+# cp ./sources/hooks/yolo_inference/300.jpg /tmp/
