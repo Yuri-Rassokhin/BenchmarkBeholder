@@ -61,7 +61,7 @@ def old_cartesian(dimensions)
 end
 
 def push!(query, config)
-  mysql = Mysql2::Client.new(default_file: '~/.my.cnf')
+  mysql = Mysql2::Client.new(default_file: File.expand_path('~/.my.cnf'))
   # consumption_cpu = '#{cpu_consumption}',
   # consumption_storage_tps = '#{storage_tps}',
   generic_query = <<-SQL
