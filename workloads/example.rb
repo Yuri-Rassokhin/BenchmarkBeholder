@@ -1,7 +1,7 @@
 ### PROJECT: what project this benchmark is a part of
 $project_description = "ADDME"
-$project_code = "ADDME"
-$project_tier = "ADDME"
+$project_code = "cheetah" # MODIFY ME
+$project_tier = "test" # MODIFY ME
 
 ### SERIES: identification of this benchmark series
 # NOTE: this one must correspond to the directory name of the hook and its classes
@@ -18,7 +18,7 @@ $startup_target = "ADDME" # protocols: file, device, http, object, bucket, ram
 $iterate_iterations = 4 # MODIFY ME
 
 # INFRASTRUCTURE
-$infra_hosts = "127.0.0.1" # ADDME: benchmark hosts
+$infra_hosts = "localhost" # ADDME: benchmark hosts
 # User for passwordless ssh to the benchmark nodes
 $infra_user = "opc
 " # user for passwordless SSH to the benchmark nodes
