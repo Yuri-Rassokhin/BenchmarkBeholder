@@ -6,8 +6,6 @@ $project_tier = "test"
 # NOTE: this one must correspond to the directory name of the hook and its classes
 $series_benchmark = "example"
 $series_description = '#{$startup_actor} on #{$startup_target} on #{mode} #{shape}'
-$series_owner_name = "John Doe"
-$series_owner_email = "john.doe@acme.com"
 
 # STARTUP: how to create the workload?
 $startup_actor = "sleep" # No external actor needed, we'll run from within the hook
