@@ -25,6 +25,8 @@ def table_set(name, schema)
 end
 
 def table_add_io_schedulers
+  return if table?
+  raise "Database table has not been specified" unless @table
   puts "alter table #{@table} add iterate_scheduler varchar(50) not null;"
   @client.query("alter table #{@table} add iterate_scheduler varchar(50) not null;")
 end
