@@ -73,12 +73,17 @@ logger.info "checking target '#{target.protocol}://#{target.path}'"
 hosts.each { |host| target.check(host) }
 
 unless options.mode == :space
+
+  logger.info "checking if storage is idle on benchmark node(s)"
   hosts.each do |host|
-    logger.info "checking if CPU is idle on '#{host}'"
       logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
-    logger.info "checking if storage is idle on '#{host}'"
-      logger.error("IO utilization >= 10%, no good for benchmarking") if agent.run(host,:io_idle) < 90
   end
+
+  logger.info "checking if storage is idle on benchmark node(s)"
+  hosts.each do |host|
+      logger.error("storage utilization >= 10%, no good for benchmarking") if agent.run(host,:io_idle) < 90
+  end
+
 end
 
 config.delayed_init
