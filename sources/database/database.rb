@@ -47,8 +47,11 @@ end
 def table_create
   raise "Database table has not been specified" unless @table
   db_admin("creation") do
+    @logger.info "creating common properties in the table"
     table_create_generic
+    @logger.info "creating workload-specific properties in the table"
     table_add_specific
+    @logger.info "creating automation triggers"
     create_triggers
   end
 end
