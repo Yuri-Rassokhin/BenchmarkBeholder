@@ -174,7 +174,7 @@ end
   def execute_remote(host, code)
     # convert the code from raw text to Base64 to avoid any modification of $1, $2, etc, if any in the code
     code64 = Base64.encode64(code)
-    Net::SSH.start(host, @user, password: @password) do |ssh|
+    Net::SSH.start(host, @user, password: @password, config: true) do |ssh|
       ssh.exec!("echo '#{code64}' > /tmp/remote_method_call.64")
       ssh.exec!("base64 --decode /tmp/remote_method_call.64 > /tmp/remote_method_call.rb")
       ttt = ssh.exec!("ruby /tmp/remote_method_call.rb 2>&1")
