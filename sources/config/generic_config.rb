@@ -16,18 +16,18 @@ class GenericConfig < Object
   end
 
   # given hash of parameters, fulfills their values from a given file
-  def load_conf(file, codes = {}, parameters: nil, &project_codes)
+  def load_conf(file, project_codes: , parameters: nil)
     # from config file, assign all the values to internal config object, and validate their correctness
     load file
     if parameters == nil
       @parameters.each do |p,v|
-        project_codes&.call(p,v)
+        v.checks = { :allowed_values => project_codes } if p == :project_code
         v.value = eval("$#{p}")
       end
     else
       res = parameters
       res.each do |p,v|
-        project_codes&.call(p,v)
+        v.checks = { :allowed_values => project_codes } if p == :project_code
         v.value = eval("$#{p}")
       end
       return res
