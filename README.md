@@ -33,7 +33,6 @@ BBH is invoked as the following:
 
 # Quick Start
 
-```markdown
 ```bash
 git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
 cd ./BenchmarkBeholder
