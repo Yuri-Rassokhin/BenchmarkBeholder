@@ -39,34 +39,35 @@ agent = Agent.new(config.get(:infra_user), nil)
 logger.info("Checking SSH persistance on the central node")
 `./sources/misc/ssh_sharing.sh`
 
-config.get(:infra_hosts).each do |host|
+hosts = config.get(:infra_hosts)
+
+hosts.each do |host|
   logger.info("Checking SSH availability of benchmark node '#{host}'")
   logger.error("'#{host}' is unavailable, #{agent.error}") if !agent.available?(host)
 end
 
 # TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
 # check if config path exists on the nodes
-config.get(:infra_hosts).each do |host|
-  logger.info("Checking actor on '#{host}'")
-    if config.get(:startup_actor) == "self"
-      logger.info("Checking actor: placeholder 'self' specificed, actor in the hook will be used")
-    else
-      logger.error("#{config.get(:startup_actor)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
-    end
+if config.get(:startup_actor) == "self"
+  logger.info("Checking actor: 'self' specificed, actor in the hook will be used")
+else
+  hosts.each do |host|
+    logger.info("Checking actor on the benchmark nodes")
+    logger.error("#{config.get(:startup_actor)} is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
+  end
 end
 
-target = Target.new(config.get[:startup_target])
-logger.info("Checking if target '#{target.name}' is available")
-  config.get(:infra_hosts).each do |host|
-    logger.error("target '#{target.name}' is unavailable on '#{host}'") if !target.availalbe?
-  end
+target = Target.new(agent, logger, config.get(:startup_target))
+
+logger.info("Checking #{target.protocol} '#{target.path}'")
+hosts.each { |host| target.check(host) }
 
 # enable all available kernel IO schedulers on the nodes
 logger.info("Checking available kernel IO schedulers")
-  config.get(:infra_hosts).each do |host|
-    %w[mq-deadline kyber bfq none].each do |scheduler|
-      `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} sudo modprobe -q #{scheduler}`
-    end
+hosts.each do |host|
+  %w[mq-deadline kyber bfq none].each do |scheduler|
+    `ssh -o StrictHostKeyChecking=no #{config.get(:infra_user)}@#{host} sudo modprobe -q #{scheduler}`
+  end
 end
 
 logger.info("Checking specification of kernel IO schedulers")
@@ -76,7 +77,7 @@ logger.info("Checking specification of kernel IO schedulers")
 end
 
 unless parser.mode == :space
-  config.get(:infra_hosts).each do |host|
+  hosts.each do |host|
     logger.info("Checking if CPU is idle on '#{host}'")
       logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
     logger.info("Checking if storage is idle on '#{host}'")
@@ -118,31 +119,6 @@ str = full_config.get(:series_description).gsub(/\#\{([^}]+)\}/) do |match|
   end
 end
 full_config.set(:series_description, str)
-
-# TODO: This parameter is benchmark-specific and may not be need for other benchmarks?..
-# check if the target the benchmark is available on all the nodes
-full_config.get(:infra_hosts).each do |host|
-  logger.info("Checking #{full_config.get(:startup_type)} '#{full_config.get(:startup_target)}' on '#{host}'")
-    case full_config.get(:startup_type)
-    when "file"
-      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_target))
-    when "device"
-      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :file_exists?, full_config.get(:startup_target))
-    when "bucket"
-      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :oci_bucket_exists?, full_config.get(:startup_target))
-    when "object"
-      logger.error("#{full_config.get(:startup_target)} is missing on '#{host}'") if !agent.run(host, :oci_object_exists?, full_config.get(:startup_target), full_config.get(:startup_namespace))
-    else
-      logger.error("unknown target '#{full_config.get(:startup_type)}'")
-    end
-end
-
-# TODO: this should execute in parallel, if explicitly mentioned (check if filesystem is known on the nodes)
-if target_supports_filesystem?(full_config.get(:startup_type))
-  full_config.get(:infra_hosts).each do |host|
-    logger.error("can't determine filesystem on '#{full_config.get(:startup_target)}'") if !agent.run(host, :get_filesystem, full_config.get(:startup_target))
-  end
-end
 
 # assign collector, aka permanent agent, for each node
 # during creation, collector gathers all static data about its infrastructure

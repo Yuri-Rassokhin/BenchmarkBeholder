@@ -43,7 +43,12 @@ end
 #  end
 
   def file_exists?(file)
-    `test -f #{file} && echo 1`.strip == "1"
+    File.exist?(file)
+    #`test -f #{file} && echo 1`.strip == "1"
+  end
+
+  def block_device_exists?(file)
+    File.blockdev?(file)
   end
 
   def dir_exists?(file)
@@ -124,11 +129,11 @@ end
     `df -h #{src} | tail -1 | sed -e 's/ .*$//'`.strip
   end
 
-  def get_filesystem(src)
-    s_type = `stat -c "%F" #{src}`.strip
+  def get_filesystem(file)
+    s_type = `stat -c "%F" #{file}`.strip
     case s_type
     when "regular file", "regular empty file"
-      `df -T #{src} | tail -1 | awk '{print $2}'`.strip
+      `df -T #{file} | tail -1 | awk '{print $2}'`.strip
     when "block special device"
       "N/A"
     else
