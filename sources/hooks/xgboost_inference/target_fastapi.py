@@ -1,4 +1,6 @@
 import os
+import torch
+import xgboost as xgb
 from fastapi import FastAPI
 import joblib
 import numpy as np
@@ -59,7 +61,8 @@ def load_model():
     
     model = joblib.load(MODEL_PATH)
     if device == "cuda":
-        model.set_params(tree_method="gpu_hist")  # Enable GPU inference
+        model.set_params(tree_method="hist", device="cuda")
+# deprecated:       model.set_params(tree_method="gpu_hist")  # Enable GPU inference
 
     scaler = joblib.load(SCALER_PATH)
     print("Model and scaler loaded successfully.")
@@ -71,7 +74,18 @@ def predict(transaction: TransactionInput):
     
     # Scale the Amount column
     input_data['Amount'] = scaler.transform(input_data[['Amount']])
-    
+
+    # Convert input to numpy
+    input_array = input_data.values
+
+    if device == "cuda":
+        input_array = np.array(input_array, dtype=np.float32)  # Ensure correct format
+        dmatrix = xgb.DMatrix(input_array)  # No `device` argument
+        model.set_params(predictor="gpu_predictor")  # ✅ Enable GPU inference
+    else:
+        dmatrix = xgb.DMatrix(input_array)  # CPU
+        model.set_params(predictor="gpu_predictor")  # ✅ CPU inference
+
     # Predict
     predicted_class = model.predict(input_data)[0]
     predicted_prob = model.predict_proba(input_data)[0, 1]
