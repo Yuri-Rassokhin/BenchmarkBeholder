@@ -26,13 +26,13 @@ Any application can be integrated with BBH by writing a simple hook in Ruby. Out
 
 BBH is invoked as the following:
 
-* As input, BBH takes a config file describing *parameter space*, that is, a Cartesian of the valid values of all the parameters you want to benchmark your application against.
-* After that, BBH runs the application against all combinations of parameter values from the parameter space.
-* During the runs, BBH collects specified application metrics, enriches them with infrastructure metrics, and pushes everything to a database.
-* Finally, the database of benchmark results is a single, centralized table structured in accordance with your projects/user teams, for convenience.
+* As input, BBH takes a config file describing *parameter space*, that is, a Cartesian of the valid values of all the parameters you want to benchmark your application against
+* After that, BBH runs the application against all the  combinations from the parameter space
+* During the runs, BBH collects specified application metrics, enriches them with infrastructure metrics, and pushes everything to a database
+* Finally, the database of benchmark grows as a single, centralized table structured in accordance with your projects and/or user teams
 
 # Quick start
 
-* Just git clone the BenchmarkBeholder repo
-* And run ./bbh ./config/example.conf to grasp an idea of how it works
+* git clone the BenchmarkBeholder repo
+* ./bbh ./config/example.conf to grasp an idea of how it works
 * After that, read through ./config/example.conf and start modifying it for your needs
