@@ -137,9 +137,9 @@ def human_readable_time(seconds)
   hours = (seconds % (24 * 3600) / 3600).to_i
   minutes = (seconds % 3600 / 60).to_i
   readable = []
-  readable << "#{days}d" if days > 0
-  readable << "#{hours}h" if hours > 0
-  readable << "#{minutes}min" if minutes > 0
+  readable << "#{days} daysd" if days > 0
+  readable << "#{hours} hours" if hours > 0
+  readable << "#{minutes} minutes" if minutes > 0
   readable.empty? ? "less than a minute" : readable.join(" ")
 end
 
@@ -165,7 +165,8 @@ def msg(text)
     uri = URI("https://api.telegram.org/bot#{$config[:token]}/sendMessage")
     params = {
       chat_id: $config[:chat_id],
-      text: text
+      text: text,
+      parse_mode: 'MarkdownV2'
     }
     response = Net::HTTP.post_form(uri, params)
   rescue StandardError => e
@@ -252,6 +253,7 @@ def push!(query, config)
       series_benchmark = '#{config[:series_benchmark]}',
       startup_actor = '#{config[:startup_actor]}',
       infra_host = '#{config[:host]}',
+      infra_platform = '#{config[:platform]}',
       infra_shape = '#{config[:shape]}',
       infra_filesystem = '\"#{config[:filesystem]}\"',
       infra_storage = '\"#{config[:storage_type]}\"',
@@ -263,13 +265,14 @@ def push!(query, config)
       infra_cpu = '\"#{config[:cpu]}\"',
       infra_cores = '#{config[:cores]}',
       infra_ram = '#{config[:ram]}',
+      infra_gds_supported = '#{config[:gds_supported]}'
   SQL
 
   formatted_query = query.lines.map.with_index do |line, index|
     index == query.lines.size - 1 ? line.strip : "#{line.strip},"
   end.join("\n") << ";"
 
-  mysql.query(generic_query << formatted_query)
+  mysql.query(generic_query << "," << formatted_query)
 end
 
 # construct workload-specific part of the output data for the database
