@@ -51,7 +51,8 @@ class CustomLogger
 
   private
 
-  def log(severity, message)
+  def log(severity, msg)
+    message = msg[0].upcase + msg[1..-1]
     current_level = SEVERITY_LEVELS[severity]
     if current_level.nil?
       file, line = caller_locations(1,1)[0].path, caller_locations(1,1)[0].lineno

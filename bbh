@@ -52,7 +52,7 @@ logger.info("Checking specification of kernel IO schedulers")
     logger.error("unknown IO scheduler '#{scheduler}'") unless system_schedulers.include?(scheduler)
 end
 
-unless parser.mode == :time
+unless parser.mode == :space
   config.get(:infra_hosts).each do |host|
     logger.info("Checking if CPU is idle on '#{host}'")
       logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
@@ -125,7 +125,7 @@ database.table_set(full_config.get(:series_benchmark), SCHEMA)
 # Calculate size of the parameter space, and add it to the config for reporting purposes
 parameter_space = full_config.iteratable_size
 full_config.merge({ iteratable_size: parameter_space })
-if parser.mode == :time
+if parser.mode == :space
   logger.info("parameter space is #{parameter_space} invocations")
   exit 0
 end

@@ -55,8 +55,8 @@ def helper(option, hooks)
     exit 0
   end
 
-  if [ "time", "-t", "--time" ].include?(option)
-    @mode = :time
+  if [ "space", "-s", "--space" ].include?(option)
+    @mode = :space
     @conf_file = @argv[1]
   end
 
