@@ -13,6 +13,10 @@ def dimension_naming
   [ :iteration, :processes, :requests ]
 end
 
+def debug(config, comment, text)
+  puts "**DEBUG** #{comment.capitalize}: #{text}" if config[:debug]
+end
+
 # CUSTOMIZE: if you need one-time intitialization before traversal of the pararameter space started, it's here
 def prepare(config = nil)
   require 'net/http'
@@ -48,7 +52,6 @@ def invocation(config, iterator)
   target_command = ""
   device = config[:startup_device]
 
-  reader, writer = IO.pipe
   # reload the inference server if the iterator has updated its parameters: device or workers
   if $workers != processes or $device != device
    target_array = [
@@ -59,13 +62,12 @@ def invocation(config, iterator)
       "--chdir", app_dir,
       "#{app_name}:app"
    ]
-   env = { "DEVICE" => device }
+   env = { "DEVICE" => device, "MODEL_PATH" => model_path, "SCALER_PATH" => scaler_path }
 
    target_command = "DEVICE=#{device} MODEL_PATH=#{model_path} SCALER_PATH=#{scaler_path} #{target_array.join(' ')}"
-   puts target_command
+   debug(config, "launching inference server", target_command)
 
     target_process = spawn(env, *target_array, out: STDOUT, err: STDOUT)
-    writer.close
     Process.detach(target_process)
     sleep(10)
     $workers = processes
@@ -81,17 +83,17 @@ def invocation(config, iterator)
   payload = raw_payload.to_json
 
   command = "seq 1 #{requests} | xargs -P #{requests} -I {} curl -X POST #{target} -H 'Content-Type: application/json' -d '#{payload}'"
-  puts command
+  debug(config, "sending concurrent requests", command)
   time_start = Time.now
   raw_result = `#{command}`
   inference_time = Time.now - time_start
+  debug(config, "requests returned", raw_result.chomp)
   requests_per_second = requests / inference_time
   server_raw_output = "" #writer.read
 
   `pkill gunicorn`
 
-  # extract benchmark results
-  error = (`echo "#{server_raw_output}" | grep "CUDA run out of memory"` << `echo "#{server_raw_output}" | grep -i "error | grep -vi dictionary"`)[0..499]
+  error = ""
 
   # collect result
   collect = { inference_time: inference_time, requests_per_second: requests_per_second, error: error.chomp, input_elements: raw_payload.size }

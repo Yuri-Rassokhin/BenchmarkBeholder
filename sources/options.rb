@@ -2,7 +2,7 @@ require 'optparse'
 
 class Options
 
-attr_reader :mode, :hosts, :workload
+attr_reader :mode, :hosts, :workload, :debug
 
 def initialize(logger, argv)
   @logger = logger
@@ -10,6 +10,7 @@ def initialize(logger, argv)
   @mode = "launch"
   @workload = nil
   @hooks = Dir.entries("./sources/hooks") - %w[. ..]
+  @debug = false
   options_parse(argv)
 end
 
@@ -30,6 +31,10 @@ def options_parse(argv)
     opts.on('-h', '--help', 'Show help') do
       opts.to_s.each_line { |line| @logger.info line.chomp }
       exit
+    end
+
+    opts.on('-d', '--debug', 'Output debugging information') do
+      @debug = true
     end
 
     opts.on('-p', '--projects', 'Show projects') do
