@@ -56,7 +56,7 @@ def iterate_parameters
 end
 
   require_relative 'input_parameters'
-  include Parameters
+  include InputParameters
 
 end
 CONFIG
@@ -230,7 +230,7 @@ File.open("#{srcdir}/launch.rb", "a") { |file| file.write(launch) }
 
 # template file for workload-specific parameters
 parameters = <<~PARAMETERS
-module Parameters
+module InputParameters
 
 # Parameter can be either VNum (for a single numeric value) or VStr (non-numeric values or lists of values)
 # Parameters should have data validation, the following validation apply.
@@ -246,13 +246,13 @@ module Parameters
 # ADD DEFINITIONS OF WORKLOAD-SPECIFIC STARTUP PARAMETERS
 def startup_parameters
   {
-    iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true)
   }
 end
 
 # ADD YOUR DEFINITIONS OF WORKLOAD-SPECIFIC ITERATABLE PARAMETERS
 def iterate_parameters
   {
+    iterate_schedulers: VStr.new(non_empty: true, comma_separated: true, iteratable: true)
   }
 end
 

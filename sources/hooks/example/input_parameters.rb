@@ -1,4 +1,4 @@
-module Parameters
+module InputParameters
 
 # ADD DEFINITIONS OF WORKLOAD-SPECIFIC STARTUP PARAMETERS
 def startup_parameters
