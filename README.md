@@ -34,5 +34,5 @@ BBH is invoked as the following:
 # Quick start
 
 * git clone the BenchmarkBeholder repo
-* ./bbh ./config/example.conf to grasp an idea of how it works
+* ./bbh ./config/example.conf to grasp the idea of how it works
 * After that, read through ./config/example.conf and start modifying it for your needs
