@@ -1,5 +1,6 @@
 {
 	"workload": {
+		"name": "dd",
 		"protocol": "file",
 		"actor": "dd",
 		"target": "/tmp",

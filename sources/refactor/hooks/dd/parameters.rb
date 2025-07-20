@@ -2,6 +2,7 @@
 SCHEMA = Dry::Schema.JSON do
 
   required(:workload).hash do
+    required(:name).filled(:string)
     required(:protocol).filled(:string, included_in?: %w[file http http])
     required(:actor).filled(:string)
     required(:target).filled(:string)

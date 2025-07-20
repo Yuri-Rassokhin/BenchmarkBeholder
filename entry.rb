@@ -1,4 +1,4 @@
 require_relative './sources/refactor/config.rb'
 
-config = Config.new("dd")
+config = Config.new("./workloads/dd.json")
 
