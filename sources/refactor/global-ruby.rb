@@ -12,50 +12,90 @@ module Global
 
     def initialize
       @method_hosts = {}        # method_name => текущий хост
-      @original_methods = {}    # method_name => { method: UnboundMethod|Method|Proc, context: Binding }
+      @original_methods = {}    # method_name => { method:, context:, body: }
       @@landed_methods = Set.new
     end
 
     def run(context, method, host, *args)
+      puts "DEBUG run: method=#{method.inspect}, host=#{host}, args=#{args.inspect}"
       execute_remotely(method, context, host, *args)
     end
 
     def land(context, target = nil, method_name, host)
       callable = method_name
+      puts "DEBUG land(before): callable=#{callable.inspect}, method_name=#{method_name}"
 
-      # ✅ Генерация уникального имени для Method/Proc
+      klass = target.nil? ? Object : target
+      is_original_method = callable.is_a?(Method)
+      original_method_obj = callable if is_original_method
+
+      # ✅ Генерация уникального имени
       unless method_name.is_a?(Symbol) || method_name.is_a?(String)
-        method_name = if callable.is_a?(Method)
-                        :"__global_#{callable.receiver.class.name.downcase}_#{callable.name}"
-                      else
-                        :"__global_callable_#{object_id}"
-                      end
+        if is_original_method
+          method_name = "__global_#{original_method_obj.receiver.class.name.downcase}_#{original_method_obj.name}".gsub(/\?/, '').to_sym
+        else
+          method_name = :"__global_callable_#{object_id}"
+        end
       end
 
+      puts "DEBUG land(after): method_name=#{method_name}"
       @method_hosts[method_name] = host
-      klass = target.nil? ? Object : target
 
-      # ✅ Сохраняем оригинальный метод один раз
+      # ✅ Создание временного метода для Method без исходника
+      if is_original_method && !@original_methods.key?(method_name)
+        if !klass.method_defined?(method_name)
+          body = <<~RUBY
+            def #{method_name}(*args)
+              #{original_method_obj.receiver}.#{original_method_obj.name}(*args)
+            end
+          RUBY
+          klass.class_eval(body)
+          puts "DEBUG: temporary method #{method_name} created in #{klass}"
+
+          @original_methods[method_name] = {
+            method: klass.instance_method(method_name),
+            context: context,
+            body: body
+          }
+        else
+          @original_methods[method_name] = {
+            method: klass.instance_method(method_name),
+            context: context,
+            body: ""
+          }
+        end
+      end
+
+      # ✅ Обычные методы / Proc
       unless @original_methods.key?(method_name)
         original_method =
           case callable
           when Symbol, String
-            klass.instance_method(callable.to_sym)
-          when Method, Proc
-            callable
+            klass.instance_method(method_name.to_sym)
+          when Proc
+            if callable.respond_to?(:source)
+              callable
+            else
+              klass.define_method(method_name, &callable)
+              klass.instance_method(method_name)
+            end
           else
-            raise TypeError, "#{callable.inspect} is not a symbol, string, Method, or Proc"
+            raise TypeError, "#{callable.inspect} is not a symbol, string, Method, or Proc" unless is_original_method
           end
 
-        @original_methods[method_name] = { method: original_method, context: context }
+        @original_methods[method_name] ||= {
+          method: original_method,
+          context: context,
+          body: ""
+        }
       end
 
-      # ✅ Также сохраняем зависимости один раз (только для символов/строк)
+      # ✅ Сохраняем зависимости (только для символов/строк)
       if callable.is_a?(Symbol) || callable.is_a?(String)
         full_dependency_chain(method_name.to_sym).each do |dependency|
           unless @original_methods.key?(dependency)
             method_obj = Object.instance_method(dependency)
-            @original_methods[dependency] = { method: method_obj, context: context }
+            @original_methods[dependency] = { method: method_obj, context: context, body: "" }
           end
         end
       end
@@ -63,6 +103,7 @@ module Global
       hub_instance = self
 
       klass.define_method(method_name) do |*args, &block|
+        puts "DEBUG: local method #{method_name} invoked with args=#{args.inspect}, sending to remote..."
         current_host = hub_instance.instance_variable_get(:@method_hosts)[method_name]
         remote_result = hub_instance.run(context, method_name, current_host, *args, &block)
 
@@ -74,18 +115,31 @@ module Global
         puts remote_result["output"] if remote_result["output"]
         remote_result["result"]
       end
+
+      puts "DEBUG land: method #{method_name} defined, ready for run!"
+      method_name
     end
 
     def run!(context, method_name, host, *args, target: nil)
-      land(context, target, method_name, host)
-      context.eval("#{method_name}(#{args.map(&:inspect).join(', ')})")
+      final_name = land(context, target, method_name, host)
+      puts "DEBUG run!: invoking #{final_name} via Object.send"
+      Object.send(final_name, *args)
+    rescue => e
+      puts "DEBUG run!: failed to invoke #{method_name} -> #{e.class}: #{e.message}"
+      raise
     end
 
     private
 
     def method_dependencies(method)
       return [] unless method.respond_to?(:source)
-      source = method.source
+      begin
+        source = method.source
+      rescue MethodSource::SourceNotFoundError
+        puts "DEBUG method_dependencies: dynamic method #{method}, skipping dependencies"
+        return []
+      end
+
       dependencies = []
       sexp = Ripper.sexp(source)
       traverse_sexp(sexp) do |node|
@@ -112,7 +166,7 @@ module Global
         begin
           method_obj = Object.instance_method(method_name)
           context = binding
-          @original_methods[method_name] = { method: method_obj, context: context }
+          @original_methods[method_name] = { method: method_obj, context: context, body: "" }
         rescue NameError
           return []
         end
@@ -120,11 +174,7 @@ module Global
 
       method_obj = @original_methods[method_name][:method]
       dependencies = method_dependencies(method_obj)
-
-      full_chain = dependencies.flat_map do |dependency|
-        full_dependency_chain(dependency, seen_methods)
-      end
-
+      full_chain = dependencies.flat_map { |dependency| full_dependency_chain(dependency, seen_methods) }
       [method_name] + full_chain.uniq
     end
 
@@ -134,7 +184,13 @@ module Global
       chain.each do |dependency|
         begin
           method_obj = @original_methods[dependency][:method]
-          result << method_obj.source + "\n" if method_obj.respond_to?(:source)
+          if method_obj.respond_to?(:source)
+            begin
+              result << method_obj.source + "\n"
+            rescue MethodSource::SourceNotFoundError
+              puts "DEBUG output_dependency_chain: no source for #{dependency}, skipping"
+            end
+          end
         rescue => e
           result << "# Error processing dependency #{dependency}: #{e.message}\n"
         end
@@ -143,35 +199,39 @@ module Global
     end
 
     def get_context_variables(context)
-      instance_vars = context.eval('instance_variables').map do |var|
-        [var, context.eval(var.to_s)]
-      end
-
+      instance_vars = context.eval('instance_variables').map { |var| [var, context.eval(var.to_s)] }
       class_vars = if context.eval('self').is_a?(Class) || context.eval('self').is_a?(Module)
-                     context.eval('self.class_variables').map do |var|
-                       [var, context.eval("self.class_variable_get(:#{var})")]
-                     end
+                     context.eval('self.class_variables').map { |var| [var, context.eval("self.class_variable_get(:#{var})")] }
                    else
                      []
                    end
-
       constants = if context.eval('self').is_a?(Class) || context.eval('self').is_a?(Module)
-                    context.eval('self.constants').map do |const|
-                      [const, context.eval("self.const_get(:#{const})")]
-                    end
+                    context.eval('self.constants').map { |const| [const, context.eval("self.const_get(:#{const})")] }
                   else
                     []
                   end
-
       (instance_vars + class_vars + constants).to_h
     end
 
     def serialize_method(method_name, caller_context)
       method_obj = @original_methods[method_name][:method]
       context = @original_methods[method_name][:context] || caller_context
+
+      method_body = ""
+      if method_obj.respond_to?(:source)
+        begin
+          method_body = method_obj.source
+        rescue MethodSource::SourceNotFoundError
+          puts "DEBUG serialize_method: dynamic method #{method_name}, using stored body"
+          method_body = @original_methods[method_name][:body] || ""
+        end
+      else
+        method_body = @original_methods[method_name][:body] || ""
+      end
+
       {
         method_name: method_name,
-        method_body: method_obj.respond_to?(:source) ? method_obj.source : "",
+        method_body: method_body,
         dependencies: get_context_variables(context)
       }.to_json
     end
@@ -186,6 +246,7 @@ module Global
     end
 
     def execute_remotely(method_name, context, host, *args)
+      puts "DEBUG execute_remotely: #{method_name}, args=#{args.inspect}"
       serialized_data = serialize_method(method_name, context)
       data = JSON.parse(serialized_data)
 
@@ -194,7 +255,7 @@ module Global
         deps << "#{key} = #{value.inspect}\n" if key.start_with?("@", "@@", "$")
       end
 
-      method_definitions = output_dependency_chain(method_name)
+      method_definitions = data["method_body"].to_s + "\n" + output_dependency_chain(method_name)
       serialized_args = args.map(&:inspect).join(", ")
 
       remote_script = <<~RUBY
@@ -204,7 +265,7 @@ module Global
         original_stdout = $stdout
         original_stderr = $stderr
         $stdout = output_stream
-        $stderr = output_stream
+        $stderr = $stderr
 
         begin
           #{deps}
@@ -215,7 +276,7 @@ module Global
           }
         ensure
           $stdout = original_stdout
-          $stderr = original_stderr
+          $stderr = $stderr
         end
 
         output = {
