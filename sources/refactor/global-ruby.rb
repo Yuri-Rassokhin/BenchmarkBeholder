@@ -12,7 +12,7 @@ module Global
 
     def initialize
       @method_hosts = {}        # method_name => текущий хост
-      @original_methods = {}    # method_name => { method: UnboundMethod, context: Binding }
+      @original_methods = {}    # method_name => { method: UnboundMethod|Method|Proc, context: Binding }
       @@landed_methods = Set.new
     end
 
@@ -21,27 +21,47 @@ module Global
     end
 
     def land(context, target = nil, method_name, host)
-      @method_hosts[method_name] = host
+      callable = method_name
 
+      # ✅ Генерация уникального имени для Method/Proc
+      unless method_name.is_a?(Symbol) || method_name.is_a?(String)
+        method_name = if callable.is_a?(Method)
+                        :"__global_#{callable.receiver.class.name.downcase}_#{callable.name}"
+                      else
+                        :"__global_callable_#{object_id}"
+                      end
+      end
+
+      @method_hosts[method_name] = host
       klass = target.nil? ? Object : target
 
-      # ✅ Сохраняем оригинал ТОЛЬКО один раз
+      # ✅ Сохраняем оригинальный метод один раз
       unless @original_methods.key?(method_name)
-        original_method = klass.instance_method(method_name)
+        original_method =
+          case callable
+          when Symbol, String
+            klass.instance_method(callable.to_sym)
+          when Method, Proc
+            callable
+          else
+            raise TypeError, "#{callable.inspect} is not a symbol, string, Method, or Proc"
+          end
+
         @original_methods[method_name] = { method: original_method, context: context }
       end
 
-      # ✅ Также сохраняем зависимости один раз
-      full_dependency_chain(method_name).each do |dependency|
-        unless @original_methods.key?(dependency)
-          method_obj = Object.instance_method(dependency)
-          @original_methods[dependency] = { method: method_obj, context: context }
+      # ✅ Также сохраняем зависимости один раз (только для символов/строк)
+      if callable.is_a?(Symbol) || callable.is_a?(String)
+        full_dependency_chain(method_name.to_sym).each do |dependency|
+          unless @original_methods.key?(dependency)
+            method_obj = Object.instance_method(dependency)
+            @original_methods[dependency] = { method: method_obj, context: context }
+          end
         end
       end
 
       hub_instance = self
 
-      # ✅ Каждый land переопределяет метод с актуальным хостом
       klass.define_method(method_name) do |*args, &block|
         current_host = hub_instance.instance_variable_get(:@method_hosts)[method_name]
         remote_result = hub_instance.run(context, method_name, current_host, *args, &block)
@@ -56,14 +76,15 @@ module Global
       end
     end
 
-  def run!(context, method_name, host, *args, target: nil)
-    land(context, target, method_name, host)
-    context.eval("#{method_name}(#{args.map(&:inspect).join(', ')})")
-  end
+    def run!(context, method_name, host, *args, target: nil)
+      land(context, target, method_name, host)
+      context.eval("#{method_name}(#{args.map(&:inspect).join(', ')})")
+    end
 
     private
 
     def method_dependencies(method)
+      return [] unless method.respond_to?(:source)
       source = method.source
       dependencies = []
       sexp = Ripper.sexp(source)
@@ -113,7 +134,7 @@ module Global
       chain.each do |dependency|
         begin
           method_obj = @original_methods[dependency][:method]
-          result << method_obj.source + "\n"
+          result << method_obj.source + "\n" if method_obj.respond_to?(:source)
         rescue => e
           result << "# Error processing dependency #{dependency}: #{e.message}\n"
         end
@@ -150,13 +171,13 @@ module Global
       context = @original_methods[method_name][:context] || caller_context
       {
         method_name: method_name,
-        method_body: method_obj.source,
+        method_body: method_obj.respond_to?(:source) ? method_obj.source : "",
         dependencies: get_context_variables(context)
       }.to_json
     end
 
     def add_parameter_to_method(method_body, new_param)
-      method_body.sub(/def\s+(\w+)(\(([^)]*)\))?/) do |match|
+      method_body.sub(/def\s+(\w+)(\(([^)]*)\))?/) do
         method_name = Regexp.last_match(1)
         params = Regexp.last_match(3) || ""
         updated_params = params.empty? ? new_param : "#{params}, #{new_param}"
@@ -231,6 +252,5 @@ module Global
   def self.run(context, host, method_name, *args, target: nil)
     Hub.instance.run!(context, method_name, host, *args, target: target)
   end
-
 end
 
