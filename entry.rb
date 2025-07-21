@@ -40,3 +40,6 @@ config[:infra] = { :hosts => options.hosts } # hosts to run workload
 
 Preparation.run(logger, config)
 
+target = Target.new(logger, config)
+
+

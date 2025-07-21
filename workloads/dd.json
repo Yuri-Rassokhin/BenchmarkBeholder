@@ -2,7 +2,7 @@
 	"workload": {
 		"name": "dd",
 		"actor": "dd",
-		"protocol": "file",
+		"protocol": "directory",
 		"target": "/tmp",
 		"iterations": 4
 	},

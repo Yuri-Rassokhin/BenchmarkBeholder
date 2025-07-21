@@ -31,6 +31,14 @@ def hosts
   get(:infra, :hosts)
 end
 
+def protocol
+  get(:workload, :protocol)
+end
+
+def target
+  get(:workload, :target)
+end
+
 def [](key)
   get(key)
 end

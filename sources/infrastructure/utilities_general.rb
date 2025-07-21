@@ -48,7 +48,7 @@ end
   end
 
   def file_exists?(file)
-    File.exist?(`which #{file}`.strip)
+    File.exist?(`which #{file.strip}`.strip)
   end
 
   def bbh_running?
