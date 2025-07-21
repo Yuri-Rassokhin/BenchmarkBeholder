@@ -42,8 +42,9 @@ end
 #    puts "[ " + status.to_s + ", #{output} ]"
 #  end
 
-  def actor_exists?(hook, file)
-    file_exists?("")
+  def actor_exists?(actor_file)
+    file = actor_file.strip
+    File.exist?("./hooks/#{actor_file}") || File.exist?(`which #{actor_file}`.strip)
   end
 
   def file_exists?(file)

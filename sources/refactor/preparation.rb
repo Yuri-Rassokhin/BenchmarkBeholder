@@ -52,7 +52,7 @@ end
 # B). system-wide using 'which'
 # This approach allows to flexibly use multiple specialized actors for one workload as well as a system actor
 def self.check_actor(logger, config)
-  logger.info "checking actor on benchmark hosts"
+  logger.info "checking actor on benchmark nodes"
   actor = config.actor
   config.hosts.each do |host|
     found = Global.run(binding, host, :actor_exists?, actor)
