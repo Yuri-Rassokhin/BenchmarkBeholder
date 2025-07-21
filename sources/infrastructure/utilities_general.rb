@@ -151,11 +151,11 @@ end
   end
 
   def cpu_idle()
-    `mpstat 1 1 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip
+    `mpstat 1 1 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
   def io_idle()
-    `mpstat | head -4 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip
+    `mpstat | head -4 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
 def get_filesystem_block_size(main_dev, filesystem)

@@ -10,6 +10,8 @@ def self.run(logger, config)
   self.check_another_instance(logger, config.hosts)
   self.check_dependencies(logger, config.hosts)
   self.check_actor(logger, config)
+  self.check_cpu_idle(logger, config)
+  self.check_storage_idle(logger, config)
 end
 
 private
@@ -57,6 +59,20 @@ def self.check_actor(logger, config)
   config.hosts.each do |host|
     found = Global.run(binding, host, :actor_exists?, actor)
     logger.error("actor '#{actor}' is missing on the node '#{host}'") if not found
+  end
+end
+
+def self.check_cpu_idle(logger, config)
+  logger.info "checking if CPU cores are idle on benchmark nodes"
+  config.hosts.each do |host|
+    logger.error("CPU utilization >= 10% on '#{host}', no good for benchmarking") if Global.run(binding, host, :cpu_idle) < 90
+  end
+end
+
+def self.check_storage_idle(logger, config)
+  logger.info "checking if IO subsystem is idle on benchmark nodes"
+  config.hosts.each do |host|
+    logger.error("IO utilization >= 10% on '#{host}', no good for benchmarking") if Global.run(binding, host, :io_idle) < 90
   end
 end
 
