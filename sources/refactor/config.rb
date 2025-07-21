@@ -3,10 +3,10 @@ require 'dry-validation'
 
 class Config
 
-def initialize(config_path)
-  @data = JSON.parse(File.read(config_path), symbolize_names: true)
-  @name = get(:workload, :name)
-  @schema = "./hooks/#{@name}/parameters.rb"
+def initialize(logger, config_path)
+  @logger = logger
+  @data = load_json(config_path)
+  @schema = "./hooks/#{name}/parameters.rb"
   result = check
   if !result.success?
       result.errors.each do |error|
@@ -14,12 +14,44 @@ def initialize(config_path)
       value = error.path.reduce(@data) do |acc, key|
         acc.is_a?(Hash) ? acc[key] : acc[key] rescue nil
       end
-      puts "Incorrect value '#{value}' in #{path}, #{error.text}"
+      @logger.msg "Incorrect value '#{value}' in #{path}, #{error.text}"
     end
   end
 end
 
+def name
+  get(:workload, :name)
+end
+
+def actor
+  get(:workload, :actor)
+end
+
+def hosts
+  get(:infra, :hosts)
+end
+
+def [](key)
+  get(key)
+end
+
+def []=(key, value)
+  @data[key] = value
+end
+
 private
+
+def load_json(path)
+  result = JSON.parse(File.read(path), symbolize_names: true)
+  rescue Errno::ENOENT
+    @logger.error "workload file '#{path}' not found"
+  rescue Errno::EACCESS
+    @logger.error "workload file '#{path}' not accessible"
+  rescue JSON::ParserError
+    @logger.error "workload file '#{path}' contains invalid JSON"
+
+  result
+end
 
 def check
   require_relative @schema
@@ -28,7 +60,7 @@ end
 
 def get(*keys)
   value = @data.dig(*keys)
-  raise "missing parameter #{keys.join('.')}" if value.nil?
+  @logger.error "missing configuration parameter '#{keys.join('.')}'" if value.nil?
   value
 end
 

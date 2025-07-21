@@ -3,7 +3,7 @@ require 'open3'
 require 'fileutils'
 require 'tempfile'
 
-module UtilitiesGeneral
+#module UtilitiesGeneral
 
   def oci_bucket_exists?(bucket_name, namespace)
     require 'oci'
@@ -41,6 +41,10 @@ end
 #  def out(status, output)
 #    puts "[ " + status.to_s + ", #{output} ]"
 #  end
+
+  def actor_exists?(hook, file)
+    file_exists?("")
+  end
 
   def file_exists?(file)
     File.exist?(`which #{file}`.strip)
@@ -284,5 +288,5 @@ end
 
 
 
-end
+#end
 
