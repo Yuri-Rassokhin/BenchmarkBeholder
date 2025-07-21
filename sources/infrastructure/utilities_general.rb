@@ -52,7 +52,7 @@ end
   end
 
   def bbh_running?
-    `ps ax | grep "ruby /tmp/remote_method_call.rb" | grep -v grep` != ""
+    not `ps ax | grep "ruby /tmp/remote_method_call.rb" | grep -v grep`.strip.empty?
   end
 
   def block_device_exists?(file)

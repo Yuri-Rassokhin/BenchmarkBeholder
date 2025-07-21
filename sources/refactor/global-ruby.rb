@@ -109,7 +109,9 @@ module Global
           context.eval("#{key} = #{value.inspect}") if key.start_with?("@")
         end
 
-        puts remote_result["output"] if remote_result["output"]
+        if remote_result["output"] && !remote_result["output"].strip.empty?
+          puts remote_result["output"]
+        end
         remote_result["result"]
       end
 
