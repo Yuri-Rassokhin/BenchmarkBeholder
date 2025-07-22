@@ -2,12 +2,60 @@ class Target
   attr_reader :target, :protocol
 
 def initialize(logger, config)
-  @logger = logger
-  @protocol = config.protocol
-  @target = config.target
-  @hosts = config.hosts
+  @logger, @protocol, @target, @hosts = logger, config.protocol, config.target, config.hosts
+  register # define all supported targets
+  check
+  @logger.info "target #{@protocol} '#{@target}' is healthy on all nodes"
+end
 
-  # nomenclature of all supported targets
+# TODO
+def supports_fs?
+  [ "file", "directory", "ram" ].include?(@protocol)
+end
+
+# TODO
+def has_device?
+  [ "file", "ram", "block" ].include?(@protocol)
+end
+
+def schedulers_apply?
+  [ "file", "block" ].include?(@protocol)
+end
+
+
+
+private
+
+def check
+  @logger.error "target protocol '#{@protocol}' is not supported" unless protocol_supported?(@protocol)
+  @logger.error "target is missing" unless @target
+
+  consistent_target
+
+  if schedulers_apply?
+    Schedule.prepare(logger, target, config.schedulers)
+    @logger.info "IO schedulers are consistent on all nodes"
+  end
+end
+
+def consistent_target
+  @hosts.each do |h|
+    case @protocol
+      when "file"
+        @logger.error "target '#{@target}' mismatch on '#{h}', regular file expected" unless Global.run(binding, h, File.method(:exist?), @target)
+      when "directory"
+        @logger.error "target '#{@target}' mismatch on '#{h}', directory expected" unless Global.run(binding, h, File.method(:directory?), @target)
+      when "block"
+        @logger.error "target '#{@target}' mismatch on '#{h}', block device expected" unless Global.run(binding, h, File.method(:blockdev?), @target)
+      when "ram", "gpu", "http", "cpu", "object", "bucket"
+        @logger.warn "this target is NOT yet checked properly"
+      else
+        @logger.error "unsupported target: '#{File.stat(@config.target)}'"
+      end
+    end
+end
+
+def register
   @SUPPORTED = [
     { protocol: "file", description: "regular local file" },
     { protocol: "directory", description: "mount point" },
@@ -19,62 +67,11 @@ def initialize(logger, config)
     { protocol: "object", description: "single object in object storage" },
     { protocol: "bucket", description: "bucket of objects in object storage" }
   ]
-
-  @logger.error "target protocol '#{@protocol}' is not supported" unless supported?(@protocol)
-  @logger.error "target is missing" unless @target
-  @logger.error "protocol '#{@protocol}' doesn't correspond to target '#{@target}'" unless check_target_type
-  @logger.info "target #{@protocol}://#{@target} is healthy on all nodes" if exist_everywhere?
-
-  if schedulers_apply?
-    @logger.info "checking IO schedulers on benchmark nodes"
-    Schedule.prepare(logger, target, config.schedulers)
-  end
-
 end
 
-def supports_fs?
-  [ "file", "directory", "ram" ].include?(@protocol)
-end
-
-def has_device?
-  [ "file", "ram", "block" ].include?(@protocol)
-end
-
-def exist_everywhere?
-  case @protocol
-  when "file", "directory", "block"
-    @hosts.each { |h| logger.error "target '#{@target}' is missing on the node '#{h}'" unless Global.run(binding, h, File.method(:exist?), @target) }
-    # TODO: check if FS is determined:   @logger.error("unsupported filesystem on '#{host}'") if supports_fs? and !@agent.run(host, :get_filesystem, @target)
-    # TODO: check if 
-  else
-    puts "TODO: yet to implement"
-  end
-  true
-end
-
-def schedulers_apply?
-  [ "file", "block" ].include?(@protocol)
-end
-
-
-
-private
-
-def supported?(target_protocol)
+def protocol_supported?(target_protocol)
   @SUPPORTED.each { |target| return true if target[:protocol] == target_protocol }
   false
-end
-
-def check_target_type
-  case @protocol
-  when "file"
-    File.file?(@target)
-  when "directory"
-    File.directory?(@target)
-  when "block"
-    File.blockdev?(@target)
-  end
-  true
 end
 
 end

@@ -7,7 +7,7 @@
 		"iterations": 4
 	},
 	"parameters": {
-		"schedulers": [ "none", "kyber", "bfq", "deadline-mq" ],
+		"schedulers": [ "none", "kyber", "bfq" ],
 		"size": [ 4096, 65536, 262144 ],
 		"operations": [ "read", "write", "randread", "randwrite" ]
 	}

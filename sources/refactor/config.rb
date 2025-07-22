@@ -66,7 +66,7 @@ def check_schema
       value = error.path.reduce(@data) do |acc, key|
         acc.is_a?(Hash) ? acc[key] : acc[key] rescue nil
       end
-      @logger.msg "Incorrect value '#{value}' in #{path}, #{error.text}"
+      @logger.error "Incorrect value '#{value}' in #{path}, #{error.text}"
     end
   end
 end
