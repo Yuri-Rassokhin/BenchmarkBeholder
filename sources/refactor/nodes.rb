@@ -1,10 +1,10 @@
 
-module Preparation
+module Nodes
   module_function
 
   require './sources/infrastructure/utilities_general.rb'
 
-def self.run(logger, config)
+def self.check(logger, config)
   self.check_hook(logger, config.name)
   self.check_ssh_persistance(logger)
   self.check_another_instance(logger, config.hosts)

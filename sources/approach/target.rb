@@ -23,10 +23,15 @@ def initialize(logger, config)
   @logger.error "target protocol '#{@protocol}' is not supported" unless supported?(@protocol)
   @logger.error "target is missing" unless @target
   @logger.error "protocol '#{@protocol}' doesn't correspond to target '#{@target}'" unless check_target_type
-  exist_everywhere?
-  @logger.info "target #{@protocol}://#{@target} is healthy on all nodes"
+  @logger.info "target #{@protocol}://#{@target} is healthy on all nodes" if exist_everywhere?
+
+  if schedulers_apply?
+    @logger.info "checking IO schedulers on benchmark nodes"
+    Schedule.prepare(logger, target, config.schedulers)
+  end
+
 end
-   
+
 def supports_fs?
   [ "file", "directory", "ram" ].include?(@protocol)
 end
@@ -44,9 +49,10 @@ def exist_everywhere?
   else
     puts "TODO: yet to implement"
   end
+  true
 end
 
-def io_schedulers_apply?
+def schedulers_apply?
   [ "file", "block" ].include?(@protocol)
 end
 

@@ -7,16 +7,7 @@ def initialize(logger, config_path)
   @logger = logger
   @data = load_json(config_path)
   @schema = "./hooks/#{name}/parameters.rb"
-  result = check
-  if !result.success?
-      result.errors.each do |error|
-      path = error.path.reject { |p| p.is_a?(Integer) }.join('.')
-      value = error.path.reduce(@data) do |acc, key|
-        acc.is_a?(Hash) ? acc[key] : acc[key] rescue nil
-      end
-      @logger.msg "Incorrect value '#{value}' in #{path}, #{error.text}"
-    end
-  end
+  check_schema
 end
 
 def name
@@ -37,6 +28,10 @@ end
 
 def target
   get(:workload, :target)
+end
+
+def schedulers
+  get(:parameters, :schedulers)
 end
 
 def [](key)
@@ -61,9 +56,19 @@ def load_json(path)
   result
 end
 
-def check
-  require_relative @schema
-  SCHEMA.call(@data)
+def check_schema
+  require_relative @schema # load semantic schema of parameters
+  result = SCHEMA.call(@data) # apply the schema
+
+  if !result.success?
+    result.errors.each do |error|
+      path = error.path.reject { |p| p.is_a?(Integer) }.join('.')
+      value = error.path.reduce(@data) do |acc, key|
+        acc.is_a?(Hash) ? acc[key] : acc[key] rescue nil
+      end
+      @logger.msg "Incorrect value '#{value}' in #{path}, #{error.text}"
+    end
+  end
 end
 
 def get(*keys)

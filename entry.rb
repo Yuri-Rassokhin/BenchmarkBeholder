@@ -18,7 +18,8 @@ require './sources/launch.rb'
 require './sources/misc/ssh_sharing.rb'
 
 require_relative './sources/refactor/config.rb'
-require_relative './sources/refactor/preparation.rb'
+require_relative './sources/refactor/head.rb'
+require_relative './sources/refactor/nodes.rb'
 require_relative './sources/refactor/global-ruby.rb'
 
 
@@ -28,18 +29,20 @@ series = Time.now.to_i.to_s # start counting total processing time
 logger = CustomLogger.new(series) # logger for the entire application
 options = Options.new(logger, ARGV) # parse CLI options
 
-if options.mode == "user"
-  database = Database.new(logger)
-  database.user_manage(options.user)
-  exit 0
-end
+#if options.mode == "user"
+#  database = Database.new(logger)
+#  database.user_manage(options.user)
+#  exit 0
+#end
 
 config = Config.new(logger, options.workload) # parse the workload configuration file
-options.check_hook(config.name) # check if hooks directory exists and contains mandatory files
-config[:infra] = { :hosts => options.hosts } # hosts to run workload
+config[:infra] = { :hosts => options.hosts } # add benchmark nodes from CLI
 
-Preparation.run(logger, config)
+Head.check(logger, config) # head node checks such as consistent hook files
+Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
 
 target = Target.new(logger, config)
 
+#database = Database.new(logger)
+#database.table_set(config.name)
 
