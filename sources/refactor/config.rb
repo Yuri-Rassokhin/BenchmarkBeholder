@@ -18,6 +18,10 @@ def actor
   get(:workload, :actor)
 end
 
+def iterations
+  get(:workload, :iterations)
+end
+
 def hosts
   get(:infra, :hosts)
 end
@@ -31,7 +35,11 @@ def target
 end
 
 def schedulers
-  get(:parameters, :schedulers)
+  get(:parameters, :scheduler)
+end
+
+def parameters
+  get(:parameters)
 end
 
 def [](key)

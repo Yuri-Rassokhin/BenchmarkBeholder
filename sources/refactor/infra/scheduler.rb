@@ -1,13 +1,12 @@
+module Scheduler
 
-module Schedule
-
-def self.prepare(logger, target, config_schedulers)
-  conf_schedulers = Set.new(config_schedulers)
-
-  target.hosts.each do |host|
-    host_schedulers = Set.new(Global.run(binding, host, :schedulers).split)
+def self.prepare(logger, config)
+  conf_schedulers = Set.new(config.schedulers)
+  config.hosts.each do |host|
+    host_schedulers = Set.new(Global.run(binding, host, Scheduler.method(:schedulers)).split)
     diff = conf_schedulers ^ host_schedulers
-    logger.error "IO scheduler(s) '#{diff.join(", ")}' differ from config on '#{host}'" unless diff == {}
+    logger.error "IO scheduler(s) '#{diff.join(", ")}' differ from config on '#{host}'" unless diff.empty?
+
   end
 end
 
@@ -18,4 +17,3 @@ def self.schedulers
 end
 
 end
-

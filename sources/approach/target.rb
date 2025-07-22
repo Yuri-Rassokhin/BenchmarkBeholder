@@ -1,10 +1,12 @@
+require_relative '../refactor/infra/scheduler'
+
 class Target
   attr_reader :target, :protocol
 
 def initialize(logger, config)
   @logger, @protocol, @target, @hosts = logger, config.protocol, config.target, config.hosts
   register # define all supported targets
-  check
+  check(logger, config)
   @logger.info "target #{@protocol} '#{@target}' is healthy on all nodes"
 end
 
@@ -26,15 +28,15 @@ end
 
 private
 
-def check
-  @logger.error "target protocol '#{@protocol}' is not supported" unless protocol_supported?(@protocol)
-  @logger.error "target is missing" unless @target
+def check(logger, config)
+  logger.error "target protocol '#{@protocol}' is not supported" unless protocol_supported?(@protocol)
+  logger.error "target is missing" unless @target
 
   consistent_target
 
   if schedulers_apply?
-    Schedule.prepare(logger, target, config.schedulers)
-    @logger.info "IO schedulers are consistent on all nodes"
+    Scheduler.prepare(logger, config)
+    logger.info "IO schedulers are consistent on all nodes"
   end
 end
 

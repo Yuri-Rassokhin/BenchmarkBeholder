@@ -2,14 +2,14 @@
 	"workload": {
 		"name": "dd",
 		"actor": "dd",
-		"protocol": "directory",
-		"target": "/tmp",
+		"protocol": "file",
+		"target": "/tmp/dump",
 		"iterations": 4
 	},
 	"parameters": {
-		"schedulers": [ "none", "kyber", "bfq" ],
+		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],
 		"size": [ 4096, 65536, 262144 ],
-		"operations": [ "read", "write", "randread", "randwrite" ]
+		"operation": [ "read", "write", "randread", "randwrite" ]
 	}
 }
 
