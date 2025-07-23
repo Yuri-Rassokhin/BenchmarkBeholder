@@ -19,23 +19,23 @@ def setup
       when "write", "randwrite"
         flow = "if=/dev/zero of=#{@config.target}"
     end
-    "#{@config.actor} #{flow} bs=#{v.size} count=#{v.count}"
+    "#{@config.actor} #{flow} bs=#{v.size} count=#{v.count}".strip
   end
 
   self.func(:add, :result, hide: true) do |v|
-    result = Global.run(binding, v.host, proc { `#{v.command} 2>&1`.strip })
+    result = Global.run(binding, v.host, proc { `#{v.command} 2>&1>/dev/null`.strip })
   end
 
   self.func(:add, :error) do |v|
-    Global.run(binding, v.host, proc { `echo "#{result.gsub(/\s+/, ' ')}" | grep error`.strip})
+    `echo "#{result}" | grep error`.strip
   end
 
   self.func(:add, :bandwidth) do |v|
-    Global.run(binding, v.host, proc { `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f })
+    `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
   end
 
   self.func(:add, :units) do |v|
-    Global.run(binding, v.host, proc { `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip })
+    `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
   end
 end
 
