@@ -41,15 +41,10 @@ logger.info "parameter unique combinations: #{space.size}"
 logger.info "iterations for each combination: #{config.iterations}"
 logger.info "total benchmark invocations: #{space.size * config.iterations}"
 
-#options.hosts.each do |h|
-#  puts "HERE"
-# WRONG  Global.land(binding, nil, space.method(:func), h)
-# WRONG  Global.run(binding, h, :func, :run)
 #  Global.run(binding, h, space.method(:func), :run)
-#end
 
 space.func(:run)
 
 space.output(format: :csv, file: "./bbh-#{config.name}-#{series}-result.csv")
-space.output(colorize: true)
+space.output(colorize: true, align: true)
 

@@ -22,7 +22,6 @@ module Global
 
     def run(context, method, host, *args)
 #      puts "DEBUG run: method=#{method.inspect}, host=#{host}, args=#{args.inspect}"
-      puts "METHOD: #{method}, ARGS: #{args}"
       execute_remotely(method, context, host, *args)
     end
 
