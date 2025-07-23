@@ -27,7 +27,6 @@ module Global
     end
 
     def land(context, target = nil, method_name, host)
-      puts "LAND: #{host}"
       callable = method_name
 #      puts "DEBUG land(before): callable=#{callable.inspect}, method_name=#{method_name}"
 
@@ -75,23 +74,32 @@ module Global
 
       # ✅ Для обычных методов сохраняем ссылку
       unless @original_methods.key?(method_name)
-        original_method =
-          case callable
-          when Symbol, String
-            klass.instance_method(method_name.to_sym)
-          when Proc
-            if callable.respond_to?(:source)
-              callable
-            else
-              klass.define_method(method_name, &callable)
-              klass.instance_method(method_name)
-            end
-          when Method
-            is_original_method ? (klass == Object ? original_method_obj.unbind : klass.instance_method(method_name)) : nil
-          else
-            raise TypeError, "#{callable.inspect} is not a symbol, string, Method, or Proc"
-          end
+original_method =
+  case callable
+  when Symbol, String
+    klass.instance_method(method_name.to_sym)
+  when Proc
+  # Явно создаём метод в GlobalTemp
+  unless klass.method_defined?(method_name)
+    klass.module_eval do
+      define_method(method_name, &callable)
+      module_function method_name
+    end
+  end
 
+  m = klass.instance_method(method_name)
+  @original_methods[method_name] ||= {
+    method: m,
+    context: context,
+    body: (callable.respond_to?(:source) && callable.source rescue "")
+  }
+  m
+
+  when Method
+    is_original_method ? (klass == Object ? original_method_obj.unbind : klass.instance_method(method_name)) : nil
+  else
+    raise TypeError, "#{callable.inspect} is not a symbol, string, Method, or Proc"
+  end
         @original_methods[method_name] ||= {
           method: original_method,
           context: context,
