@@ -23,7 +23,7 @@ def iterations
 end
 
 def hosts
-  get(:infra, :hosts)
+  get(:parameters, :host)
 end
 
 def protocol

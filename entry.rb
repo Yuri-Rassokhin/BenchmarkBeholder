@@ -27,8 +27,8 @@ logger = CustomLogger.new(series) # logger for the entire application
 options = Options.new(logger, ARGV) # parse CLI options
 
 config = Config.new(logger, options.workload) # parse the workload configuration file
-config[:infra] = { :hosts => options.hosts } # add benchmark nodes from CLI
-
+config[:parameters][:host] = options.hosts # add benchmark nodes from CLI
+config[:parameters][:series] = series
 Head.check(logger, config) # head node checks such as consistent hook files
 Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
 
@@ -41,5 +41,5 @@ logger.info "iterations for each combination: #{config.iterations}"
 logger.info "total benchmark invocations: #{space.size * config.iterations}"
 
 space.func(:run, progress: true, title: "[ DO ]")
-space.output(align: true, format: :csv, file: "./result.csv")
+space.output(format: :csv, file: "./result.csv")
 
