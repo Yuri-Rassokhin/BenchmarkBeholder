@@ -28,7 +28,8 @@ options = Options.new(logger, ARGV) # parse CLI options
 
 config = Config.new(logger, options.workload) # parse the workload configuration file
 config[:parameters][:host] = options.hosts # add benchmark nodes from CLI
-config[:parameters][:series] = series
+config[:parameters][:series] = series # add unique series ID
+
 Head.check(logger, config) # head node checks such as consistent hook files
 Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
 
@@ -40,6 +41,15 @@ logger.info "parameter unique combinations: #{space.size}"
 logger.info "iterations for each combination: #{config.iterations}"
 logger.info "total benchmark invocations: #{space.size * config.iterations}"
 
-space.func(:run, progress: true, title: "[ DO ]")
-space.output(format: :csv, file: "./result.csv")
+#options.hosts.each do |h|
+#  puts "HERE"
+# WRONG  Global.land(binding, nil, space.method(:func), h)
+# WRONG  Global.run(binding, h, :func, :run)
+#  Global.run(binding, h, space.method(:func), :run)
+#end
+
+space.func(:run)
+
+space.output(format: :csv, file: "./bbh-#{config.name}-#{series}-result.csv")
+space.output(colorize: true)
 

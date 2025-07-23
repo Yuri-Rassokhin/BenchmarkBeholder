@@ -22,10 +22,12 @@ module Global
 
     def run(context, method, host, *args)
 #      puts "DEBUG run: method=#{method.inspect}, host=#{host}, args=#{args.inspect}"
+      puts "METHOD: #{method}, ARGS: #{args}"
       execute_remotely(method, context, host, *args)
     end
 
     def land(context, target = nil, method_name, host)
+      puts "LAND: #{host}"
       callable = method_name
 #      puts "DEBUG land(before): callable=#{callable.inspect}, method_name=#{method_name}"
 

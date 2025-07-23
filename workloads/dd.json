@@ -9,7 +9,7 @@
 	"parameters": {
 		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],
 		"size": [ 4096, 65536, 262144 ],
-		"operation": [ "read", "write", "randread", "randwrite" ]
+		"operation": [ "read", "write" ]
 	}
 }
 
