@@ -4,12 +4,10 @@ require 'fileutils'
 require 'open3'
 require 'tempfile'
 require 'date'
-require 'net/http'
 
 require 'flex-cartesian'
 
 require './sources/infrastructure/utilities_general.rb'
-require './sources/logger.rb'
 require './sources/options.rb'
 require './sources/approach/target.rb'
 require './sources/misc/ssh_sharing.rb'
@@ -19,11 +17,13 @@ require_relative './sources/refactor/head.rb'
 require_relative './sources/refactor/nodes.rb'
 require_relative './sources/refactor/global-ruby.rb'
 require_relative './sources/refactor/launcher.rb'
-
+require_relative './sources/log.rb'
 
 series = Time.now.to_i.to_s # start counting total processing time
 
-logger = CustomLogger.new(series) # logger for the entire application
+logger = Log.new # logger for the entire application
+logger.info "Starting series #{series}"
+
 options = Options.new(logger, ARGV) # parse CLI options
 
 config = Config.new(logger, options.workload) # parse the workload configuration file
