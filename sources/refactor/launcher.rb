@@ -1,9 +1,11 @@
+
 class Launcher < FlexCartesian
   
-def initialize(logger, config)
+def initialize(logger, config, target)
   super(config.parameters)
   @logger = logger
   @config = config
+  @target = target
   setup
 end
 
@@ -23,6 +25,7 @@ def setup
   end
 
   self.func(:add, :result, hide: true) do |v|
+# TODO    Schedule.apply
     result = Global.run(binding, v.host, proc { `#{v.command} 2>&1>/dev/null`.strip })
   end
 
@@ -37,6 +40,13 @@ def setup
   self.func(:add, :units) do |v|
     `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
   end
+
+  self.func(:add, :platform) { |v| @target.infra[v.host][:platform] }
+  self.func(:add, :shape) { |v| @target.infra[v.host][:shape] }
+  self.func(:add, :device) { |v| @target.infra[v.host][:device] }
+  self.func(:add, :filesystem) { |v| @target.infra[v.host][:filesystem] }
+  self.func(:add, :type) { |v| @target.infra[v.host][:type] }
+  self.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
 end
 
 end

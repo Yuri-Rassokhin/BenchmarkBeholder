@@ -1,12 +1,14 @@
 require_relative '../refactor/infra/scheduler'
+require_relative '../refactor/infra/platform'
 
 class Target
-  attr_reader :target, :protocol
+  attr_reader :target, :protocol, :infra
 
 def initialize(logger, config)
-  @logger, @protocol, @target, @hosts = logger, config.protocol, config.target, config.hosts
+  @config, @logger, @protocol, @target, @hosts = config, logger, config.protocol, config.target, config.hosts
   register # define all supported targets
   check(logger, config)
+  @infra = infra_initialize
   @logger.info "target #{@protocol} '#{@target}' is healthy on all nodes"
 end
 
@@ -74,6 +76,12 @@ end
 def protocol_supported?(target_protocol)
   @SUPPORTED.each { |target| return true if target[:protocol] == target_protocol }
   false
+end
+
+def infra_initialize
+  result = {}
+  @hosts.each { |h| result[h] = Global.run(binding, h, Platform.method(:platform_collect), @config.target, has_device?) }
+  result
 end
 
 end

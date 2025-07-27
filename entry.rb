@@ -35,7 +35,7 @@ Nodes.check(logger, config) # benchmark node checks such as SSH availability, ac
 
 target = Target.new(logger, config)
 
-space = Launcher.new(logger, config)
+space = Launcher.new(logger, config, target)
 
 logger.info "parameter unique combinations: #{space.size}"
 logger.info "iterations for each combination: #{config.iterations}"
@@ -45,6 +45,8 @@ logger.info "total benchmark invocations: #{space.size * config.iterations}"
 
 space.func(:run)
 
-space.output(format: :csv, file: "./bbh-#{config.name}-#{series}-result.csv")
+logger.info "Series #{series} completed"
+
+#space.output(format: :csv, file: "./bbh-#{config.name}-#{series}-result.csv")
 space.output(colorize: true, align: true)
 

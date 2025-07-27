@@ -10,6 +10,10 @@ def self.prepare(logger, config)
   end
 end
 
+def self.switch(logger, scheduler)
+  #TODO
+end
+
 private
 
 def self.schedulers
