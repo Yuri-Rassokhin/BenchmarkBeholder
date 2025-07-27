@@ -11,6 +11,24 @@ end
 
 private
 
+def convert_to_gbps(bandwidth, units)
+  case units
+  when "kB/s"
+    bandwidth = bandwidth / 1024 / 1024
+  when "MB/s"
+    bandwidth = bandwidth / 1024
+  when "GB/s"
+    bandwidth = bandwidth
+  when "TB/s"
+    bandwidth = bandwidth * 1024
+  when "PB/s"
+    bandwidth = bandwidth * 1024 * 1024
+  else
+    @logger.error "failed to convert to GB/s: #{bandwidth} #{units}"
+  end
+  bandwidth.round(4)
+end
+
 def setup
   result = ""
 
@@ -34,11 +52,13 @@ def setup
   end
 
   self.func(:add, :bandwidth) do |v|
-    `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
+    bw = `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
+    units = `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
+    convert_to_gbps(bw, units)
   end
 
   self.func(:add, :units) do |v|
-    `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
+    "GB/s"
   end
 
   self.func(:add, :platform) { |v| @target.infra[v.host][:platform] }
