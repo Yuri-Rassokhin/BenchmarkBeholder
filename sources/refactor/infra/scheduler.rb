@@ -10,11 +10,23 @@ def self.prepare(logger, config)
   end
 end
 
-def self.switch(logger, scheduler)
-  #TODO
+def self.switch(logger, scheduler, volumes)
+  volumes.each do |v|
+    begin
+      `sudo bash -c "echo #{scheduler} > /sys/block/#{base_device(v)}/queue/scheduler"`
+    rescue => e
+      logger.error("Failed to switch IO scheduler for #{v}: #{e.message}")
+    end
+  end
 end
 
 private
+
+def self.base_device(dev_path)
+  dev = File.basename(dev_path) # sda3
+  link = File.readlink("/sys/class/block/#{dev}") # "../../block/sda/sda3"
+  link.split("/")[-2] # => "sda"
+end
 
 def self.schedulers
   `cat /sys/block/sda/queue/scheduler`.strip.gsub(/[\[\]]/, '')

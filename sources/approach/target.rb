@@ -12,12 +12,10 @@ def initialize(logger, config)
   @logger.info "target #{@protocol} '#{@target}' is healthy on all nodes"
 end
 
-# TODO
 def supports_fs?
   [ "file", "directory", "ram" ].include?(@protocol)
 end
 
-# TODO
 def has_device?
   [ "file", "ram", "block" ].include?(@protocol)
 end
