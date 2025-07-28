@@ -24,7 +24,7 @@ def convert_to_gbps(bandwidth, units)
   when "PB/s"
     bandwidth = bandwidth * 1024 * 1024
   else
-    @logger.error "failed to convert to GB/s: #{bandwidth} #{units}"
+    @logger.error "unsupported units #{units}"
   end
   bandwidth.round(4)
 end
