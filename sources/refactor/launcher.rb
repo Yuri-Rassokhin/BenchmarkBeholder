@@ -44,12 +44,10 @@ def setup
   self.func(:add, :bandwidth) do |v|
     bw = `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
     units = `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
-    Utilities.convert_units(@logger, bw, units, "GB")
+    Utilities.convert_units(@logger, bw, from: units, to: v.units, precision: @config[:workload][:precision])
   end
 
-  self.func(:add, :units) do |v|
-    "GB/s"
-  end
+  self.func(:add, :units) { @config[:workload][:units] }
 
   self.func(:add, :platform) { |v| @target.infra[v.host][:platform] }
   self.func(:add, :shape) { |v| @target.infra[v.host][:shape] }

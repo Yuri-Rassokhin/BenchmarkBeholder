@@ -8,6 +8,8 @@ SCHEMA = Dry::Schema.JSON do
     required(:target).filled(:string)
     required(:iterations).filled(:integer, gt?: 0)
     required(:total_size).filled(:integer, gt?: 0)
+    required(:units).filled(:string)
+    required(:precision).filled(:integer, gt?: 0)
   end
 
   required(:parameters).hash do
