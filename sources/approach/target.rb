@@ -78,7 +78,7 @@ end
 
 def infra_initialize
   result = {}
-  @hosts.each { |h| result[h] = Global.run(binding, h, Platform.method(:platform_collect), @config.target, has_device?) }
+  @hosts.each { |h| result[h] = Global.run(binding, h, Platform.method(:platform_collect), @logger, @config.target, has_device?) }
   result
 end
 
