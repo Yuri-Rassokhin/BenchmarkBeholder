@@ -2,7 +2,7 @@
 class Launcher < FlexCartesian
   
 def initialize(logger, config, target)
-  super(config.parameters)
+  super(config.parameters.merge!({ iteration: (1..config[:workload][:iterations]).to_a}))
   @logger = logger
   @config = config
   @target = target
@@ -37,15 +37,14 @@ end
 def setup
   result = ""
   counter = 1
-  total = self.size * @config.iterations
+  total = self.size
 
   self.func(:add, :command) do |v|
     @logger.info "invocation #{counter} of #{total}: #{puts_dimensions(v)}"
-    counter += 1
     case v.operation
-      when "read", "randread"
+      when "read"
         flow = "if=#{@config.target} of=/dev/null"
-      when "write", "randwrite"
+      when "write"
         flow = "if=/dev/zero of=#{@config.target}"
     end
     "#{@config.actor} #{flow} bs=#{v.size} count=#{(@config[:workload][:total_size]/v.size).to_i}".strip
@@ -54,6 +53,7 @@ def setup
   self.func(:add, :result, hide: true) do |v|
     Scheduler.switch(@logger, v.scheduler, @target.infra[v.host][:volumes])
     result = Global.run(binding, v.host, proc { `#{v.command} 2>&1>/dev/null`.strip })
+    counter += 1
   end
 
   self.func(:add, :error) do |v|

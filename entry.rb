@@ -38,8 +38,6 @@ target = Target.new(logger, config)
 space = Launcher.new(logger, config, target)
 
 logger.info "parameter unique combinations: #{space.size}"
-logger.info "iterations for each combination: #{config.iterations}"
-logger.info "total benchmark invocations: #{space.size * config.iterations}"
 
 #  Global.run(binding, h, space.method(:func), :run)
 
