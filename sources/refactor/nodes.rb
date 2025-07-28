@@ -29,21 +29,21 @@ def self.check_ssh_persistance(logger)
 end
 
 def self.check_ssh_availability(logger, hosts)
-  logger.info "checking SSH availability of benchmark node(s)"
+  logger.info "checking SSH availability of benchmark nodes"
   hosts.each do |host|
     logger.error("#{agent.error}") if !agent.available?(host)
   end
 end
 
 def self.check_another_instance(logger, hosts)
-  logger.info "checking if another BBH instance is running on benchmark node(s)"
+  logger.info "checking if another BBH instance is running on benchmark nodes"
   hosts.each do |host|
     logger.error("another instance of BBH is running on '#{host}'") if Global.run(binding, host, :bbh_running?)
   end
 end
 
 def self.check_dependencies(logger, hosts)
-  logger.info "checking dependencies on benchmark node(s)"
+  logger.info "checking dependencies on benchmark nodes"
   hosts.each do |host|
     [ "ruby", "curl", "mpstat", "iostat" ].each { |tool| logger.error("'#{tool}' is missing ") if not Global.run(binding, host, :file_exists?, "#{tool}") }
   end
