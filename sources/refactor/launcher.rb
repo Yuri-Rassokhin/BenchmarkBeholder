@@ -54,7 +54,7 @@ def setup
   self.func(:add, :device) { |v| @target.infra[v.host][:device] }
   self.func(:add, :fs) { |v| @target.infra[v.host][:filesystem] }
   self.func(:add, :fs_block_size) { |v| @target.infra[v.host][:filesystem_block_size] }
-  self.func(:add, :fs_mount_options) { |v| @target.infra[v.host][:filesystem_mount_options] }
+  self.func(:add, :fs_mount_options) { |v| "\"#{@target.infra[v.host][:filesystem_mount_options]}\"" }
   self.func(:add, :type) { |v| @target.infra[v.host][:type] }
   self.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
   self.func(:add, :kernel) { |v| @target.infra[v.host][:kernel] }
