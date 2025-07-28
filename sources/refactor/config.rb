@@ -56,7 +56,7 @@ def load_json(path)
   result = JSON.parse(File.read(path), symbolize_names: true)
   rescue Errno::ENOENT
     @logger.error "workload file '#{path}' not found"
-  rescue Errno::EACCESS
+  rescue Errno::EACCES
     @logger.error "workload file '#{path}' not accessible"
   rescue JSON::ParserError
     @logger.error "workload file '#{path}' contains invalid JSON"
