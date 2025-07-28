@@ -36,11 +36,15 @@ end
 
 def setup
   result = ""
-  counter = 1
+  counter = 0
   total = self.size
 
-  self.func(:add, :command) do |v|
+  self.func(:add, :counter, hide: true) do |v|
+    counter += 1
     @logger.info "invocation #{counter} of #{total}: #{puts_dimensions(v)}"
+  end
+
+  self.func(:add, :command) do |v|
     case v.operation
       when "read"
         flow = "if=#{@config.target} of=/dev/null"
@@ -53,7 +57,6 @@ def setup
   self.func(:add, :result, hide: true) do |v|
     Scheduler.switch(@logger, v.scheduler, @target.infra[v.host][:volumes])
     result = Global.run(binding, v.host, proc { `#{v.command} 2>&1>/dev/null`.strip })
-    counter += 1
   end
 
   self.func(:add, :error) do |v|

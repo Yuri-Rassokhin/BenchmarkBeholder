@@ -45,6 +45,6 @@ space.func(:run)
 
 logger.info "Series #{series} completed"
 
-#space.output(format: :csv, file: "./bbh-#{config.name}-#{series}-result.csv")
+space.output(format: :csv, file: "./log/bbh-#{config.name}-#{series}-result.csv")
 space.output(colorize: true, align: true)
 
