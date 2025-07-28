@@ -29,17 +29,26 @@ def convert_to_gbps(bandwidth, units)
   bandwidth.round(4)
 end
 
+def puts_dimensions(obj)
+  return obj.inspect unless obj.is_a?(Struct)
+  obj.each_pair.map { |k, v| "#{k}=#{v}" }.join(', ')
+end
+
 def setup
   result = ""
+  counter = 1
+  total = self.size * @config.iterations
 
   self.func(:add, :command) do |v|
+    @logger.info "invocation #{counter} of #{total}: #{puts_dimensions(v)}"
+    counter += 1
     case v.operation
       when "read", "randread"
         flow = "if=#{@config.target} of=/dev/null"
       when "write", "randwrite"
         flow = "if=/dev/zero of=#{@config.target}"
     end
-    "#{@config.actor} #{flow} bs=#{v.size} count=#{v.count}".strip
+    "#{@config.actor} #{flow} bs=#{v.size} count=#{(@config[:workload][:total_size]/v.size).to_i}".strip
   end
 
   self.func(:add, :result, hide: true) do |v|
