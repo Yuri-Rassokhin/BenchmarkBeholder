@@ -1,3 +1,4 @@
+require_relative './utilities'
 
 class Launcher < FlexCartesian
   
@@ -11,29 +12,6 @@ end
 
 private
 
-def convert_to_gbps(bandwidth, units)
-  case units
-  when "kB/s"
-    bandwidth = bandwidth / 1024 / 1024
-  when "MB/s"
-    bandwidth = bandwidth / 1024
-  when "GB/s"
-    bandwidth = bandwidth
-  when "TB/s"
-    bandwidth = bandwidth * 1024
-  when "PB/s"
-    bandwidth = bandwidth * 1024 * 1024
-  else
-    @logger.error "unsupported units #{units}"
-  end
-  bandwidth.round(4)
-end
-
-def puts_dimensions(obj)
-  return obj.inspect unless obj.is_a?(Struct)
-  obj.each_pair.map { |k, v| "#{k}=#{v}" }.join(', ')
-end
-
 def setup
   result = ""
   counter = 0
@@ -41,7 +19,7 @@ def setup
 
   self.func(:add, :counter, hide: true) do |v|
     counter += 1
-    @logger.info "invocation #{counter} of #{total}: #{puts_dimensions(v)}"
+    @logger.info "invocation #{counter} of #{total}: #{dimensions(v, separator: ' ')}"
   end
 
   self.func(:add, :command) do |v|
@@ -66,7 +44,7 @@ def setup
   self.func(:add, :bandwidth) do |v|
     bw = `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $1}'`.strip.to_f
     units = `echo "#{result}" | grep copied | sed -e 's/^.*,//' | awk '{print $2}'`.strip
-    convert_to_gbps(bw, units)
+    Utilities.convert_units(@logger, bw, units, "GB")
   end
 
   self.func(:add, :units) do |v|

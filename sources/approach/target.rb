@@ -9,7 +9,7 @@ def initialize(logger, config)
   register # define all supported targets
   check(logger, config)
   @infra = infra_initialize
-  @logger.info "target #{@protocol} '#{@target}' is healthy on all nodes"
+  @logger.info "target #{@protocol} #{@target} is healthy on all nodes"
 end
 
 def supports_fs?
@@ -29,7 +29,7 @@ end
 private
 
 def check(logger, config)
-  logger.error "target protocol '#{@protocol}' is not supported" unless protocol_supported?(@protocol)
+  logger.error "target protocol is not supported: #{@protocol}" unless protocol_supported?(@protocol)
   logger.error "target is missing" unless @target
 
   consistent_target

@@ -37,7 +37,7 @@ target = Target.new(logger, config)
 
 space = Launcher.new(logger, config, target)
 
-logger.info "parameter unique combinations: #{space.size}"
+logger.info "Number of invocations: #{space.size}"
 
 #  Global.run(binding, h, space.method(:func), :run)
 
