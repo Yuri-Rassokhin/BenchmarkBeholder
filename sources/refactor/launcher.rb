@@ -71,7 +71,7 @@ def setup
   self.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
   self.func(:add, :kernel) { |v| @target.infra[v.host][:kernel] }
   self.func(:add, :os_release) { |v| @target.infra[v.host][:os_release] }
-  self.func(:add, :arch) { |v| @target.infra[v.host][:architecture] }
+  self.func(:add, :arch) { |v| @target.infra[v.host][:arch] }
   self.func(:add, :cpu) { |v| @target.infra[v.host][:cpu] }
   self.func(:add, :cores) { |v| @target.infra[v.host][:cores] }
   self.func(:add, :cpu_ram) { |v| @target.infra[v.host][:cpu_ram] }
