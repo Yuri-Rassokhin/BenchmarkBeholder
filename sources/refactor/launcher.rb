@@ -7,20 +7,23 @@ def initialize(logger, config, target)
   @logger = logger
   @config = config
   @target = target
+  @counter = 0
+  @total = self.size
+  prepare
   setup
 end
 
 private
 
+def prepare
+  self.func(:add, :counter, hide: true) do |v|
+    @counter += 1
+    @logger.info "invocation #{@counter} of #{@total}: #{self.dimensions(v, separator: ' ')}"
+  end
+end
+
 def setup
   result = ""
-  counter = 0
-  total = self.size
-
-  self.func(:add, :counter, hide: true) do |v|
-    counter += 1
-    @logger.info "invocation #{counter} of #{total}: #{dimensions(v, separator: ' ')}"
-  end
 
   self.func(:add, :command) do |v|
     case v.operation
