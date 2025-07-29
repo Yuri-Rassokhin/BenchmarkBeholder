@@ -6,7 +6,7 @@ require 'ripper'
 require 'set'
 require 'singleton'
 
-# 🔹 Модуль для временных методов (изоляция от основного кода)
+# module for temporary methods - isolated from the core code to not break it
 module GlobalTemp
 end
 
@@ -15,21 +15,19 @@ module Global
     include Singleton
 
     def initialize
-      @method_hosts = {}        # method_name => текущий хост
+      @method_hosts = {}        # method_name => current host
       @original_methods = {}    # method_name => { method:, context:, body: }
       @@landed_methods = Set.new
     end
 
     def run(context, method, host, *args)
-#      puts "DEBUG run: method=#{method.inspect}, host=#{host}, args=#{args.inspect}"
       execute_remotely(method, context, host, *args)
     end
 
     def land(context, target = nil, method_name, host)
       callable = method_name
-#      puts "DEBUG land(before): callable=#{callable.inspect}, method_name=#{method_name}"
 
-      # ✅ Определяем, где должен жить метод
+      # Determine where the method should live
       klass =
         if callable.is_a?(Symbol) || callable.is_a?(String)
           target.nil? ? Object : target
@@ -40,7 +38,7 @@ module Global
       is_original_method = callable.is_a?(Method)
       original_method_obj = callable if is_original_method
 
-      # ✅ Генерация уникального имени для временных методов
+      # Generate unique name for temporary method
       unless method_name.is_a?(Symbol) || method_name.is_a?(String)
         if is_original_method
           method_name = "__global_#{original_method_obj.receiver.class.name.downcase}_#{original_method_obj.name}".gsub(/\?/, '').to_sym
@@ -49,10 +47,9 @@ module Global
         end
       end
 
-#      puts "DEBUG land(after): method_name=#{method_name}"
       @method_hosts[method_name] = host
 
-      # ✅ Создание временного метода в GlobalTemp (и только там)
+      # Create temporary method in GlobalTemp - and only GlobalTemp!
       if klass == GlobalTemp && !@original_methods.key?(method_name)
         if is_original_method && !klass.method_defined?(method_name)
           body = <<~RUBY
@@ -62,7 +59,6 @@ module Global
             module_function :#{method_name}
           RUBY
           klass.module_eval(body)
-#          puts "DEBUG: temporary method #{method_name} created in #{klass}"
           @original_methods[method_name] = {
             method: klass.instance_method(method_name),
             context: context,
@@ -71,14 +67,14 @@ module Global
         end
       end
 
-      # ✅ Для обычных методов сохраняем ссылку
+      # In case of a regular method, keep the reference
       unless @original_methods.key?(method_name)
 original_method =
   case callable
   when Symbol, String
     klass.instance_method(method_name.to_sym)
   when Proc
-  # Явно создаём метод в GlobalTemp
+  # Explicitly create the method in GlobalTemp
   unless klass.method_defined?(method_name)
     klass.module_eval do
       define_method(method_name, &callable)
@@ -109,7 +105,6 @@ original_method =
       hub_instance = self
 
       klass.define_method(method_name) do |*args, &block|
-#        puts "DEBUG: local method #{method_name} invoked with args=#{args.inspect}, sending to remote..."
         current_host = hub_instance.instance_variable_get(:@method_hosts)[method_name]
         remote_result = hub_instance.run(context, method_name, current_host, *args, &block)
 
@@ -124,13 +119,11 @@ original_method =
         remote_result["result"]
       end
 
-#      puts "DEBUG land: method #{method_name} defined in #{klass}, ready for run!"
       method_name
     end
 
     def run!(context, method_name, host, *args, target: nil)
       final_name = land(context, target, method_name, host)
-#      puts "DEBUG run!: invoking #{final_name}"
 
       if GlobalTemp.method_defined?(final_name) || GlobalTemp.respond_to?(final_name)
         GlobalTemp.send(final_name, *args)
@@ -138,7 +131,6 @@ original_method =
         (target || Object).send(final_name, *args)
       end
     rescue => e
-#      puts "DEBUG run!: failed to invoke #{method_name} -> #{e.class}: #{e.message}"
       raise
     end
 
@@ -149,7 +141,6 @@ original_method =
       begin
         source = method.source
       rescue MethodSource::SourceNotFoundError
-#        puts "DEBUG method_dependencies: dynamic method #{method}, skipping dependencies"
         return []
       end
       dependencies = []
@@ -234,7 +225,6 @@ original_method =
         begin
           method_body = method_obj.source
         rescue MethodSource::SourceNotFoundError
-#          puts "DEBUG serialize_method: dynamic method #{method_name}, using stored body"
           method_body = @original_methods[method_name][:body] || ""
         end
       else
@@ -258,7 +248,6 @@ original_method =
     end
 
     def execute_remotely(method_name, context, host, *args)
-#      puts "DEBUG execute_remotely: #{method_name}, args=#{args.inspect}"
       serialized_data = serialize_method(method_name, context)
       data = JSON.parse(serialized_data)
 
@@ -300,12 +289,12 @@ original_method =
       RUBY
 
       output = ""
-      File.write("/tmp/code_dump.txt", remote_script) # DEBUG
+#      File.write("/tmp/code_dump.txt", remote_script) # DEBUG
       Net::SSH.start(host) do |ssh|
         output = ssh.exec!("ruby -e #{Shellwords.escape(remote_script)}")
       end
       begin
-        File.write("/tmp/result_dump.txt", output) # DEBUG
+#        File.write("/tmp/result_dump.txt", output) # DEBUG
         JSON.parse(output.strip)
       rescue => e
         puts "global execution error: #{e.message}"
