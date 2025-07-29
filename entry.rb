@@ -16,7 +16,7 @@ require_relative './sources/refactor/config.rb'
 require_relative './sources/refactor/head.rb'
 require_relative './sources/refactor/nodes.rb'
 require_relative './sources/refactor/global-ruby.rb'
-require_relative './sources/refactor/launcher.rb'
+require_relative './sources/refactor/hook.rb'
 require_relative './sources/log.rb'
 
 series = Time.now.to_i.to_s # start counting total processing time
@@ -35,7 +35,7 @@ Nodes.check(logger, config) # benchmark node checks such as SSH availability, ac
 
 target = Target.new(logger, config)
 
-space = Launcher.new(logger, config, target)
+space = Hook.new(logger, config, target)
 
 logger.info "Number of invocations: #{space.size}"
 

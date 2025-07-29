@@ -1,6 +1,6 @@
 require_relative './utilities'
 
-class Launcher < FlexCartesian
+class Hook < FlexCartesian
   
 def initialize(logger, config, target)
   super(config.parameters.merge!({ iteration: (1..config[:workload][:iterations]).to_a}))
