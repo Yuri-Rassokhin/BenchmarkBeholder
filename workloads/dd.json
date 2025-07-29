@@ -1,6 +1,6 @@
 {
 	"workload": {
-		"name": "dd",
+		"hook": "dd",
 		"actor": "dd",
 		"protocol": "file",
 		"target": "/tmp/dump",
