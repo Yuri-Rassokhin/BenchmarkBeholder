@@ -4,7 +4,6 @@ require 'fileutils'
 require 'open3'
 require 'tempfile'
 require 'date'
-
 require 'flex-cartesian'
 
 require './sources/infrastructure/utilities_general.rb'
@@ -12,19 +11,20 @@ require './sources/options.rb'
 require './sources/approach/target.rb'
 require './sources/misc/ssh_sharing.rb'
 
-require_relative './sources/refactor/config.rb'
-require_relative './sources/refactor/head.rb'
-require_relative './sources/refactor/nodes.rb'
-require_relative './sources/refactor/global-ruby.rb'
-require_relative './sources/refactor/hook.rb'
+require_relative './sources/config.rb'
+require_relative './sources/head.rb'
+require_relative './sources/nodes.rb'
+require_relative './sources/global-ruby.rb'
+require_relative './sources/hook.rb'
 require_relative './sources/log.rb'
 
 series = Time.now.to_i.to_s # start counting total processing time
 
 logger = Log.new # logger for the entire application
-logger.info "Starting series #{series}"
 
 options = Options.new(logger, ARGV) # parse CLI options
+
+logger.info "Starting series #{series}"
 
 config = Config.new(logger, options.workload) # parse the workload configuration file
 config[:parameters][:host] = options.hosts # add benchmark nodes from CLI
@@ -35,8 +35,8 @@ Nodes.check(logger, config) # benchmark node checks such as SSH availability, ac
 
 target = Target.new(logger, config)
 
-require_relative './sources/refactor/hooks/dd/benchmarking'
-
+# create Benchmarking class using its child named after the hook
+require_relative "./sources/hooks/#{config.hook}/benchmarking"
 space = Benchmarking.new(logger, config, target)
 
 logger.info "Number of invocations: #{space.size}"
