@@ -6,12 +6,12 @@ class Config
 def initialize(logger, config_path)
   @logger = logger
   @data = load_json(config_path)
-  @schema = "./hooks/#{name}/workload.rb"
+  @schema = "./hooks/#{hook}/workload.rb"
   check_schema
 end
 
-def name
-  get(:workload, :name)
+def hook
+  get(:workload, :hook)
 end
 
 def actor
@@ -74,7 +74,7 @@ def check_schema
       value = error.path.reduce(@data) do |acc, key|
         acc.is_a?(Hash) ? acc[key] : acc[key] rescue nil
       end
-      @logger.error "Incorrect value '#{value}' in #{path}, #{error.text}"
+      @logger.warn "Incorrect value '#{value}' in #{path}, #{error.text}"
     end
   end
 end

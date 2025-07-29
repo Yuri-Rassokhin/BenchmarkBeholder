@@ -5,7 +5,7 @@ module Nodes
   require './sources/infrastructure/utilities_general.rb'
 
 def self.check(logger, config)
-  self.check_hook(logger, config.name)
+  self.check_hook(logger, config.hook)
   self.check_ssh_persistance(logger)
   self.check_another_instance(logger, config.hosts)
   self.check_dependencies(logger, config.hosts)

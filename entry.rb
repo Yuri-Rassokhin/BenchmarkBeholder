@@ -35,7 +35,9 @@ Nodes.check(logger, config) # benchmark node checks such as SSH availability, ac
 
 target = Target.new(logger, config)
 
-space = Hook.new(logger, config, target)
+require_relative './sources/refactor/hooks/dd/benchmarking'
+
+space = Benchmarking.new(logger, config, target)
 
 logger.info "Number of invocations: #{space.size}"
 
@@ -45,6 +47,6 @@ space.func(:run)
 
 logger.info "Series #{series} completed"
 
-space.output(format: :csv, file: "./log/bbh-#{config.name}-#{series}-result.csv")
+space.output(format: :csv, file: "./log/bbh-#{config.hook}-#{series}-result.csv")
 space.output(colorize: true, align: true)
 

@@ -3,7 +3,7 @@ module Head
   module_function
 
 def self.check(logger, config)
-  self.check_hook(logger, config.name)
+  self.check_hook(logger, config.hook)
 end
 
 def self.check_hook(logger, hook)

@@ -2,7 +2,7 @@
 SCHEMA = Dry::Schema.JSON do
 
   required(:workload).hash do
-    required(:name).filled(:string)
+    required(:hook).filled(:string)
     required(:protocol).filled(:string)
     required(:actor).filled(:string)
     required(:target).filled(:string)
