@@ -1,178 +1,50 @@
 #!/usr/bin/ruby
 
-require 'fileutils'
-require 'open3'
-require 'tempfile'
-require 'date'
-require 'method_source'
-require 'mysql2'
-require 'net/http'
+require 'flex-cartesian'
 
-require './sources/logger.rb'
-require './sources/basic/validation'
-require './sources/config/generic_config.rb'
-require './sources/config/general_config.rb'
-require './sources/distributed/agent.rb'
-require './sources/options.rb'
-require './sources/database/database.rb'
-require './sources/collector.rb'
-require './sources/distributed/transfer.rb'
-require './sources/approach/target.rb'
-require './sources/launch.rb'
-require './sources/misc/ssh_sharing.rb'
+require './sources/infra/scheduler'
+require './sources/infra/platform'
+require './sources/infra/utilities_general'
+require './sources/options'
+require './sources/target'
+require './sources/ssh/ssh_sharing'
+require './sources/config'
+require './sources/head'
+require './sources/nodes'
+require './sources/global-ruby'
+require './sources/hook'
+require './sources/log'
 
-series = Time.now.to_i.to_s
-logger = CustomLogger.new(series)
-options = Options.new(logger, ARGV)
-database = Database.new(logger)
+series = Time.now.to_i.to_s # start counting total processing time
 
-if options.mode == "user"
-  database.user_manage(options.user)
-  exit 0
-end
+logger = Log.new # logger for the entire application
 
-config = GeneralConfig.new(options.workload)
-hook = config.get(:series_benchmark)
-hosts = options.hosts
-options.check_hook(hook) # check if hooks directory exists and contains mandatory files
-agent = Agent.new(nil, nil)
+options = Options.new(logger, ARGV) # parse CLI options
 
-logger.info "checking SSH persistance on central node" # maximize SSH performance
-ssh_sharing_enable
+logger.info "Starting series #{series}"
 
-logger.info "checking SSH availability of benchmark node(s)"
-hosts.each do |host|
-  logger.error("#{agent.error}") if !agent.available?(host)
-end
+config = Config.new(logger, options.workload) # parse the workload configuration file
+config[:parameters][:host] = options.hosts # add benchmark nodes from CLI
+config[:parameters][:series] = series # add unique series ID
 
-logger.info "checking if another BBH instance is running on benchmark node(s)"
-hosts.each do |host|
-  logger.error("another instance of BBH is running on '#{host}'") if agent.run(host, :bbh_running?) == "true"
-end
+Head.check(logger, config) # head node checks such as consistent hook files
+Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
 
-logger.info "checking dependencies on benchmark node(s)"
-hosts.each do |host|
-  [ "ruby", "curl", "mpstat", "iostat" ].each { |tool| logger.error("'#{tool}' is missing ") if !agent.run(host, :file_exists?, "#{tool}") }
-end
+target = Target.new(logger, config)
 
-# TODO: this check is benchmark-specific, such checks should perform automatically, as part of config checks
-# check if config path exists on the nodes
-if config.get(:startup_actor) == "self"
-  logger.info("checking actor: built-in actor in the hook")
-else
-  logger.info "checking actor on benchmark node(s)"
-  hosts.each do |host|
-    logger.error("actor '#{config.get(:startup_actor)}' is missing on '#{host}'") if !agent.run(host, :file_exists?, config.get(:startup_actor))
-  end
-end
+# create Benchmarking class using its child named after the hook
+require_relative "./sources/hooks/#{config.hook}/benchmarking"
+space = Benchmarking.new(logger, config, target)
 
-target = Target.new(logger, config.protocol, config.target)
+logger.info "Parameter space: #{space.dimensions(separator: ', ')}"
+logger.info "Number of invocations: #{space.size}"
+exit 0 if options.mode == "space"
 
-logger.info "checking target: #{target.protocol}://#{target.path}"
-hosts.each { |host| target.check(host) }
+#  Global.run(binding, h, space.method(:func), :run)
 
-unless options.mode == :space
+space.func(:run)
+logger.info "Series #{series} completed"
 
-  logger.info "checking if CPU is idle on benchmark node(s)"
-  hosts.each do |host|
-      logger.error("CPU utilization >= 10%, no good for benchmarking") if agent.run(host, :cpu_idle) < 90
-  end
-
-  logger.info "checking if storage is idle on benchmark node(s)"
-  hosts.each do |host|
-      logger.error("storage utilization >= 10%, no good for benchmarking") if agent.run(host,:io_idle) < 90
-  end
-
-end
-
-config.delayed_init
-
-# first phase of description substituion - here we substitute all the variables from the config file
-config.description_substitute
-
-config.set(:startup_target, target.path)
-
-# collector is a permanent agent assigned to each node to store its infrastructure information and perform actions on it
-collector = Hash.new
-mode = hosts.size > 1 ? "multiple" : "single"
-logger.info "initializing workload #{hook} on benchmark node(s)"
-hosts.each do |host|
-  collector[host] = Collector.new(config, host, mode, logger, series, target)
-end
-
-# create database table for the requested benchmark, if it doesn't exist yet
-database.table_set(hook)
-
-if target.io_schedulers_apply?
-
-  database.table_add_io_schedulers if target.io_schedulers_apply?
-
-  # enable all available kernel IO schedulers on the nodes
-  logger.info("Checking available kernel IO schedulers")
-  hosts.each do |host|
-    %w[mq-deadline kyber bfq none].each do |scheduler|
-      `ssh -o StrictHostKeyChecking=no #{host} sudo modprobe -q #{scheduler}`
-    end
-  end
-
-  logger.info("Checking specification of kernel IO schedulers")
-    config.get(:iterate_schedulers).each do |scheduler|
-      system_schedulers = `cat /sys/block/sda/queue/scheduler`.strip + " N/A"
-      logger.error("unknown IO scheduler '#{scheduler}'") unless system_schedulers.include?(scheduler)
-  end
-end
-
-# Calculate size of the parameter space, and add it to the config for reporting purposes
-parameter_space_size = config.parameter_space_size
-config.merge({ parameter_space_size: parameter_space_size })
-if options.mode == :space
-  config.parameter_space_dimensions { |line| logger.info("dimension #{line}") }
-  logger.info("parameter space size is #{parameter_space_size} invocations")
-  exit 0
-end
-
-# adding CLI option for debugging info
-config.merge({ debug: options.debug })
-
-#unless Object.method_defined?(:invocation)
-logger.info "loading #{hook} hook on central node"
-load "./sources/hooks/#{hook}/invocation.rb"
-#end
-
-config.merge( { startup_target_protocol: target.protocol } )
-
-# check if Telegram chat is configured and active
-def check_telegram_logging(logger)
-  token_file = File.expand_path("~/.bbh/telegram")
-    if not File.exist?(token_file)
-      logger.warning "telegram token hasn't been specified, there will be no telegram output"
-      return { token: nil, chat_id: nil }
-    end
-  
-  token = File.read(token_file).chomp
-  uri = URI("https://api.telegram.org/bot#{token}/getUpdates")
-  response = Net::HTTP.get(uri)
-  updates = JSON.parse(response)
-    logger.error "telegram bot has gone inactive, please send something to it and re-run the benchmark" if updates["result"] == []
-    updates["result"].each do |update|
-      return { token: token, chat_id: update['message']['chat']['id'] }
-    end
-    logger.error "telegram chat not found, check correctness of the token"
-end
-
-# set Telegram chat for the benchmarks nodes to report to, nil means there's no chat configured
-token = check_telegram_logging(logger)[:token]
-chat_id = check_telegram_logging(logger)[:chat_id]
-config.merge( { token: token} )
-config.merge( { chat_id: chat_id } )
-
-#TODO: here, we've returned to the current restrictions of the agent functionality: class must respond to value method, and only a single function can transfer.
-
-logger.info "launching workload #{hook} on benchmark node(s)"
-hosts.each do |host|
-  config.merge(collector[host].infra_static)
-  collector[host].detach(host, :launch, config, dependencies: [:invocation, :dimensions, :dimension_naming, :prepare, :debug])
-end
-
-logger.info "workload #{hook} series #{series} has launched on #{hosts.join(', ')}"
+space.output(format: :csv, file: "./log/bbh-#{config.hook}-#{series}-result.csv")
+space.output(colorize: true, align: true)
 

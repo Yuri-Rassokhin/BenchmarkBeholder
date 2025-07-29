@@ -1,6 +1,3 @@
-require_relative '../infra/scheduler'
-require_relative '../infra/platform'
-
 class Target
   attr_reader :target, :protocol, :infra
 
