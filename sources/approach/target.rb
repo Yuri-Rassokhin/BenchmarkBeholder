@@ -9,7 +9,7 @@ def initialize(logger, config)
   register # define all supported targets
   check(logger, config)
   @infra = infra_initialize
-  @logger.info "target #{@protocol} #{@target} is healthy on all nodes"
+  @logger.info "target #{@protocol} #{@target} is healthy on benchmark nodes"
 end
 
 def supports_fs?
@@ -36,7 +36,7 @@ def check(logger, config)
 
   if schedulers_apply?
     Scheduler.prepare(logger, config)
-    logger.info "IO schedulers are consistent on all nodes"
+    logger.info "IO schedulers are consistent on benchmark nodes"
   end
 end
 

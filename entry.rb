@@ -39,12 +39,13 @@ target = Target.new(logger, config)
 require_relative "./sources/hooks/#{config.hook}/benchmarking"
 space = Benchmarking.new(logger, config, target)
 
+logger.info "Parameter space: #{space.dimensions(separator: ', ')}"
 logger.info "Number of invocations: #{space.size}"
+exit 0 if options.mode == "space"
 
 #  Global.run(binding, h, space.method(:func), :run)
 
 space.func(:run)
-
 logger.info "Series #{series} completed"
 
 space.output(format: :csv, file: "./log/bbh-#{config.hook}-#{series}-result.csv")

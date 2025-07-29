@@ -5,7 +5,6 @@ module Nodes
   require './sources/infrastructure/utilities_general.rb'
 
 def self.check(logger, config)
-  self.check_hook(logger, config.hook)
   self.check_ssh_persistance(logger)
   self.check_another_instance(logger, config.hosts)
   self.check_dependencies(logger, config.hosts)
@@ -15,16 +14,6 @@ def self.check(logger, config)
 end
 
 private
-
-def self.check_hook(logger, hook)
-  hooks = Dir.entries("./sources/hooks") - %w[. ..]
-  logger.error "unknown workload '#{hook}'" if !hooks.include?(hook)
-  benchmarking = "./sources/hooks/#{hook}/benchmarking.rb"
-  if !File.exist?(benchmarking)
-    logger.error "inconsistent hook '#{hook}', #{benchmarking} is missing"
-    exit 0
-  end
-end
 
 def self.check_ssh_persistance(logger)
   logger.info "checking SSH persistance on central node" # maximize SSH performance
