@@ -179,26 +179,28 @@ end
 All you need to edit in this class is `setup` method.
 Calls `func(:add, ...)` are the DSL of [flex-cartesian](https://rubygems.org/gems/flex-cartesian) Ruby library, which provides a simple way for defining functions on a Cartesian product (that is, on all combinations of given parameters). Let's go through the functions in our example. The following functions are added to be called for each combination of parameters, `v`.
 
-This function constructs a `ping` command with current parameters, as a string.
+The function `command` constructs a `ping` command with current parameters, as a string.
 ```ruby
   func(:add, :command) { |v| "ping -c #{v.count} -s #{v.size} #{v.dns}" } # construct PING command with current combination of parameters
 ```
 
-This function executes `ping` command constructed by the previous function and caches its raw output in a variable.
-Caching is to avoid excessive invocations of the same command every time this functions is referred by other functions.
-Not only such caching maintains consistency of the benchmarking result, but speeds up overall process as well.
+The function `raw_ping` executes `ping` command constructed by `command` function and caches its raw output in a variable.
+Caching allows to avoid excessive invocations of the same command every time `raw_ping` is called.
+Not only such caching maintains consistency of the benchmarking results, but speeds up overall process as well.
 ```ruby
   func(:add, :raw_ping, hide: true) { |v| result[v.command] ||= `#{v.command} 2>&1` } # run PING and capture its raw result
 ```
 
-This function extracts average ping time from the raw output provided by `raw_ping` function.
+The function `time` extracts average ping time from the raw output provided by `raw_ping` function.
 ```ruby
   func(:add, :time) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = [^\/]+\/([^\/]+)/, 1]&.to_f } # extract ping time from result
 ```
 
-A couple of similar functions follow, one to extract minimal ping time, and another to extract loss rate. Effectively, this is it. And the final notes on the mechanism of functions
-- A function will appear in the benchmarking report as a column of the values it calluates, column name will be the function name
-- Functions can refer to one another as well as to variables - such as `result` - and other methods in your code. This makes them a powerful mechanism
+This should give you general idea of adding metrics, and we're omitting a couple of similar functions, `min` to extract minimal ping time, and `loss` to extract loss rate.
+Effectively, this is it.
+Just a few final notes on the mechanism of functions
+- A function appears in the benchmarking report as a column of the values it calculates, column named after the function
+- Functions can refer to one another, as well as variables and methods in your code. This makes functions a VERY powerful and flexible mechanism
 - If you don't need a function to appear in the benchmarking report (intermediate calculations such as `:raw_ping`), you just add the function with the flag `hide: true`
 
 As the summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
