@@ -93,14 +93,14 @@ NOTE: By design, Telegram makes inactive bot go asleep by timeout. If `./bbh` te
 As we explore ping latency, we start from the fact that `ping` requires two parameters: URL of DNS provider and packet size.
 Therefore, our workload file `./workloads/ping_dns.json` should specify valid values of these parameters. For instance, it can be the following:
 
-```json
+```jsonc
 {
-        "workload": { 			# mandatory section: general configuration of the benchmark
-                "hook": "ping_dns", 	# location of integration files: ./sources/hooks/ping_dns/
-                "actor": "ping", 	# application to benchmark
-                "iterations": 4		# how many times to repeat each invocation; comes in handy to build sustainable result
+        "workload": { 			// mandatory section: general configuration of the benchmark
+                "hook": "ping_dns", 	// location of integration files: ./sources/hooks/ping_dns/
+                "actor": "ping", 	// application to benchmark
+                "iterations": 4		// how many times to repeat each invocation; comes in handy to build sustainable result
         },
-        "parameters": { 		# mandatory section: input parameters to use during benchmarking
+        "parameters": { 		// mandatory section: input parameters to use during benchmarking
                 "dns": [ "8.8.8.8", "1.1.1.1", "208.67.222.222" ],
                 "size": [ 16, 32 ]
         }
