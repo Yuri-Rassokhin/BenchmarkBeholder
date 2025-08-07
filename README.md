@@ -201,7 +201,7 @@ Effectively, this is it.
 Just a few final notes on the mechanism of functions:
 - A function appears in the benchmarking report as a column of the values it calculates, column named after the function
 - Functions can refer to one another, as well as variables and methods in your code. This makes functions a VERY powerful and flexible mechanism
-- If you don't need a function to appear in the benchmarking report (intermediate calculations such as `:raw_ping`), you just add the function with the flag `hide: true`
+- If you don't need a function to appear in the benchmarking report (for instance, intermediate calculations such as `:raw_ping`), you just add the function with the flag `hide: true`
 
-As the summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
+As a summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
 
