@@ -52,9 +52,17 @@ To give it a go, just type
 ./bbh ./workloads/ping_dns.json
 ```
 
-It will run through several invocations of `ping` command using different combinations of `ping` parameters:
+It will run through invocations of `ping` command for each combinations of `ping` parameters and generate a table with benchmark results:
 
 ![Example of BBH output](doc/pictures/bbh_output.png)
+
+At the same time, BBH will save the results in CSV format in `./log/bbh-ping_dns-1754564563-result.csv`:
+
+![Example of CSV output of BBH](doc/pictures/bbh_output_csv.png)
+
+You can open the CSV file in any BA/BI tool you prefer to visualize and analyze performance landscape of the `ping`:
+
+![Example of chart based on CSV output of BBH](doc/pictures/bbh_output_chart.png)
 
 # How it Works
 
