@@ -198,7 +198,7 @@ The function `time` extracts average ping time from the raw output provided by `
 
 This should give you general idea of adding metrics, and we're omitting a couple of similar functions, `min` to extract minimal ping time, and `loss` to extract loss rate.
 Effectively, this is it.
-Just a few final notes on the mechanism of functions
+Just a few final notes on the mechanism of functions:
 - A function appears in the benchmarking report as a column of the values it calculates, column named after the function
 - Functions can refer to one another, as well as variables and methods in your code. This makes functions a VERY powerful and flexible mechanism
 - If you don't need a function to appear in the benchmarking report (intermediate calculations such as `:raw_ping`), you just add the function with the flag `hide: true`
