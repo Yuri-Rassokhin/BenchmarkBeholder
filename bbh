@@ -32,9 +32,9 @@ Nodes.check(logger, config) # benchmark node checks such as SSH availability, ac
 
 target = Target.new(logger, config)
 
-# create Benchmarking class using its child named after the hook
-require_relative "./sources/hooks/#{config.hook}/benchmarking"
-space = Benchmarking.new(logger, config, target)
+# create the class that implements target metrics using its child named after the hook
+require_relative "./sources/hooks/#{config.hook}/metrics"
+space = Metrics.new(logger, config, target)
 
 logger.info "Parameter space: #{space.dimensions(separator: ', ')}"
 logger.info "Number of invocations: #{space.size}"

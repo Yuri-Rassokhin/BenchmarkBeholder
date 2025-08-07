@@ -1,4 +1,4 @@
-class Benchmarking < Hook
+class Metrics < Hook
 
 def initialize(logger, config, target)
   super(logger, config, target)

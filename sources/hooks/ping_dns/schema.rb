@@ -10,7 +10,6 @@ SCHEMA = Dry::Schema.JSON do
   required(:parameters).hash do
     required(:dns).array(:string, min_size?: 1, included_in?: %w[8.8.8.8 1.1.1.1 208.67.222.222])
     required(:size).array(:integer, min_size?: 1, gteq?: 16)
-    required(:count).array(:integer, min_size?: 1, gt?: 0)
   end
 
 end

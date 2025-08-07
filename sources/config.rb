@@ -6,7 +6,7 @@ class Config
 def initialize(logger, config_path)
   @logger = logger
   @data = load_json(config_path)
-  @schema = "./hooks/#{hook}/workload.rb"
+  @schema = "./hooks/#{hook}/schema.rb"
   check_schema
 end
 
