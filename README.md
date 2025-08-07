@@ -35,8 +35,8 @@ Given your workload, BBH unfdolds its entire performance landscape. This makes b
 # Benchmarking Approach
 
 * As input, BBH takes *workload file* that describes
-  * The workload you want to benchmark (in its simplest form, it's just application name, such as 'dd', 'ping', etc.)
-  * All desired values of all input parameters of your workload
+  * The workload you want to benchmark
+  * Desired values of input parameters of your workload
 * BBH builds *parameter space*, that is, all combinations of the values of the parameters
 * BBH invokes your workload against all combinations from the parameter space
 * For each invocation, BBH collects metrics you specifed
