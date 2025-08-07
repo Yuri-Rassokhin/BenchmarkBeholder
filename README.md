@@ -8,10 +8,10 @@ Great news is that "workload" can be literally anything you can measure: applica
 
 This approach is called sweep analysis, and it allows you to:
 
-- Determine optimal combination of input parameters
-- Quantify influence of input parameters
+* Give convincing, number-justified answers for these two questions
+* In particular, it allows you to determine optimal combination of input parameters and quantify influence of input parameters
 
-For instance, BBH allows you to compare and choose
+For instance, BBH allows you to compare and choose:
 * Better performing AI model for your use case
 * Optimal storage by performance/cost ratio for the AI model
 * Assess performance of CPU RAM and decide if you should use CPU RAM as a cache of RAG index for the AI model
