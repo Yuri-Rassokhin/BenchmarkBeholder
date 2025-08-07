@@ -116,13 +116,13 @@ Its workload file includes mandatory field:
 ```
 
 The hook points to the directory under `./sources/hooks/ping_dns` where two integration files reside:
-- Schema of the workload file: `workload.rb`
-- Description of the metrics that must be calculated for each combination of parameters: `benchmarking.rb`
+- `schema.rb`, schema of the workload file
+- `metrics.rb`, description of the metrics that must be calculated for each combination of parameters
 
 ## Creating Workload Schema
 
 This file follows notation of [dry-validation](https://rubygems.org/gems/dry-validation) Ruby library that describes syntax and semantics of JSON in a self-commenting manner.
-In our example, here is the schema file `./sources/hooks/ping_dns/workload.rb`:
+In our example, here is the schema file `./sources/hooks/ping_dns/schema.rb`:
 
 ```ruby
 SCHEMA = Dry::Schema.JSON do
@@ -146,7 +146,7 @@ Whenever you run `./bbh my-workload-file` and my-workload-file refers to the hoo
 ## Creating Target Metrics
 
 Now you need to specify what metrics BBH should calculate during benchmarking.
-In our example, this file is `./sources/hooks/ping_dns/benchmarking.rb`:
+In our example, this file is `./sources/hooks/ping_dns/metrics.rb`:
 
 ```ruby
 class Benchmarking < Hook
