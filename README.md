@@ -74,11 +74,12 @@ You can enable Telegram logging in two steps:
 1. Create Telegram bot: open Telegram, search for @BotFather, type `/newbot` and follow instructions
 2. Put the bot token to `~/.bbh/telegram` on the machine that launches `./bbh`
 
-That's it, on the next launch, BBH will notice the token and start duplicating its log to your Telegram bot:
+That's it. During next launch, BBH will find the token and start duplicating its log to your Telegram bot:
 
-![Bot bot logging started](doc/pictures/bbh_bot_logging_started.jpg)
-
-![Bot bot logging completed](doc/pictures/bbh_bot_logging_completed.jpg)
+<p align="center">
+  <img src="doc/pictures/bbh_bot_logging_started.jpg" alt="Bot logging started" width="40%"/>
+  <img src="doc/pictures/bbh_bot_logging_completed.jpg" alt="Bot logging completed" width="40%"/>
+</p>
 
 NOTE: By design, Telegram's bots go to sleep by timeout, if inactive. If `./bbh` tells you that the bot has gone asleep, just awake the bot by sending any text to it.
 
