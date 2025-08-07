@@ -63,7 +63,7 @@ The same results will be saved in CSV format to `./log/bbh-ping_dns-1754564563-r
   <img src="doc/pictures/bbh_output_csv.png" alt="Example of CSV output of BBH" width="60%"/>
 </p>
 
-Now, you can open the CSV file in any BA/BI tool you like to visualize it and analyze performance sweetspots of the `ping` to DNS providers:
+Now, you can open the CSV file in any BA/BI tool you like, visualize it, and analyze performance sweetspots of the `ping` to DNS providers:
 
 <p align="center">
   <img src="doc/pictures/bbh_output_chart.png" alt="Example of chart based on CSV output of BBH" width="60%"/>
