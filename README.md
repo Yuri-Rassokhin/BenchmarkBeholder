@@ -8,7 +8,7 @@ This approach is called sweep analysis, and it allows you to:
 - Determine optimal combination of input parameters
 - Quantify influence of input parameters
 
-By doing this, BBH helps you to answre two very practical and very hot questions:
+BBH helps you to answer two very practical and hot questions:
 
 1. HOW DO I TUNE MY WORKLOAD FOR THE HIGHEST PERFORMANCE AND SCALABILITY ?
 2. WHAT IMPLEMENTATION OF MY WORKLOAD SHOULD I CHOOSE FOR THE TASK ?
