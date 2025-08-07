@@ -187,12 +187,14 @@ This function constructs a `ping` command with current parameters, as a string.
   func(:add, :command) { |v| "ping -c #{v.count} -s #{v.size} #{v.dns}" } # construct PING command with current combination of parameters
 ```
 
-This function executes `ping` command constructed by the previous function and stores its raw output in `result[v.command]` variable.
+This function executes `ping` command constructed by the previous function and caches its raw output in a variable.
+Caching is to avoid excessive invocations of the same command every time this functions is referred by other functions.
+Not only such caching maintains consistency of the benchmarking result, but speeds up overall process as well.
 ```ruby
   func(:add, :raw_ping, hide: true) { |v| result[v.command] ||= `#{v.command} 2>&1` } # run PING and capture its raw result
 ```
 
-This function extracts average ping time from the raw output stored in `result[v.command]`
+This function extracts average ping time from the raw output provided by `raw_ping` function.
 ```ruby
   func(:add, :time) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = [^\/]+\/([^\/]+)/, 1]&.to_f } # extract ping time from result
 ```
