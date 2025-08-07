@@ -54,6 +54,8 @@ To give it a go, just type
 
 It will run through several invocations of `ping` command using different combinations of `ping` parameters:
 
+![Example of BBH output](doc/pictures/bbh_output.png)
+
 # How it Works
 
 When we investigate ping latency, we start from the fact that ping depends on two parameters:
