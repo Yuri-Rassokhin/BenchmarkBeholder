@@ -57,7 +57,7 @@ BBH will run `ping` command with multiple different combinations of `ping` param
   <img src="doc/pictures/bbh_output.png" alt="Example of BBH output" width="40%"/>
 </p>
 
-The same results will be saved in CSV format to `./log/bbh-ping_dns-1754564563-result.csv`, where `ping_dns` is name of workload, and `1754564563` is unique identifier of the benchmarking series you initiated:
+The same results will be saved in CSV format to `./log/bbh-ping_dns-1754564563-result.csv`, where `ping_dns` is the name of workload, and `1754564563` is a globally unique identifier of the benchmarking series you launched:
 
 <p align="center">
   <img src="doc/pictures/bbh_output_csv.png" alt="Example of CSV output of BBH" width="40%"/>
