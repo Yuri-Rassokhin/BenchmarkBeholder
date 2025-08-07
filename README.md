@@ -114,7 +114,7 @@ Its workload file includes mandatory field:
 
 ```json
 	"workload": {
-		"hook: "ping_dns"
+		"hook": "ping_dns"
 	}
 ```
 
