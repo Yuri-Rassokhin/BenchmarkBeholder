@@ -106,7 +106,7 @@ Therefore, our workload file `./workloads/ping_dns.json` should specify valid va
 # How to Integrate New Applications
 
 You can describe any workload you want, and integrate it to BBH.
-For the sake of example, let's have a look `ping_dns` integration.
+For the sake of example, let's have a look at `ping_dns` integration.
 Its workload file includes mandatory field:
 
 ```json
