@@ -2,11 +2,18 @@ class Target
   attr_reader :target, :protocol, :infra
 
 def initialize(logger, config)
-  @config, @logger, @protocol, @target, @hosts = config, logger, config.protocol, config.target, config.hosts
-  register # define all supported targets
-  check(logger, config)
-  @infra = infra_initialize
-  @logger.info "target #{@protocol} #{@target} is healthy on benchmark nodes"
+  @logger, @config, @hosts = logger, config, config.hosts
+
+  if config.defined?(:workload, :protocol) and config.defined?(:workload, :target)
+    @protocol, @target = config.protocol, config.target
+    register # define all supported targets
+    check(logger, config)
+    @infra = infra_initialize
+    @logger.info "target #{@protocol} #{@target} is healthy on benchmark nodes"
+  else
+    @protocol, @target = nil, nil
+    @logger.warn "protocol + target pair isn't specified, skipping their tests"
+  end
 end
 
 def supports_fs?

@@ -50,6 +50,10 @@ def []=(key, value)
   @data[key] = value
 end
 
+def defined?(*keys)
+  @data.dig(*keys) != nil
+end
+
 private
 
 def load_json(path)
@@ -90,6 +94,7 @@ def get(*keys)
   @logger.error "missing configuration parameter '#{keys.join('.')}'" if value.nil?
   value
 end
+
 
 
 end
