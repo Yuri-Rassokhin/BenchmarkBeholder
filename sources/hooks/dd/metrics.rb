@@ -1,4 +1,6 @@
-class Benchmarking < Hook
+require 'tempfile'
+
+class Metrics < Hook
 
 def initialize(logger, config, target)
   super(logger, config, target)
@@ -6,7 +8,20 @@ end
 
 private
 
+def file_init
+  size = @config[:workload][:total_size]
+  file = @target.target
+
+  @logger.info "creating target file #{file} of the size #{size}, rounded to megabytes"
+  File.open(file, "wb") do |f|
+      block = "\0" * 1024 * 1024  # 1MB
+      (size / block.size).times { f.write(block) }
+  end
+end
+
 def setup
+  file_init
+
   result = ""
 
   self.func(:add, :command) do |v|
