@@ -6,8 +6,11 @@ end
 
 private
 
-# In this method, we specify what BBH should do for each combination of parameters
-# `v` is vector of parameters specified in `parameters` section of the workload file
+# In .setup, we specify what BBH should do for each combination of parameters, vector `v`
+# `v` sweeps over all combinations of values specified in `parameters` section of the workload file
+# This method is called just once and sets WHAT and HOW to benchmark.
+# (If you need to arrange any one-time preparations before the benchnarking, you can do it from .setup
+# However, if you need preparations before EACH combination is benchmarked, you should define it as a function below)
 def setup
   result = {} # here we'll store raw result of PING
   func(:add, :command) { |v| "ping -c #{v.count} -s #{v.size} #{v.dns}" } # construct PING command with current combination of parameters
