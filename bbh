@@ -45,6 +45,8 @@ exit 0 if options.mode == "space"
 space.func(:run)
 logger.info "Series #{series} completed"
 
-space.output(format: :csv, file: "./log/bbh-#{config.hook}-#{series}-result.csv")
+report = "./log/bbh-#{config.hook}-#{series}-result.csv"
+FileUtils.mkdir_p(File.dirname(report))
+space.output(format: :csv, file: report)
 space.output(colorize: true, align: true)
 

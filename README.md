@@ -29,7 +29,7 @@ Given your workload, BBH unfdolds its entire performance landscape. This makes b
 
 **LUCID.** BBH unfdolds the entire performance landscape for you, leaving no stone unturned: you can take your BA/BI tool and visualize all possible combinations of input parameters and their influence on the application.
 
-# How it works
+# Benchmarking Approach
 
 * As input, BBH takes *workload file* that describes
   * The workload you want to benchmark (in its simplest form, it's just application name, such as 'dd', 'ping', etc.)
@@ -64,9 +64,27 @@ You can open the CSV file in any BA/BI tool you prefer to visualize and analyze 
 
 ![Example of chart based on CSV output of BBH](doc/pictures/bbh_output_chart.png)
 
+# Telegram Logging
+
+Benchmarking can take long time. For convenience, you can tell BBH to duplicate its input directly to [Telegram](https://telegram.org/) on your mobile device.
+Then you'll be able to track progress in real time.
+This is especially convenient for debugging purposes, when you want to quickly see if something goes weird.
+
+You can enable Telegram logging in two steps:
+1. Create Telegram bot: open Telegram, search for @BotFather, type `/newbot` and follow instructions
+2. Put the bot token to `~/.bbh/telegram` on the machine that launches `./bbh`
+
+That's it, on the next launch, BBH will notice the token and start duplicating its log to your Telegram bot:
+
+![Bot bot logging started](doc/pictures/bbh_bot_logging_started.jpg)
+
+![Bot bot logging completed](doc/pictures/bbh_bot_logging_completed.jpg)
+
+NOTE: By design, Telegram's bots go to sleep by timeout, if inactive. If `./bbh` tells you that the bot has gone asleep, just awake the bot by sending any text to it.
+
 # How it Works
 
-When we investigate ping latency, we start from the fact that ping depends on two parameters:
+As we explore ping latency, we start from the fact that ping depends on two parameters:
 - URL of DNS provider
 - Packet size
 
@@ -93,9 +111,7 @@ The workload file includes mandatory field:
 
 ```json
 	"workload": {
-		...
 		"hook: "ping_dns"
-		...
 	}
 ```
 
@@ -189,7 +205,3 @@ Effectively, this is it. And the final notes:
 
 As the summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
 
-```
-git clone https://github.com/Yuri-Rassokhin/BenchmarkBeholder
-cd ./BenchmarkBeholder
-```
