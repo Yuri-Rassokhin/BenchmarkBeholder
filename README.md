@@ -5,9 +5,9 @@ Without exaggeration, the "workload" can be anything you can measure: applicatio
 
 BBH helps you answer hot and practical questions:
 
-**HOW DO I TUNE MY WORKLOAD FOR THE HIGHEST PERFORMANCE AND SCALABILITY ?**
-**WHAT IMPLEMENTATION OF MY WORKLOAD SHOULD I CHOOSE FOR THE TASK ?**
-**HOW DO I PROVE IF MY WORKLOAD HAS BEEN TUNED AT ITS BEST ?**
+* **HOW DO I TUNE MY WORKLOAD FOR THE HIGHEST PERFORMANCE AND SCALABILITY ?**
+* **WHAT IMPLEMENTATION OF MY WORKLOAD SHOULD I CHOOSE FOR THE TASK ?**
+* **HOW DO I PROVE IF MY WORKLOAD HAS BEEN TUNED AT ITS BEST ?**
 
 BBH's approach of sweeping over all valid combinations of input parameters and benchmarking target metrics for each combination is called sweep analysis.
 When it clarifies these three questions for you, it does it constructively: you will disclose optimal  and suboptimal combinations of parameters, quantified influence of parameters, and trends and edge cases, if any.
