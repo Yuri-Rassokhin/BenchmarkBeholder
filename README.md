@@ -1,20 +1,27 @@
 # BenchmarkBeholder
 
-BenchmarkBeholder, or simply BBH, is a tool for performance benchmarking of ANY workload against ALL combinations of input parameters of the application.
+BenchmarkBeholder, abbreviated BBH, is a tool for performance benchmarking of ANY workload against ALL combinations of input parameters of the workload.
+Great news is that "workload" can be literally anything you can measure: application, AI model, HTTP server, filesystem, database, block device, GPU, RAM, and so forth.
+
 This approach is called sweep analysis, and it allows you to:
 
-1. Determine optimal combination of input parameters.
-2. Determine suboptimal combinations of input parameters.
-3. Quantify influence of input parameters.
-4. Disclose correlations between input parameters and/or performanc of your target workload.
+- Determine optimal combination of input parameters
+- Quantify influence of input parameters
 
-Great news is that `workload` can be literally anything you can measure: conventional application, AI model, HTTP server, filesystem, database, etc.
+By doing this, BBH helps you to answre two very practical and very hot questions:
 
-BBH has been designed to anwer practical questions:
-1. How do I achieve the highest performance of my workload?
-2. What application/AI model/filesystem/database/etc should I choose for the task?
+1. HOW DO I TUNE MY WORKLOAD FOR THE HIGHEST PERFORMANCE AND SCALABILITY ?
+2. WHAT IMPLEMENTATION OF MY WORKLOAD SHOULD I CHOOSE FOR THE TASK ?
 
-Given your workload, BBH unfdolds its entire performance landscape. It makes benchmarking insightful, efficient, and comfortable as it implememts R.E.A.L. paradigm:
+For instance, BBH allows you to compare and choose
+* Better performing AI model for your use case
+* Optimal storage by performance/cost ratio for the AI model
+* Assess performance of CPU RAM and decide if you should use CPU RAM as a cache of RAG index for the AI model
+* Compare performance/price of GPU models to run your AI model
+
+# What Makes it Cool
+
+Given your workload, BBH unfdolds its entire performance landscape. This makes benchmarking insightful, efficient, comfortable, and complete - thanks to R.E.A.L. paradigm implanted in BBH.
 
 **REPRODUCIBLE.** BBH stores benchmark results with their configuration, making them reproducible.
 
@@ -24,17 +31,16 @@ Given your workload, BBH unfdolds its entire performance landscape. It makes ben
 
 **LUCID.** BBH unfdolds the entire performance landscape for you, leaving no stone unturned: you can take your BA/BI tool and visualize all possible combinations of input parameters and their influence on the application.
 
-# How Does It Work?
+# How it works
 
 * As input, BBH takes *workload file* that describes
   * The workload you want to benchmark (in its simplest form, it's just application name, such as 'dd', 'ping', etc.)
   * All desired values of all input parameters of your workload
-* BBH builds *parameter space* as a Cartesian product of the values of all the parameters
+* BBH builds *parameter space*, that is, all combinations of the values of the parameters
 * BBH invokes your workload against all combinations from the parameter space
-* For each invocation, BBH collects specified metrics
-* Optionally, BBH enriches them with infrastructure metrics
-* For each invocation, BBH generates benchmark report: input parameters, accumulated metrics, and (optionally) infrastructure metrics
-* Finally, BBH provides a simple CSV report with all the benchmark results for the specified parameter space
+* For each invocation, BBH collects metrics you specifed
+* Optionally, BBH enriches them with infrastructure metrics from the environment it runs on
+* Finally, BBH provides CSV report with benchmark results: combination of parameter values, calculated metrics, and (optional) infeastructure metrics
 
 # Quick Start
 
