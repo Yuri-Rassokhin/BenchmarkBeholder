@@ -72,9 +72,7 @@ Now, you can open the CSV file in any BA/BI tool you like, visualize it, and ana
 # Telegram Logging
 
 Benchmarking can take long time. For your convenience, you can tell BBH to duplicate its logging to [Telegram](https://telegram.org/) on your mobile device.
-Then you'll be able to track progress in real time. This is especially convenient for debugging purposes, when you want to quickly see if something goes weird.
-
-You can enable Telegram logging in two steps:
+Then you'll be able to track progress in real time. This is especially convenient for debugging purposes, when you want to quickly see if something goes weird. Enabling Telegram logging takes two steps:
 1. Create Telegram bot: open Telegram, search for @BotFather, type `/newbot` and follow instructions
 2. Put the bot token to `~/.bbh/telegram` file on the machine that launches `./bbh`
 
