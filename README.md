@@ -45,7 +45,7 @@ Given your workload, BBH unfdolds its entire performance landscape. This makes b
 
 # Quick Start
 
-Let's take an example. Perhaps, we want to answer the question: **"How do I achieve the best ping latency to global DNS service?"** Just type
+Let's take an example. Perhaps, we want to answer the question: **how do I achieve the best ping latency to global DNS service?** Just type:
 
 ```bash
 ./bbh ./workloads/ping_dns.json
