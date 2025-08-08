@@ -5,7 +5,7 @@
 # About
 
 BenchmarkBeholder, abbreviated BBH, is a tool for performance benchmarking of ANY workload against ALL combinations of input parameters of the workload.
-Without exaggeration, the "workload" can be anything you can measure: application, AI model, HTTP server, filesystem, database, block device, GPU, RAM, and so forth.
+Without exaggeration, the workload can be anything you can measure: application, AI model, HTTP server, filesystem, database, block device, GPU, RAM, and so forth.
 
 BBH helps you answer hot and practical questions:
 
