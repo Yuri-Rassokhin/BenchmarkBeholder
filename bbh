@@ -19,10 +19,9 @@ series = Time.now.to_i.to_s # start counting total processing time
 
 logger = Log.new # logger for the entire application
 
-options = Options.new(logger, ARGV) # parse CLI options
-
 logger.info "Starting series #{series}"
 
+options = Options.new(logger, ARGV) # parse CLI options
 config = Config.new(logger, options.workload) # parse the workload configuration file
 config[:parameters][:host] = options.hosts # add benchmark nodes from CLI
 config[:parameters][:series] = series # add unique series ID
