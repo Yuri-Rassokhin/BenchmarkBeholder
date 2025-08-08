@@ -6,11 +6,15 @@ attr_reader :mode, :hosts, :workload
 
 def initialize(logger, argv)
   @logger = logger
-  @hosts = [ "127.0.0.1" ]
+  @hosts = []
   @mode = "launch"
   @workload = nil
   @hooks = Dir.entries("./sources/hooks") - %w[. ..]
   options_parse(argv)
+  if @hosts == []
+    @logger.info "no nodes specified, running on 127.0.0.1"
+    @hosts = [ '127.0.0.1' ]
+  end
 end
 
 private
@@ -19,7 +23,7 @@ def options_parse(argv)
   options = {}
 
   parser = OptionParser.new do |opts|
-    opts.banner = "Usage: bbh [-v] [-h] [-d] [-u] [-s] [workload_file] [host] ..."
+    opts.banner = "Usage: bbh [-v] [-h] [-s] [workload_file] [host] ..."
 
     opts.on('-h', '--help', 'Show help') do
       opts.to_s.each_line { |line| @logger.info line.chomp }
@@ -56,7 +60,7 @@ def options_parse(argv)
       exit 1
     end
     @workload = args.shift
-    @hosts ||= args
+    @hosts = (@hosts ? @hosts += args : args)
   end
 end
 
