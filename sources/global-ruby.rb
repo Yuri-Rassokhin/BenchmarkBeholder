@@ -2,7 +2,7 @@ require 'json'
 require 'net/ssh'
 require 'method_source'
 require 'shellwords'
-require 'ripper'
+#require 'ripper'
 require 'set'
 require 'singleton'
 
@@ -261,7 +261,7 @@ original_method =
 
       remote_script = <<~RUBY
         require 'json'
-        require 'stringio'
+        # require 'stringio'
         output_stream = StringIO.new
         original_stdout = $stdout
         original_stderr = $stderr
