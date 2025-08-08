@@ -1,0 +1,23 @@
+# Gemfile
+source "https://rubygems.org"
+
+ruby ">= 3.0"
+
+gem "json"
+gem "dry-validation"
+gem "net-ssh"
+gem "net-http"
+gem "method_source"
+gem "shellwords"
+#gem "ripper"
+gem "set"
+gem "singleton"
+#gem "stringio"
+gem "tempfile"
+gem "fileutils"
+gem "oci"
+gem "open3"
+gem "logger"
+gem "telegram"
+gem "optparse"
+gem "flex-cartesian", "~> 1.2"
