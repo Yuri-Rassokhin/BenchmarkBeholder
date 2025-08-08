@@ -35,7 +35,7 @@ def setup
   end
 
   self.func(:add, :result, hide: true) do |v|
-    Scheduler.switch(@logger, v.scheduler, @target.infra[v.host][:volumes])
+    Global.run(binding, Scheduler.method(:switch), @logger, v.scheduler, @target.infra[v.host][:volumes])
     result = Global.run(binding, v.host, proc { `#{v.command} 2>&1>/dev/null`.strip })
   end
 
