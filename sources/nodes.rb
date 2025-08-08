@@ -1,10 +1,10 @@
+require 'net/ssh'
 
 module Nodes
   module_function
 
-#  require './sources/infrastructure/utilities_general.rb'
-
 def self.check(logger, config)
+  self.check_ssh_availability(logger, config.hosts)
   self.check_ssh_persistance(logger)
   self.check_another_instance(logger, config.hosts)
   self.check_dependencies(logger, config.hosts)
@@ -23,7 +23,10 @@ end
 def self.check_ssh_availability(logger, hosts)
   logger.info "checking SSH availability of benchmark nodes"
   hosts.each do |host|
-    logger.error("#{agent.error}") if !agent.available?(host)
+    Net::SSH.start(host, non_interactive: true, timeout: 2) { |ssh| return true }
+    rescue Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout, SocketError
+      logger.error "node #{host} is unavailable via SSH"
+      exit 0
   end
 end
 
