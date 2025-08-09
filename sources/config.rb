@@ -76,7 +76,7 @@ def check_schema
     exit 0
   end
   require_relative @schema # load semantic schema of parameters
-  result = SCHEMA.call(@data) # apply the schema
+  result = Schema.validate.call(@data) # apply the schema
 
   if !result.success?
     result.errors.each do |error|

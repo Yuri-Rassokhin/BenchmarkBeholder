@@ -9,7 +9,10 @@ def initialize(logger, config, target)
   @target = target
   counter_set
   setup
+  load "./sources/hooks/#{@config[:workload][:hook]}/metrics.rb"
 end
+
+#require_relative "../#{@config[:workload][:hook]}/metrics.rb"
 
 private
 
@@ -23,7 +26,7 @@ def counter_set
 end
 
 def setup
-  # must be implemented in child class of your hook
+  Metrics.setup(self, @logger, @config)
 end
 
 end
