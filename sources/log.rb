@@ -35,7 +35,7 @@ class Log
     token_file = File.expand_path("~/.bbh/telegram")
 
     unless File.exist?(token_file)
-      @logger.warn("telegram token hasn't been specified, there will be no telegram output")
+      @logger.warn("telegram token is not specified, there will be no telegram logging")
       return { token: nil, chat_id: nil }
     end
 
