@@ -2,7 +2,7 @@ require 'json'
 require 'net/ssh'
 require 'method_source'
 require 'shellwords'
-#require 'ripper'
+require 'ripper'
 require 'set'
 require 'singleton'
 
@@ -261,7 +261,7 @@ original_method =
 
       remote_script = <<~RUBY
         require 'json'
-        # require 'stringio'
+        require 'stringio'
         output_stream = StringIO.new
         original_stdout = $stdout
         original_stderr = $stderr
@@ -289,12 +289,12 @@ original_method =
       RUBY
 
       output = ""
-#      File.write("/tmp/code_dump.txt", remote_script) # DEBUG
+      File.write("/tmp/code_dump.txt", remote_script) # DEBUG
       Net::SSH.start(host) do |ssh|
         output = ssh.exec!("ruby -e #{Shellwords.escape(remote_script)}")
       end
       begin
-#        File.write("/tmp/result_dump.txt", output) # DEBUG
+        File.write("/tmp/result_dump.txt", output) # DEBUG
         JSON.parse(output.strip)
       rescue => e
         puts "global execution error: #{e.message}"
