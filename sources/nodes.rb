@@ -23,7 +23,7 @@ end
 def self.check_ssh_availability(logger, hosts)
   logger.info "checking SSH availability of benchmark nodes"
   hosts.each do |host|
-    Net::SSH.start(host, non_interactive: true, timeout: 2) { |ssh| return true }
+    Net::SSH.start(host, nil, non_interactive: true, timeout: 2) { |ssh| return true }
     rescue Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout, SocketError
       logger.error "node #{host} is unavailable via SSH"
       exit 0
