@@ -8,7 +8,7 @@ module Platform
 def platform_collect(logger, target, has_device)
   result = {
     platform: platform,
-    shape: shape,
+    shape: shape(platform),
     device: main_device(target),
     kernel: kernel_release,
     os_release: os_release,
@@ -59,31 +59,32 @@ def check_device(logger, src)
   }
 end
 
-def shape
-  # Check if it's OCI
-  shape = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
-  return shape.strip.gsub(/["",]/, '') if shape != ""
-
-  # Check if it's Azure
-  shape = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
-  return shape.strip.gsub(/["",]/, '') if shape != ""
-
-  # Check if it's AWS
-  shape = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
-  return shape.strip.gsub(/["",]/, '') if shape != "No such metadata item"
-
-  "unknown"
+def shape(platform)
+  case platform
+  when "oci"
+    raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
+    return raw.strip.gsub(/["",]/, '') if shape != ""
+  when "azure"
+    raw = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
+    return raw.strip.gsub(/["",]/, '') if shape != ""
+  when "aws"
+    raw = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
+    return raw.strip.gsub(/["",]/, '')
+    #if shape != "No such metadata item"
+  else
+    return "unknown"
+  end
 end
 
 def platform
   shape = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
-  return "oci" if shape != ""
+  return "oci" if not shape.empty?
 
   shape = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
-  return "azure" if shape != ""
+  return "azure" if not shape.empty?
 
   shape = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
-  return "aws" if shape != "No such metadata item"
+  return "aws" if not shape.empty?
 
   "unknown"
 end
