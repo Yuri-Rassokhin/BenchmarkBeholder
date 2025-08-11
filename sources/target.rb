@@ -46,17 +46,25 @@ end
 
 def consistent_target
   @hosts.each do |h|
+    unless Global.run(binding, h, File.method(:exist?), @target)
+      @logger.error "target #{@protocol} #{@target} is missing on benchmark node #{h}"
+      exit 0
+    end
     case @protocol
       when "file"
-        @logger.error "target '#{@target}' mismatch on '#{h}', regular file expected" unless Global.run(binding, h, File.method(:exist?), @target)
+        @logger.error "target '#{@target}' mismatch on '#{h}', regular file expected" unless Global.run(binding, h, File.method(:file?), @target)
+        exit 0
       when "directory"
         @logger.error "target '#{@target}' mismatch on '#{h}', directory expected" unless Global.run(binding, h, File.method(:directory?), @target)
+        exit 0
       when "block"
         @logger.error "target '#{@target}' mismatch on '#{h}', block device expected" unless Global.run(binding, h, File.method(:blockdev?), @target)
+        exit 0
       when "ram", "gpu", "http", "cpu", "object", "bucket"
         @logger.warn "this target is NOT yet checked properly"
       else
         @logger.error "unsupported target: '#{File.stat(@config.target)}'"
+        exit 0
       end
     end
 end
