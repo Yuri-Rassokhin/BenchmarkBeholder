@@ -1,0 +1,15 @@
+{
+	"workload": {
+		"hook": "fio",
+		"actor": "fio",
+		"protocol": "file",
+		"target": "/tmp/dump"
+	},
+	"parameters": {
+		"operation": [ "read", "write", "randread", "randwrite" ],
+		"block": [ "4k" ],
+		"iodepth": [ 64, 512, 256, 512, 1024 ],
+		"jobs": [ 1, 2, 4, 8, 16, 32, 64, 128, 256 ]
+	fio --direct=1 --unit_base=8 --kb_base=1024 --rw=randwrite --bs=4k --ioengine=libaio --iodepth=1024 --runtime=30 --numjobs=256 --time_based --group_reporting --name=fio --eta-newline=1 --filename=/heap/md0/dump.raw
+	}
+}
