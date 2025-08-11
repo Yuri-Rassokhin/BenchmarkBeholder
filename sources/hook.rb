@@ -7,9 +7,10 @@ def initialize(logger, config, target)
   @logger = logger
   @config = config
   @target = target
+  @hook = @config[:workload][:hook]
   counter_set
   setup
-  load "./sources/hooks/#{@config[:workload][:hook]}/metrics.rb"
+  load "./sources/hooks/#{@hook}/metrics.rb"
 end
 
 #require_relative "../#{@config[:workload][:hook]}/metrics.rb"
@@ -17,11 +18,13 @@ end
 private
 
 def counter_set
+  @time_start = Time.now.to_i
   @counter = 0
   @total = self.size
   self.func(:add, :counter, hide: true) do |v|
     @counter += 1
-    @logger.info "invocation #{@counter} of #{@total}: #{self.dimensions(v, separator: ' ')}"
+    @done = (@counter*100/@total.to_f).to_i
+    @logger.info " #{@hook} #{@counter}/#{@total} (#{@done}%): #{self.dimensions(v, separator: ' ')}"
   end
 end
 
