@@ -1,12 +1,7 @@
 require 'tempfile'
 
-class Metrics < Hook
-
-def initialize(logger, config, target)
-  super(logger, config, target)
-end
-
-private
+module Metrics
+  module_function
 
 def file_init
   size = @config[:workload][:total_size]
@@ -19,7 +14,7 @@ def file_init
   end
 end
 
-def setup
+def setup(space, logger, config)
   file_init
 
   result = ""
