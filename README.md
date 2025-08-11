@@ -16,9 +16,7 @@ BBH helps you answer hot and practical questions:
 BBH's approach of sweeping over all valid combinations of input parameters and benchmarking target metrics for each combination is called sweep analysis.
 When it clarifies these three questions for you, it does it constructively: you will disclose optimal  and suboptimal combinations of parameters, quantified influence of parameters, and trends and edge cases, if any.
 
-# What is It For?
-
-Perhaps you need to choose an optimal AI model and SW+HW configuration for a chatbot. With BBH, you will easily:
+For instance, you need to choose an optimal AI model and SW+HW configuration for a chatbot. With BBH, you will easily:
 * Compare and choose highest-performing AI model for your task
 * Compare and choose optimal storage by performance/cost ratio
 * Assess performance of CPU RAM and decide if you should use CPU RAM as RAG cache for your task
@@ -89,8 +87,7 @@ That's it. During next launch, BBH will notice the token and start duplicating i
 
 NOTE: By design, Telegram makes inactive bot go asleep by timeout. If `./bbh` tells you that the bot has gone asleep, just awake the bot by sending any text to it.
 
-# How it Works
-
+# Workload Description
 As we explore ping latency, we start from the fact that `ping` requires two parameters: URL of DNS provider and packet size.
 Therefore, our workload file `./workloads/ping_dns.json` should specify valid values of these parameters. For instance, it can be the following (except for my comments - JSON doesn't support them):
 ```jsonc
@@ -107,105 +104,26 @@ Therefore, our workload file `./workloads/ping_dns.json` should specify valid va
 }
 ```
 
-# How to Integrate New Applications
+This example gives you an idea of how you can describe ANY workload configuration for BBH.
 
-You can describe any workload you want, and integrate it to BBH.
-For the sake of example, let's have a look at `ping_dns` integration.
-Its workload file includes mandatory field:
+# What Workloads Can I Benchmark Right Now?
 
-```json
-	"workload": {
-		"hook": "ping_dns"
-	}
+You can see already integrated workloads by typing `./bbh -v`. In the example below, `dd` and `ping_dns` workloads are already integrated. In this repository, new workloads are added regularly.
+
+```bash
+2025-08-11 20:34:40 [INFO] Starting series 1754944480
+2025-08-11 20:34:40 [INFO] ### BenchmarkBeholder ###
+2025-08-11 20:34:40 [INFO] Home page: https://github.com/Yuri-Rassokhin/BenchmarkBeholder
+2025-08-11 20:34:40 [INFO] Supported workloads: dd, ping_dns
+2025-08-11 20:34:40 [INFO] Supported cloud platforms: OCI, AWS, Azure
+2025-08-11 20:34:40 [INFO] Supported local filesystems: XFS, ext3/4, btrfs, and any other POSIX-compliant
+2025-08-11 20:34:40 [INFO] Supported shared filesystems: GlusterFS, NFS, BeeGFS
+2025-08-11 20:34:40 [INFO] Supported special storage: raw block device, mdadm RAID, tmpfs, ramfs, brd, vboxsf
+2025-08-11 20:34:41 [INFO] Supported operating systems: Ubuntu, RHEL/CentOS, Fedora, Oracle Linux
 ```
 
-The hook points to the directory under `./sources/hooks/ping_dns` where two integration files reside:
-- `schema.rb`, schema of the workload file
-- `metrics.rb`, description of the metrics that must be calculated for each combination of parameters
+# How to Benchmark New Workload
 
-## Creating Workload Schema
-
-This file follows notation of [dry-validation](https://rubygems.org/gems/dry-validation) Ruby library that describes syntax and semantics of JSON in a self-commenting manner.
-In our example, here is the schema file `./sources/hooks/ping_dns/schema.rb`:
-
-```ruby
-SCHEMA = Dry::Schema.JSON do
-
-  required(:workload).hash do
-    required(:hook).filled(:string) # hook must be a string
-    required(:actor).filled(:string) # actor must be a string
-    required(:iterations).filled(:integer, gt?: 0) # iterations must be a natural number
-  end
-
-  required(:parameters).hash do
-    required(:dns).array(:string, min_size?: 1, included_in?: %w[8.8.8.8 1.1.1.1 208.67.222.222]) # DNS providers must be a list of valid URLs
-    required(:size).array(:integer, min_size?: 1, gteq?: 16) # Packet size must be a list of integers >= 16 (for lesser values, PING is unable to generate statistics)
-  end
-
-end
-```
-
-Whenever you run `./bbh my-workload-file` and my-workload-file refers to the hook `ping_dns`, the schema above will apply to it, and BBH will check syntax and semantics of your workload file.
-
-## Creating Target Metrics
-
-Now you need to specify what metrics BBH should calculate during benchmarking.
-In our example, this file is `./sources/hooks/ping_dns/metrics.rb`:
-
-```ruby
-class Benchmarking < Hook
-
-def initialize(logger, config, target)
-  super(logger, config, target)
-end
-
-private
-
-# In the `setup` method, you specify all the target metrics BBH should calculate for each combination of parameters
-# Vector `v` refers to current combination of parameters
-# You can refer to values of individual parameters by their names: `v.time`, `v.size`, etc, using the same parameter names as you defined in your workload file
-# BBH will call `setup` just once, at startup, to define target metrics - that is, to know WHAT and HOW it should derive from the workload
-# After that, BBH will launch the benchmarking and sweep `v` over all valid combinations of parameters
-# NOTE: If you need pre-benchmark preparation, just place it in the beginning of `setup`
-# NOTE: If you need preparation before EACH combination is benchmarked, define it as one more `func(:add, ...)` and call it from the function that invokes benchmark
-def setup
-  result = {} # here we'll store raw result of PING
-  func(:add, :command) { |v| "ping -c #{v.count} -s #{v.size} #{v.dns}" } # construct PING command with current combination of parameters
-  func(:add, :raw_ping, hide: true) { |v| result[v.command] ||= `#{v.command} 2>&1` } # run PING and capture its raw result
-  func(:add, :time) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = [^\/]+\/([^\/]+)/, 1]&.to_f } # extract ping time from result
-  func(:add, :min) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = ([^\/]+)/, 1]&.to_f } # extract min ping time from result
-  func(:add, :loss) { |v| v.raw_ping[/(\d+(?:\.\d+)?)% packet loss/, 1]&.to_f } # extract loss rate from result
-end
-
-end
-```
-
-All you need to edit in this class is `setup` method.
-Calls `func(:add, ...)` are the DSL of [flex-cartesian](https://rubygems.org/gems/flex-cartesian) Ruby library, which provides a simple way for defining functions on a Cartesian product (that is, on all combinations of given parameters). Let's go through the functions in our example. The following functions are added to be called for each combination of parameters, `v`.
-
-The function `command` constructs a `ping` command with current parameters, as a string.
-```ruby
-  func(:add, :command) { |v| "ping -c #{v.count} -s #{v.size} #{v.dns}" } # construct PING command with current combination of parameters
-```
-
-The function `raw_ping` executes `ping` command constructed by `command` function and caches its raw output in a variable.
-Caching allows to avoid excessive invocations of the same command every time `raw_ping` is called.
-Not only such caching maintains consistency of the benchmarking results, but speeds up overall process as well.
-```ruby
-  func(:add, :raw_ping, hide: true) { |v| result[v.command] ||= `#{v.command} 2>&1` } # run PING and capture its raw result
-```
-
-The function `time` extracts average ping time from the raw output provided by `raw_ping` function.
-```ruby
-  func(:add, :time) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = [^\/]+\/([^\/]+)/, 1]&.to_f } # extract ping time from result
-```
-
-This should give you general idea of adding metrics, and we're omitting a couple of similar functions, `min` to extract minimal ping time, and `loss` to extract loss rate.
-Effectively, this is it.
-Just a few final notes on the mechanism of functions:
-- A function appears in the benchmarking report as a column of the values it calculates, column named after the function
-- Functions can refer to one another, as well as variables and methods in your code. This makes functions a VERY powerful and flexible mechanism
-- If you don't need a function to appear in the benchmarking report (for instance, intermediate calculations such as `:raw_ping`), you just add the function with the flag `hide: true`
-
-As a summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
+To benchmark a new workload, it must be integrated to BBH. Integration requires you to write two simple files: schema of input parameters of the workload, and description of the metrics derived from the workload.
+Step-by-step integration with example is described here.
 
