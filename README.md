@@ -126,5 +126,5 @@ You can see already integrated workloads by typing `./bbh -v`. In the example be
 
 To benchmark a new workload, it must be integrated to BBH.
 You have to write three simple files: workload description; workload schema; and workload metrics.
-You shall find an example of [ping_dns](./sources/hooks/ping_dns) integration.
+Here is step-by-step [explanation](./doc/integration.md) by example.
 
