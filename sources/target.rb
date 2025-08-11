@@ -36,7 +36,7 @@ def check(logger, config)
   logger.error "target protocol is not supported: #{@protocol}" unless protocol_supported?(@protocol)
   logger.error "target is missing" unless @target
 
-  consistent_target
+#   exit 0 if not consistent_target?
 
   if schedulers_apply?
     Scheduler.prepare(logger, config)
@@ -44,29 +44,31 @@ def check(logger, config)
   end
 end
 
-def consistent_target
+def consistent_target?
   @hosts.each do |h|
+
     unless Global.run(binding, h, File.method(:exist?), @target)
       @logger.error "target #{@protocol} #{@target} is missing on benchmark node #{h}"
-      exit 0
+      return false
     end
-    case @protocol
-      when "file"
-        @logger.error "target '#{@target}' mismatch on '#{h}', regular file expected" unless Global.run(binding, h, File.method(:file?), @target)
-        exit 0
-      when "directory"
-        @logger.error "target '#{@target}' mismatch on '#{h}', directory expected" unless Global.run(binding, h, File.method(:directory?), @target)
-        exit 0
-      when "block"
-        @logger.error "target '#{@target}' mismatch on '#{h}', block device expected" unless Global.run(binding, h, File.method(:blockdev?), @target)
-        exit 0
-      when "ram", "gpu", "http", "cpu", "object", "bucket"
-        @logger.warn "this target is NOT yet checked properly"
-      else
-        @logger.error "unsupported target: '#{File.stat(@config.target)}'"
-        exit 0
-      end
+
+    case Global.run(binding, h, proc { File.stat.ftype }, @target).file?
+    when "Regular file"
+      @logger.error "target #{@target} mismatch on #{h}: file expected" unless @protocol == "file"
+      return false
+    when "Directory"
+      @logger.error "target #{@target} mismatch on #{h}, directory expected" unless @protocol == "directory"
+      return false
+    when "Block device"
+      @logger.error "target #{@target} mismatch on #{h}, block device expected" unless @protocol == "block"
+      return false
+# TODO: check against "ram", "gpu", "http", "cpu", "object", "bucket"
+    else
+      @logger.error "unsupported target: #{File.stat(@target)}"
+      return false
     end
+  end
+  return true
 end
 
 def register
