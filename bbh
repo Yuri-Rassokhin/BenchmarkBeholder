@@ -29,6 +29,11 @@ config[:parameters][:series] = series # add unique series ID
 Head.check(logger, config) # head node checks such as consistent hook files
 Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
 
+if File.exist?("./sources/hooks/#{config.hook}/prepare.rb")
+  require "./sources/hooks/#{config.hook}/prepare"
+  config.hosts.each { |h| Global.run(binding, h, Prepare.method(:prepare), logger, config) }
+end
+
 target = Target.new(logger, config)
 
 # create the class that implements target metrics using its child named after the hook
