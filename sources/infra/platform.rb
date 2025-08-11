@@ -63,28 +63,28 @@ def shape(platform)
   case platform
   when "oci"
     raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
-    return raw.strip.gsub(/["",]/, '') if shape != ""
+    return raw.strip.gsub(/["",]/, '') if raw != ""
   when "azure"
     raw = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
-    return raw.strip.gsub(/["",]/, '') if shape != ""
+    return raw.strip.gsub(/["",]/, '') if raw != ""
   when "aws"
     raw = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
     return raw.strip.gsub(/["",]/, '')
-    #if shape != "No such metadata item"
+    #if raw != "No such metadata item"
   else
     return "unknown"
   end
 end
 
 def platform
-  shape = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
-  return "oci" if not shape.empty?
+  raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
+  return "oci" if not raw.empty?
 
-  shape = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
-  return "azure" if not shape.empty?
+  raw = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
+  return "azure" if not raw.empty?
 
-  shape = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
-  return "aws" if not shape.empty?
+  raw = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
+  return "aws" if not raw.empty?
 
   "unknown"
 end
