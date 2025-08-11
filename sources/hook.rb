@@ -29,7 +29,7 @@ def counter_set
 end
 
 def setup
-  Metrics.setup(self, @logger, @config)
+  Metrics.setup(self, @logger, @config, @target)
 end
 
 end
