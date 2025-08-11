@@ -122,8 +122,9 @@ You can see already integrated workloads by typing `./bbh -v`. In the example be
 2025-08-11 20:34:41 [INFO] Supported operating systems: Ubuntu, RHEL/CentOS, Fedora, Oracle Linux
 ```
 
-# How to Benchmark New Workload
+# How Do I Benchmark New Workload?
 
-To benchmark a new workload, it must be integrated to BBH. Integration requires you to write two simple files: schema of input parameters of the workload, and description of the metrics derived from the workload.
-Step-by-step integration with example is described here.
+To benchmark a new workload, it must be integrated to BBH.
+You have to write three simple files: workload description; workload schema; and workload metrics.
+You shall find an example of [ping_dns](./sources/hooks/ping_dns) integration.
 
