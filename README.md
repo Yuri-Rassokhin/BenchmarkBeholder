@@ -52,13 +52,14 @@ This workload has already been described in `./workloads/ping_dns.json`, here it
 
 ```jsonc
 {
-	// Describes what application or service to benchmark
-        "workload": {
-                "hook": "ping_dns", // location of integration hook: schema of input parameters and how to fetch target metrics
+	// What application, service, or device to benchmark?
+	"workload": {
+		"hook": "ping_dns", // location of integration hook: schema of input parameters and how to fetch target metrics
                 "actor": "ping",    // application to benchmark
                 "iterations": 4     // how many times to repeat each invocation
         },
-        "parameters": { // what combinations of parameter values to pass to the application
+	// What combinations of parameter values to pass to the application?
+	"parameters": {
                 "dns": [ "8.8.8.8", "1.1.1.1", "208.67.222.222" ],
                 "size": [ 16, 32 ]
         }
