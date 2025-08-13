@@ -46,11 +46,10 @@ You're building a chatbot. With BBH, you can:
 
 ## Quick Start
 
-BBH runs all parameter combinations of the specified workload, saves results as a CSV file, and you're ready to analyze.
-
 ```bash
 ./bbh ./workloads/ping_dns.json
 ```
+BBH runs all parameter combinations of the specified workload, saves results as a CSV file, and you're ready to analyze.
 
 ## Telegram Logging
 Get real-time progress updates by setting up a bot via @BotFather.
