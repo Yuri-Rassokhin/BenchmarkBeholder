@@ -120,7 +120,7 @@ Each line of the output corresponds to unique combination from _parameter space_
 
 The rest of the line is the metrics we defined using the metrics file: `command`, `time`, `min`, and `loss`.
 
-BBH generates result on the screen in plain text table and saves its CSV version to `./log/`bbh-<hook>-<series>-result.csv` file for analysis.
+BBH generates result on the screen in plain text table and saves its CSV version to `./log/bbh-\<hook\>-\<series\>-result.csv` file for analysis.
 
 ## 
 
