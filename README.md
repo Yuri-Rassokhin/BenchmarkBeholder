@@ -16,12 +16,12 @@ It runs <b>all parameter combinations</b> for your task, measures target metrics
 
 ## What is BBH?
 
-BBH systematically benchmarks your workload across all combinations of its input parameters.  
-It helps you:
+BBH systematically benchmarks your workload across all combinations of its input parameters.
+It helps you answer basic questions:
 
-- Tune your system for maximum performance.
-- Choose between competing models, tools, or configurations.
-- Validate that your system is truly optimized.
+- How do I tune for maximum performance and scalability?
+- Which implementation or config is best for my task?
+- How can I prove it’s tuned optimally?
 
 ---
 
