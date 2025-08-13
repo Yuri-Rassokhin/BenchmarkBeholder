@@ -134,6 +134,6 @@ This repository includes a collection of ready-to-go workloads, updated regularl
 
 You can see already integrated workloads by typing `./bbh -v`.
 
-# How Do Add New Workload to BBH?
+# How Do I Add New Workload to BBH?
 
 To benchmark a new workload, it must be integrated to BBH - here is step-by-step [explanation](./doc/integration.md) by example.

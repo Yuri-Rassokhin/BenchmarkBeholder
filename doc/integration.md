@@ -6,6 +6,7 @@ To integrate a new workload, you should create three files:
 * **Workload Description:** `./workloads/ping_dns.json` - this file explains general configuration of the workload (`workload` section) and its input parameters for the benchmarking (`parameters` section).
 * **Workload Schema:** `./source/hooks/ping_dns/schema.rb` - this file describes valid syntax and semantics of the workload file.
 * **Workload Metrics:** `./source/hooks/ping_dns/metrics.rb` - this file describes target metrics to derive from the workload during benchmarking.
+* **(Optional) Workload Preparation:** - this optional file would be named `prepare.rb`, and it would prepare benchmark environment: creates files, launches AI models, etc. In case of `ping_dns`, there is nothing to prepare.
 
 Our workload file includes mandatory field `hook`:
 
