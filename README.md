@@ -4,13 +4,12 @@
 
 <h1 align="center">BenchmarkBeholder</h1>
 <p align="center">
-  <b>Benchmark any workload, explore every parameter combination, and uncover the performance sweet spot.</b>
+  <b>Benchmark any workload, explore every parameter combination, and uncover the performance sweet spot</b>
 </p>
 
 ---
 
-**BenchmarkBeholder (BBH)** is a universal benchmarking tool for <b>any workload</b> — from AI models and APIs to databases, filesystems, GPUs, and beyond.  
-It runs <b>all parameter combinations</b> for your task, measures target metrics, and reveals the optimal setup, trends, and bottlenecks — all in a single sweep.
+**BenchmarkBeholder (BBH)** is a universal benchmarking tool for <b>any workload</b> — from AI models and APIs to databases, filesystems, GPUs, and beyond. It runs <b>all parameter combinations</b> for your task, measures target metrics, and reveals the optimal setup, trends, and bottlenecks — all in a single sweep.
 
 ---
 
