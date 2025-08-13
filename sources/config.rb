@@ -5,7 +5,7 @@ class Config
 
 def initialize(logger, config_path)
   @logger = logger
-  @data = load_json(config_path)
+  @data = preprocess(load_json(config_path))
   @schema = "./hooks/#{hook}/schema.rb"
   check_schema
 end
@@ -55,6 +55,11 @@ def defined?(*keys)
 end
 
 private
+
+# umbrella method for any preprocessing of workload file
+def preprocess(json)
+  Utilities.json_unscale(@logger, json)
+end
 
 def load_json(path)
   result = JSON.parse(File.read(path), symbolize_names: true)
