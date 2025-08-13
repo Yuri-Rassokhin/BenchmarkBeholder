@@ -2,19 +2,19 @@
   <img src="doc/pictures/logo.png" alt="BenchmarkBeholder Logo" width="100%"/>
 </p>
 
-<h1 align="center">BenchmarkBeholder (BBH)</h1>
+<h1 align="center">BenchmarkBeholder</h1>
 <p align="center">
   <b>Test any workload, explore every parameter combination, and uncover the performance sweet spot.</b>
 </p>
 
 ---
 
-**BBH** is a universal benchmarking tool for <b>any workload</b> — from AI models and APIs to databases, filesystems, GPUs, and beyond.  
+**BenchmarkBeholder (BBH)** is a universal benchmarking tool for <b>any workload</b> — from AI models and APIs to databases, filesystems, GPUs, and beyond.  
 It runs <b>all parameter combinations</b> for your task, measures target metrics, and reveals the optimal setup, trends, and bottlenecks — all in a single sweep.
 
 ---
 
-## 🚀 What is BBH?
+## What is BBH?
 
 BBH systematically benchmarks your workload across all combinations of its input parameters.  
 It helps you:
@@ -25,7 +25,7 @@ It helps you:
 
 ---
 
-## 💡 Example Use Case
+## Example Use Case
 
 You're building a chatbot. With BBH, you can:
 
@@ -36,16 +36,16 @@ You're building a chatbot. With BBH, you can:
 
 ---
 
-## ✨ Key Features
+## R.E.A.L. Features
 
 - **Reproducible** — Stores all configs + metrics.
 - **Extensible** — Works with any workload or platform (AWS, Azure, OCI).
 - **Accumulative** — Saves results in CSV for long-term tracking.
-- **Visual-friendly** — Compatible with Excel, Power BI, Tableau, etc.
+- **Lucid** — Complete performance landscape for visualization in Excel, Power BI, Tableau, etc.
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ```bash
 ./bbh ./workloads/ping_dns.json
