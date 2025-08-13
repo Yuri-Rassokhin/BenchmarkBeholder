@@ -50,7 +50,7 @@ Given your workload, BBH unfdolds its entire performance landscape. This makes b
 Let's take an example. Perhaps, we want to answer the question: **how do I achieve the best ping latency to global DNS service?**
 This workload has already been described in `./workloads/ping_dns.json`, here it is commented (note that JSON doesn't support comments, I only put them for clarity).
 
-```json
+```jsonc
 {
 	// Describes what application or service to benchmark
         "workload": {
