@@ -5,7 +5,7 @@
 		"protocol": "file",
 		"target": "/tmp/dump",
 		"iterations": 4,
-		"total_size": "2G",
+		"total_size": "5G",
 		"units": "MB/s",
 		"precision": 3
 	},
