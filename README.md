@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="doc/pictures/bbh-logo-black.png" alt="BenchmarkBeholder Logo" width="100%"/>
+  <img src="doc/pictures/logo.png" alt="BenchmarkBeholder Logo" width="100%"/>
 </p>
 
 <h1 align="center">BenchmarkBeholder (BBH)</h1>
