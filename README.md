@@ -75,7 +75,6 @@ As you can see, the workload file simply describes
   * How to fetch target metrics during benchmarking?
 
 Just type `./bbh ./workloads/ping_dns.json` to make `ping` benchmark against all `workload/parameters` described in the workload file:
-```
 
 <p align="center">
   <img src="doc/pictures/ping_dns.png" alt="Example of BBH output" width="60%"/>
@@ -128,25 +127,13 @@ Therefore, our workload file `./workloads/ping_dns.json` should specify valid va
 
 This example gives you an idea of how you can describe ANY workload configuration for BBH.
 
-# What Workloads Can I Benchmark Right Now?
+# What Workloads Can I Benchmark?
 
-You can see already integrated workloads by typing `./bbh -v`. In the example below, `dd` and `ping_dns` workloads are already integrated. In this repository, new workloads are added regularly.
+You can benchmark literally _anything_ as long as you quickly write integration hook.
+This repository includes a collection of ready-to-go workloads, updated regularly.
 
-```bash
-2025-08-11 20:34:40 [INFO] Starting series 1754944480
-2025-08-11 20:34:40 [INFO] ### BenchmarkBeholder ###
-2025-08-11 20:34:40 [INFO] Home page: https://github.com/Yuri-Rassokhin/BenchmarkBeholder
-2025-08-11 20:34:40 [INFO] Supported workloads: dd, ping_dns
-2025-08-11 20:34:40 [INFO] Supported cloud platforms: OCI, AWS, Azure
-2025-08-11 20:34:40 [INFO] Supported local filesystems: XFS, ext3/4, btrfs, and any other POSIX-compliant
-2025-08-11 20:34:40 [INFO] Supported shared filesystems: GlusterFS, NFS, BeeGFS
-2025-08-11 20:34:40 [INFO] Supported special storage: raw block device, mdadm RAID, tmpfs, ramfs, brd, vboxsf
-2025-08-11 20:34:41 [INFO] Supported operating systems: Ubuntu, RHEL/CentOS, Fedora, Oracle Linux
-```
+You can see already integrated workloads by typing `./bbh -v`.
 
-# How Do I Benchmark New Workload?
+# How Do Add New Workload to BBH?
 
-To benchmark a new workload, it must be integrated to BBH.
-You have to write three simple files: workload description; workload schema; and workload metrics.
-Here is step-by-step [explanation](./doc/integration.md) by example.
-
+To benchmark a new workload, it must be integrated to BBH - here is step-by-step [explanation](./doc/integration.md) by example.
