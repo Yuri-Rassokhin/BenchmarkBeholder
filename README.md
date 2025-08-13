@@ -81,8 +81,8 @@ Then you'll be able to track progress in real time. This is especially convenien
 That's it. During next launch, BBH will notice the token and start duplicating its log to your bot:
 
 <p align="center">
-  <img src="doc/pictures/ping_dns_telegram_started.jpg" alt="Bot logging started" width="30%"/>
-  <img src="doc/pictures/ping_dns_telegram_completed.jpg" alt="Bot logging completed" width="30%"/>
+  <img src="doc/pictures/ping_dns_telegram_started.png" alt="Bot logging started" width="30%"/>
+  <img src="doc/pictures/ping_dns_telegram_completed.png" alt="Bot logging completed" width="30%"/>
 </p>
 
 NOTE: By design, Telegram makes inactive bot go asleep by timeout. If `./bbh` tells you that the bot has gone asleep, just awake the bot by sending any text to it.
