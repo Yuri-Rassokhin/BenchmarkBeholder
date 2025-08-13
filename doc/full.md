@@ -25,9 +25,9 @@ BBH:
 
 ## Example: DNS Latency
 
----
-
 ### Workload file: `./workloads/ping_dns.json`
+
+---
 
 ```jsonc
 {
@@ -50,6 +50,8 @@ Parameters in the `workload` section are mandatory:
 
 Input parameters in the `parameters` section are application-specifis and defined by the creator of the workload file.
 As ping accepts two parameters - target URL and packet size - the workload file defines these two and suggests ranges of reasonable values for each parameter.
+
+---
 
 ## Parameter Schema: `./sources/hooks/ping_dns/schema.rb`
 
@@ -78,6 +80,8 @@ end
 
 end
 ```
+
+---
 
 ## Target Metrics: `./sources/hooks/ping_dns/metrics.rb`
 
@@ -115,6 +119,8 @@ The mechanism of functions is very flexible and simple:
 
 You can take a look at the predefined functions in more complicated workloads such as `./sources/hooks/dd/metrics.rb`.
 As a summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
+
+---
 
 ## Benchmark Result
 
