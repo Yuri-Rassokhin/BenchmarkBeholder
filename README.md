@@ -46,7 +46,7 @@ You're building a chatbot. With BBH, you can:
 
 ## Quick Start
 
-BBH runs all parameter combinations of the specified workload, saves results as a CSV file, and you're ready to analyze:
+BBH runs all parameter combinations of the specified workload, saves results as a CSV file, and you're ready to analyze.
 
 ```bash
 ./bbh ./workloads/ping_dns.json
@@ -58,3 +58,4 @@ Save the token to `~/.bbh/telegram` and BBH will log to your phone automatically
 
 ## Full Technical Documentation
 
+Learn [more](doc/full.md).
