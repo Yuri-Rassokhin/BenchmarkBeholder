@@ -1,6 +1,11 @@
+
+---
+
 ## BBH Approach
 
 BBH performs sweep analysis — benchmarking every combination of parameters and collecting metrics to reveal optimal and suboptimal setups, parameter impact, trends, and edge cases.
+
+---
 
 ## Benchmarking Workflow
 
@@ -16,7 +21,11 @@ BBH:
 - Collects metrics (+ optional infrastructure metrics).
 - Outputs a CSV report.
 
+---
+
 ## Example: DNS Latency
+
+---
 
 ### Workload file: `./workloads/ping_dns.json`
 
