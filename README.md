@@ -4,7 +4,7 @@
 
 <h1 align="center">BenchmarkBeholder</h1>
 <p align="center">
-  <b>Test any workload, explore every parameter combination, and uncover the performance sweet spot.</b>
+  <b>Benchmark any workload, explore every parameter combination, and uncover the performance sweet spot.</b>
 </p>
 
 ---
@@ -38,7 +38,7 @@ You're building a chatbot. With BBH, you can:
 
 ## R.E.A.L. Features
 
-- **Reproducible** — Stores all configs + metrics.
+- **Reproducible** — Stores all configs and metrics.
 - **Extensible** — Works with any workload or platform (AWS, Azure, OCI).
 - **Accumulative** — Saves results in CSV for long-term tracking.
 - **Lucid** — Complete performance landscape for visualization in Excel, Power BI, Tableau, etc.
@@ -47,6 +47,15 @@ You're building a chatbot. With BBH, you can:
 
 ## Quick Start
 
+BBH runs all parameter combinations of the specified workload, saves results as a CSV file, and you're ready to analyze:
+
 ```bash
 ./bbh ./workloads/ping_dns.json
+```
+
+## Telegram Logging
+Get real-time progress updates by setting up a bot via @BotFather.
+Save the token to `~/.bbh/telegram` and BBH will log to your phone automatically.
+
+## Full Technical Documentation
 
