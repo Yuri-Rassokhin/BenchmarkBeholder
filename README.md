@@ -47,19 +47,40 @@ Given your workload, BBH unfdolds its entire performance landscape. This makes b
 
 # Quick Start
 
-Let's take an example. Perhaps, we want to answer the question: **how do I achieve the best ping latency to global DNS service?** Just type:
+Let's take an example. Perhaps, we want to answer the question: **how do I achieve the best ping latency to global DNS service?**
+This workload has already been described in `./workloads/ping_dns.json`, here it is commented (note that JSON doesn't support comments, I only put them for clarity).
 
-```bash
-./bbh ./workloads/ping_dns.json
+```json
+{
+	// Describes what application or service to benchmark
+        "workload": {
+                "hook": "ping_dns", // location of integration hook: schema of input parameters and how to fetch target metrics
+                "actor": "ping",    // application to benchmark
+                "iterations": 4     // how many times to repeat each invocation
+        },
+        "parameters": { // what combinations of parameter values to pass to the application
+                "dns": [ "8.8.8.8", "1.1.1.1", "208.67.222.222" ],
+                "size": [ 16, 32 ]
+        }
+}
 ```
 
-BBH will run `ping` command with multiple different combinations of `ping` parameters, and generate a table with benchmark results upon completion:
+As you can see, the workload file simply describes
+* What application to run?
+* What parameters to pass to the application?
+* How many times to repeat invocation with each combination of parameters?
+* How to integrate BBH to the application:
+  * What are input parameters of the application?
+  * How to fetch target metrics during benchmarking?
+
+Just type `./bbh ./workloads/ping_dns.json` to make `ping` benchmark against all `workload/parameters` described in the workload file:
+```
 
 <p align="center">
   <img src="doc/pictures/ping_dns.png" alt="Example of BBH output" width="60%"/>
 </p>
 
-The same results will be saved in CSV format to `./log/bbh-ping_dns-1754564563-result.csv`, where `ping_dns` is the name of workload, and `1754564563` is a globally unique identifier of the benchmarking series you launched:
+The same results, reformatted as CSV, are saved in `./log/bbh-ping_dns-1754564563-result.csv`, where `ping_dns` is the name of workload, and `1754564563` is a globally unique identifier of the benchmarking series you just launched:
 
 <p align="center">
   <img src="doc/pictures/ping_dns_csv.png" alt="Example of CSV output of BBH" width="60%"/>
