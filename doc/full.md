@@ -4,10 +4,11 @@ BBH performs sweep analysis — benchmarking every combination of parameters and
 
 ## Benchmarking Workflow
 
-Provide a workload file describing:
+Provide files describing:
 - The workload to benchmark.
 - Input parameters and their values.
 - Metric collection logic.
+- Optionally, benchmark preparations.
 
 BBH:
 - Builds the parameter space, that is, a combination of all valid combinations of input parameters.
@@ -96,7 +97,15 @@ end
 ```
 
 The mechanism of functions is very flexible and simple:
-- 
+- A function appears in the benchmarking report as a column named after the function.
+- Functions can refer to one another, as well as variables and methods in your code. This makes functions a VERY powerful and flexible mechanism.
+- If you don't need a function in the report, you just add the function with the flag `hide: true` - for instance, you may want to hide intermediate calculations such as `:raw_ping`
+- BBH already includes a number of functions for your convenience, such as:
+  - Detection of cloud platform and compute shape in the cloud.
+  - Type of storage (LVM, RAID, filesystem, etc).
+
+You can take a look at the predefined functions in more complicated workloads such as `./sources/hooks/dd/metrics.rb`.
+As a summary, you can think of functions as columnar formulas in Libre Office, MS Excel of similar software.
 
 ## Benchmark Result
 
@@ -120,8 +129,4 @@ Each line of the output corresponds to unique combination from _parameter space_
 
 The rest of the line is the metrics we defined using the metrics file: `command`, `time`, `min`, and `loss`.
 
-BBH generates result on the screen in plain text table and saves its CSV version to `./log/bbh-\<hook\>-\<series\>-result.csv` file for analysis.
-
-## 
-
-
+BBH generates result on the screen in plain text table and saves its CSV version to `./log/bbh-<hook>-<series>-result.csv` file for analysis.
