@@ -53,7 +53,12 @@ BBH runs all parameter combinations of the specified workload, saves results as 
 
 ## Telegram Logging
 Get real-time progress updates by setting up a bot via @BotFather.
-Save the token to `~/.bbh/telegram` and BBH will log to your phone automatically.
+Save the token to `~/.bbh/telegram` and BBH will log to your phone automatically:
+
+<p align="center">
+  <img src="doc/pictures/ping_dns_telegram_started.png" alt="Bot logging started" width="30%"/>
+  <img src="doc/pictures/ping_dns_telegram_completed.png" alt="Bot logging completed" width="30%"/>
+</p>
 
 ## Full Technical Documentation
 
