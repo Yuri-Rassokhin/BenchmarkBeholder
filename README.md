@@ -51,21 +51,21 @@ You're building a chatbot. With BBH, you can:
 ```
 BBH runs all parameter combinations of the specified workload:
 <p align="center">
-  <img src="doc/pictures/ping_dns.png" alt="BBH Launch" width="30%"/>
+  <img src="doc/pictures/ping_dns.png" alt="BBH Launch" width="50%"/>
 </p>
 Saves results as a CSV file:
 <p align="center">
-  <img src="doc/pictures/ping_dns_csv.png" alt="BBH Report" width="30%"/>
+  <img src="doc/pictures/ping_dns_csv.png" alt="BBH Report" width="50%"/>
 </p>
 And you're ready to analyze it in any BA/BI tool you like:
 <p align="center">
-  <img src="doc/pictures/bbh_output_chart.png" alt="Analysis" width="30%"/>
+  <img src="doc/pictures/bbh_output_chart.png" alt="Analysis" width="50%"/>
 </p>
 
-Sometimes, number of parameter combinations can grow huge. You can assess it before actual benchmark using `./bbh -s ./workload/ping_dns.json`:
+Sometimes, number of parameter combinations for your workload can grow huge. You can assess it before actual benchmark using `./bbh -s ./workload/ping_dns.json`:
 
 <p align="center">
-  <img src="doc/pictures/bbh_space.png" alt="Parameter space" width="30%"/>
+  <img src="doc/pictures/bbh_space.png" alt="Parameter space" width="50%"/>
 </p>
 
 ## Telegram Logging
