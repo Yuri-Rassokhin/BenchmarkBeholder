@@ -49,7 +49,24 @@ You're building a chatbot. With BBH, you can:
 ```bash
 ./bbh ./workloads/ping_dns.json
 ```
-BBH runs all parameter combinations of the specified workload, saves results as a CSV file, and you're ready to analyze.
+BBH runs all parameter combinations of the specified workload:
+<p align="center">
+  <img src="doc/pictures/ping_dns.png" alt="BBH Launch" width="30%"/>
+</p>
+Saves results as a CSV file:
+<p align="center">
+  <img src="doc/pictures/ping_dns_csv.png" alt="BBH Report" width="30%"/>
+</p>
+And you're ready to analyze it in any BA/BI tool you like:
+<p align="center">
+  <img src="doc/pictures/bbh_output_chart.png" alt="Analysis" width="30%"/>
+</p>
+
+Sometimes, number of parameter combinations can grow huge. You can assess it before actual benchmark using `./bbh -s ./workload/ping_dns.json`:
+
+<p align="center">
+  <img src="doc/pictures/bbh_space.png" alt="Parameter space" width="30%"/>
+</p>
 
 ## Telegram Logging
 Get real-time progress updates by setting up a bot via @BotFather.
