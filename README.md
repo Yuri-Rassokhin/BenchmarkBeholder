@@ -79,4 +79,4 @@ Save the token to `~/.bbh/telegram` and BBH will log to your phone automatically
 
 ## Full Technical Documentation
 
-[Learn more](doc/full.md).
+[Learn more](doc/full.md)
