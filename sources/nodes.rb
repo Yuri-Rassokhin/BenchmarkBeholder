@@ -40,11 +40,16 @@ end
 def self.check_dependencies(logger, hosts)
   logger.info "checking dependencies on benchmark nodes"
   hosts.each do |host|
-    [ "ruby", "curl", "mpstat", "iostat" ].each { |tool| logger.error("'#{tool}' is missing ") if not Global.run(binding, host, :file_exists?, "#{tool}") }
+    [ "ruby", "curl", "mpstat", "iostat" ].each do |tool|
+      unless Global.run(binding, host, Platform.method(:file_exists?), "#{tool}")
+        logger.error("'#{tool}' is missing on the node #{host}, please install sysstat") if not Global.run(binding, host, Platform.method(:file_exists?), "#{tool}")
+        exit 0
+      end
+    end
   end
 end
 
-# actor is an executable file WITHOUT path, it's a madatory option
+# actor is an executable file WITHOUT path, it's a mandatory option
 # BBH seeks actor in A). its integration directory
 # B). system-wide using 'which'
 # This approach allows to flexibly use multiple specialized actors for one workload as well as a system actor
