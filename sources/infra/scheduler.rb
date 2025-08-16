@@ -23,9 +23,9 @@ end
 private
 
 def self.base_device(dev_path)
-  dev = File.basename(dev_path) # sda3
-  link = File.readlink("/sys/class/block/#{dev}") # "../../block/sda/sda3"
-  link.split("/")[-2] # => "sda"
+  dev = File.basename(dev_path)
+  output = `lsblk -no PKNAME /dev/#{dev}`.strip
+  output.empty? ? dev : output
 end
 
 def self.schedulers
