@@ -148,7 +148,7 @@ end
   end
 
   def file_exists?(file)
-    File.exist?(`which #{file.strip}`.strip)
+    system("command -v #{file} >/dev/null 2>&1")
   end
 
   def bbh_running?
