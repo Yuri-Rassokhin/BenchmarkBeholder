@@ -1,5 +1,6 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
+require "bundler/setup"
 require 'flex-cartesian'
 
 require './sources/infra/scheduler'
