@@ -47,10 +47,6 @@ end
     File.exist?("./hooks/#{actor_file}") || File.exist?(`which #{actor_file}`.strip)
   end
 
-  def file_exists?(file)
-    File.exist?(`which #{file.strip}`.strip)
-  end
-
   def bbh_running?
     not `ps ax | grep "ruby /tmp/remote_method_call.rb" | grep -v grep`.strip.empty?
   end
