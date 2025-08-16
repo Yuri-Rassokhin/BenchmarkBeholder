@@ -3,15 +3,15 @@
 		"hook": "dd",
 		"actor": "dd",
 		"protocol": "file",
-		"target": "/tmp/dump",
-		"iterations": 4,
-		"total_size": "5G",
+		"target": "/mnt/raid0/dump",
+		"iterations": 10,
+		"total_size": "10G",
 		"units": "MB/s",
 		"precision": 3
 	},
 	"parameters": {
 		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],
-		"size": [ "4K", "8K", "16K", "32K", "65K", "128K", "256K", "512K", "1M", "2M", "4M", "10M", "20M", "50M", "100M" ],
+		"size": [ "4K", "8K", "16K", "32K", "65K", "128K", "256K", "512K", "1M", "2M", "4M", "10M", "20M", "50M", "100M", "200M", "500M", "1G", "2G" ],
 		"operation": [ "read", "write" ]
 	}
 }
