@@ -24,7 +24,7 @@ private
 
 def self.base_device(dev_path)
   dev = File.basename(dev_path)
-  output = `lsblk -no PKNAME /dev/#{dev}`.strip
+  output = `lsblk -no PKNAME /dev/#{dev}`.lines.first&.strip
   output.empty? ? dev : output
 end
 
