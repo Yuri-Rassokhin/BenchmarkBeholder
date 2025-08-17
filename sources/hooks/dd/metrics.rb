@@ -44,20 +44,8 @@ def setup(space, logger, config, target)
 
   space.func(:add, :units) { config[:workload][:units] }
 
-  space.func(:add, :platform) { |v| target.infra[v.host][:platform] }
-  space.func(:add, :shape) { |v| target.infra[v.host][:shape] }
-  space.func(:add, :device) { |v| target.infra[v.host][:device] }
-  space.func(:add, :fs) { |v| target.infra[v.host][:filesystem] }
-  space.func(:add, :fs_block_size) { |v| target.infra[v.host][:filesystem_block_size] }
-  space.func(:add, :fs_mount_options) { |v| "\"#{target.infra[v.host][:filesystem_mount_options]}\"" }
-  space.func(:add, :type) { |v| target.infra[v.host][:type] }
-  space.func(:add, :volumes) { |v| target.infra[v.host][:volumes] }
-  space.func(:add, :kernel) { |v| target.infra[v.host][:kernel] }
-  space.func(:add, :os_release) { |v| target.infra[v.host][:os_release] }
-  space.func(:add, :arch) { |v| target.infra[v.host][:arch] }
-  space.func(:add, :cpu) { |v| target.infra[v.host][:cpu] }
-  space.func(:add, :cores) { |v| target.infra[v.host][:cores] }
-  space.func(:add, :cpu_ram) { |v| target.infra[v.host][:cpu_ram] }
+  # standard functions for infrastructure metrics
+  Platform.add_infra(space, target)
 end
 
 end
