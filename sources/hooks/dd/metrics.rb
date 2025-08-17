@@ -45,7 +45,7 @@ def setup(space, logger, config, target)
   space.func(:add, :units) { config[:workload][:units] }
 
   # standard functions for infrastructure metrics
-  Platform.add_infra(space, target)
+  Platform.add_infra(space: space, target: target, gpu: false)
 end
 
 end
