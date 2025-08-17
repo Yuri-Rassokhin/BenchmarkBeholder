@@ -6,26 +6,38 @@ module Platform
   module_function
 
 # standard functions for infrastructure metrics  
-def add_infra(space, target)
-  (1..`lspci | grep -i nvidia`.lines.count).each do |i|
-    space.func(:add, "gpu#{i}_model".to_sym) { `nvidia-smi --query-gpu=name --format=csv,noheader -i #{i-1}` }
-    space.func(:add, "gpu#{i}_memory".to_sym) { `nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i #{i-1}`.to_i }
-    space.func(:add, "gpu#{i}_utilization".to_sym) { `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits -i #{i-1}`.to_f }
+def add_infra(space: , target: , gpu: true, storage: true, os: true, platform: true)
+
+  if gpu
+    (1..`lspci | grep -i nvidia`.lines.count).each do |i|
+      space.func(:add, "gpu#{i}_model".to_sym) { `nvidia-smi --query-gpu=name --format=csv,noheader -i #{i-1}`.chomp }
+      space.func(:add, "gpu#{i}_memory".to_sym) { `nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i #{i-1}`.chomp.to_i }
+      space.func(:add, "gpu#{i}_utilization".to_sym) { `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits -i #{i-1}`.chomp.to_f }
+    end
   end
-  space.func(:add, :platform) { |v| target.infra[v.host][:platform] }
-  space.func(:add, :shape) { |v| target.infra[v.host][:shape] }
-  space.func(:add, :device) { |v| target.infra[v.host][:device] }
-  space.func(:add, :fs) { |v| target.infra[v.host][:filesystem] }
-  space.func(:add, :fs_block_size) { |v| target.infra[v.host][:filesystem_block_size] }
-  space.func(:add, :fs_mount_options) { |v| "\"#{target.infra[v.host][:filesystem_mount_options]}\"" }
-  space.func(:add, :type) { |v| target.infra[v.host][:type] }
-  space.func(:add, :volumes) { |v| target.infra[v.host][:volumes] }
-  space.func(:add, :kernel) { |v| target.infra[v.host][:kernel] }
-  space.func(:add, :os_release) { |v| target.infra[v.host][:os_release] }
-  space.func(:add, :arch) { |v| target.infra[v.host][:arch] }
-  space.func(:add, :cpu) { |v| target.infra[v.host][:cpu] }
-  space.func(:add, :cores) { |v| target.infra[v.host][:cores] }
-  space.func(:add, :cpu_ram) { |v| target.infra[v.host][:cpu_ram] }
+
+  if platform
+    space.func(:add, :platform) { |v| target.infra[v.host][:platform] }
+    space.func(:add, :shape) { |v| target.infra[v.host][:shape] }
+    space.func(:add, :arch) { |v| target.infra[v.host][:arch] }
+    space.func(:add, :cpu) { |v| target.infra[v.host][:cpu] }
+    space.func(:add, :cores) { |v| target.infra[v.host][:cores] }
+    space.func(:add, :cpu_ram) { |v| target.infra[v.host][:cpu_ram] }
+  end
+
+  if storage and (target.has_device? or target.supports_fs?)
+    space.func(:add, :device) { |v| target.infra[v.host][:device] }
+    space.func(:add, :fs) { |v| target.infra[v.host][:filesystem] }
+    space.func(:add, :fs_block_size) { |v| target.infra[v.host][:filesystem_block_size] }
+    space.func(:add, :fs_mount_options) { |v| "\"#{target.infra[v.host][:filesystem_mount_options]}\"" }
+    space.func(:add, :type) { |v| target.infra[v.host][:type] }
+    space.func(:add, :volumes) { |v| target.infra[v.host][:volumes] }
+  end
+
+  if os
+    space.func(:add, :kernel) { |v| target.infra[v.host][:kernel] }
+    space.func(:add, :os_release) { |v| target.infra[v.host][:os_release] }
+  end
 end
 
 def platform_collect(logger, target, has_device)
@@ -84,13 +96,13 @@ end
 
 def shape(platform)
   case platform
-  when "oci"
+  when "OCI"
     raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
     return raw.strip.gsub(/["",]/, '') if raw != ""
-  when "azure"
+  when "Azure"
     raw = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
     return raw.strip.gsub(/["",]/, '') if raw != ""
-  when "aws"
+  when "AWS"
     raw = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
     return raw.strip.gsub(/["",]/, '')
     #if raw != "No such metadata item"
@@ -101,13 +113,13 @@ end
 
 def platform
   raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
-  return "oci" if not raw.empty?
+  return "OCI" if not raw.empty?
 
   raw = `curl -s --connect-timeout 3 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | grep "vmSize" | awk '{ print $2 }'`
-  return "azure" if not raw.empty?
+  return "Azure" if not raw.empty?
 
   raw = `curl -s http://169.254.169.254/latest/meta-data/instance-type`
-  return "aws" if not raw.empty?
+  return "AWS" if not raw.empty?
 
   "unknown"
 end
