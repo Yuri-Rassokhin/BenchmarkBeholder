@@ -5,7 +5,7 @@ def self.prepare(logger, config)
   config.hosts.each do |host|
     host_schedulers = Set.new(Global.run(binding, host, Scheduler.method(:schedulers)).split)
     diff = conf_schedulers ^ host_schedulers
-    logger.error "IO scheduler(s) '#{diff.join(", ")}' differ from config on '#{host}'" unless diff.empty?
+    logger.warn "IO scheduler(s) '#{diff.join(", ")}' differ from config on '#{host}'" unless diff.empty?
 
   end
 end
