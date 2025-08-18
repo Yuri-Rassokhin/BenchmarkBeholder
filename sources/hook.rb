@@ -9,8 +9,8 @@ def initialize(logger, config, target)
   @target = target
   @hook = @config[:workload][:hook]
   counter_set
-  setup
   load "./sources/hooks/#{@hook}/metrics.rb"
+  setup
 end
 
 #require_relative "../#{@config[:workload][:hook]}/metrics.rb"
@@ -26,10 +26,6 @@ def counter_set
     @done = (@counter*100/@total.to_f).to_i
     @logger.info " #{@hook} #{@counter}/#{@total} (#{@done}%): #{self.dimensions(v, separator: ' ')}"
   end
-end
-
-def setup
-  Metrics.setup(self, @logger, @config, @target)
 end
 
 end
