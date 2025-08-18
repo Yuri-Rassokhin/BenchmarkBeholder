@@ -17,7 +17,6 @@ def validate
 
     required(:parameters).hash do
       required(:scheduler).array(:string, min_size?: 1, included_in?: %w[none bfq mq-deadline kyber])
-      required(:direct).filled(:integer, gt?: -1, lt?: 2)
       required(:block_size).array(:integer, min_size?: 1, gt?: 0)
       required(:operation).array(:string, min_size?: 1, included_in?: %w[read write randread randwrite])
       required(:ioengine).array(:string, min_size?: 1, included_in?: %w[libaio])
