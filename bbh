@@ -30,8 +30,10 @@ config[:parameters][:series] = series # add unique series ID
 Head.check(logger, config) # head node checks such as consistent hook files
 Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
 
+# TODO: encapsulate this 
 if File.exist?("./sources/hooks/#{config.hook}/prepare.rb")
   require "./sources/hooks/#{config.hook}/prepare"
+  logger.info "Running preparations on the nodes"
   config.hosts.each { |h| Global.run(binding, h, Prepare.method(:prepare), logger, config) }
 end
 
