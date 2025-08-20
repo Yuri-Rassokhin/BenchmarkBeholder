@@ -27,9 +27,9 @@ exit 0 if options.space_mode
 
 Node.check(logger: logger, config: config)
 
-TODO: continue from this point
+workload.preparation
 
-# subject of the operation
+TODO: stopped here
 target = Target.new(logger, config)
 
 # infrastructure platform of the target

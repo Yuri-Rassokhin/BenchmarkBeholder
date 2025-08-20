@@ -23,7 +23,7 @@ def options_parse(argv)
 
     opts.on('-h', '--help', 'Show help') do
       opts.to_s.each_line { |line| @logger.info line.chomp }
-      exit
+      exit 0
     end
 
     opts.on('-s', '--space', 'Calculate parameter space size of the workload on host(s)') do
@@ -45,14 +45,12 @@ def options_parse(argv)
   elsif options[:space]
     if args.empty?
       @logger.error "-s requires sweep file"
-      exit 1
     end
     @space_mode = true
     @workload = args.shift
   else
     if args.empty?
       @logger.error "missing arguments, use -h for help"
-      exit 1
     end
     @workload = args.shift
   end

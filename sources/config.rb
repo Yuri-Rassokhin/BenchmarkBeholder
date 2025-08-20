@@ -70,7 +70,7 @@ end
 
 def check_schema
   if not File.exist?("./sources/" + @schema)
-    @logger.error "workload file '#{"./sources/" + @schema}' is missing"
+    @logger.error "workload schema '#{"./sources/" + @schema}' is missing"
     exit 0
   end
   require_relative @schema # load semantic schema of parameters

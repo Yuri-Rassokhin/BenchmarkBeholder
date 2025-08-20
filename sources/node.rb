@@ -18,7 +18,6 @@ def check_another_instance
   lockfile = File.open(lockfile_path, File::RDWR|File::CREAT, 0644)
   unless lockfile.flock(File::LOCK_NB | File::LOCK_EX)
     @logger.error "another BBH instance is already running, exiting"
-    exit 1
   end
 end
 

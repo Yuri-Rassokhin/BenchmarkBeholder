@@ -27,6 +27,7 @@ class Log
     text = msg[0].upcase + msg[1..]
     @logger.error(text)
     telegram_message(:error, text)
+    exit 1
   end
 
   private

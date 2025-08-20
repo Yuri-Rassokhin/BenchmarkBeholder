@@ -7,28 +7,32 @@ def initialize(logger: , config: )
   @logger = logger
   @config = config
   @workload_name = @config.workload
-  check_consistency
+  load_metrics
   counter_set
-  require_relative "./hooks/#{@workload_name}/metrics"
   setup
 end
 
 def preparation
-  @logger.info "Running preparations before benchmarking"
-  prepare
+  if self.class.private_instance_methods(false).include?(:prepare)
+    @logger.info "running preparations for the benchmarking"
+    prepare
+  else
+    @logger.info "nothing to prepare for the benchmarking"
+  end
 end
 
 private
 
-def check_consistency
-  workloads = Dir.entries("./sources/hooks") - %w[. ..]
-  @logger.error "unknown workload '#{@workload}'" if !workloads.include?(@workload_name)
+def setup
+  @logger.info "no metrics specified, nothing to do, exiting"
+  exit 0
+end
 
-  wl = "./sources/hooks/#{@workload_name}/schema.rb"
-  @logger.error "incorrect integration of '#{@workload_name}', workload schema '#{wl}' is missing" if !File.exist?(wl)
-
-  bm = "./sources/hooks/#{@workload_name}/metrics.rb"
-  @logger.error "incorrect integration of '#{@workload_name}', workload metrics '#{bm}' are missing" if !File.exist?(bm)
+def load_metrics
+  metrics_path = "./sources/hooks/#{@workload_name}/metrics.rb"
+  @logger.error "incorrect integration of '#{@workload_name}', workload metrics '#{metrics_path}' are missing" unless File.exist?(metrics_path)
+  require metrics_path
+  load metrics_path
 end
 
 def counter_set
@@ -40,12 +44,6 @@ def counter_set
     @done = (@counter*100/@total.to_f).to_i
     @logger.info " #{@workload_name} #{@counter}/#{@total} (#{@done}%): #{self.dimensions(v, separator: ' ')}"
   end
-end
-
-def prepare
-end
-
-def setup
 end
 
 end
