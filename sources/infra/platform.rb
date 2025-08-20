@@ -2,11 +2,15 @@ require 'open3'
 require 'fileutils'
 require 'tempfile'
 
-module Platform
-  module_function
+class Platform
+
+def initialize(logger, target)
+  @logger = logger
+  @target = target
+end
 
 # standard functions for infrastructure metrics  
-def add_infra(space: , target: , gpu: true, storage: true, os: true, platform: true)
+def add_infra(space: , gpu: true, storage: true, os: true, platform: true)
 
   if gpu
     (1..`lspci | grep -i nvidia`.lines.count).each do |i|
@@ -17,34 +21,34 @@ def add_infra(space: , target: , gpu: true, storage: true, os: true, platform: t
   end
 
   if platform
-    space.func(:add, :platform) { |v| target.infra[v.host][:platform] }
-    space.func(:add, :shape) { |v| target.infra[v.host][:shape] }
-    space.func(:add, :arch) { |v| target.infra[v.host][:arch] }
-    space.func(:add, :cpu) { |v| target.infra[v.host][:cpu] }
-    space.func(:add, :cores) { |v| target.infra[v.host][:cores] }
-    space.func(:add, :cpu_ram) { |v| target.infra[v.host][:cpu_ram] }
+    space.func(:add, :platform) { |v| @target.infra[v.host][:platform] }
+    space.func(:add, :shape) { |v| @target.infra[v.host][:shape] }
+    space.func(:add, :arch) { |v| @target.infra[v.host][:arch] }
+    space.func(:add, :cpu) { |v| @target.infra[v.host][:cpu] }
+    space.func(:add, :cores) { |v| @target.infra[v.host][:cores] }
+    space.func(:add, :cpu_ram) { |v| @target.infra[v.host][:cpu_ram] }
   end
 
-  if storage and (target.has_device? or target.supports_fs?)
-    space.func(:add, :device) { |v| target.infra[v.host][:device] }
-    space.func(:add, :fs) { |v| target.infra[v.host][:filesystem] }
-    space.func(:add, :fs_block_size) { |v| target.infra[v.host][:filesystem_block_size] }
-    space.func(:add, :fs_mount_options) { |v| "\"#{target.infra[v.host][:filesystem_mount_options]}\"" }
-    space.func(:add, :type) { |v| target.infra[v.host][:type] }
-    space.func(:add, :volumes) { |v| target.infra[v.host][:volumes] }
+  if storage and (@target.has_device? or @target.supports_fs?)
+    space.func(:add, :device) { |v| @target.infra[v.host][:device] }
+    space.func(:add, :fs) { |v| @target.infra[v.host][:filesystem] }
+    space.func(:add, :fs_block_size) { |v| @target.infra[v.host][:filesystem_block_size] }
+    space.func(:add, :fs_mount_options) { |v| "\"#{@target.infra[v.host][:filesystem_mount_options]}\"" }
+    space.func(:add, :type) { |v| @target.infra[v.host][:type] }
+    space.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
   end
 
   if os
-    space.func(:add, :kernel) { |v| target.infra[v.host][:kernel] }
-    space.func(:add, :os_release) { |v| target.infra[v.host][:os_release] }
+    space.func(:add, :kernel) { |v| @target.infra[v.host][:kernel] }
+    space.func(:add, :os_release) { |v| @target.infra[v.host][:os_release] }
   end
 end
 
-def platform_collect(logger, target, has_device)
+def platform_collect(logger, has_device)
   result = {
     platform: platform,
     shape: shape(platform),
-    device: main_device(target),
+    device: main_device(@target),
     kernel: kernel_release,
     os_release: os_release,
     arch: cpu_arch,
@@ -52,7 +56,7 @@ def platform_collect(logger, target, has_device)
     cores: cpu_cores,
     cpu_ram: cpu_ram,
   }
-  result.merge!(check_device(logger, target)) if has_device
+  result.merge!(check_device(logger, @target)) if has_device
 end
 
 def check_device(logger, src)
@@ -180,10 +184,6 @@ end
   def actor_exists?(actor_file)
     file = actor_file.strip
     File.exist?("./hooks/#{actor_file}") || File.exist?(`which #{actor_file}`.strip)
-  end
-
-  def file_exists?(file)
-    system("command -v #{file} >/dev/null 2>&1")
   end
 
   def bbh_running?

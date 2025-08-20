@@ -4,6 +4,24 @@ class Hook
 
 private
 
+def prepare
+  size = @config[:workload][:total_size]
+  file = @config.target
+
+  @config.hosts.each do |h|
+    @logger.info "creating target file #{file} of the size #{size}, rounded to megabytes, on #{h}"
+    Global.run(binding, h, proc do
+      File.open(file, "wb") do |f|
+        block = "\0" * 1024 * 1024  # 1MB
+        (size / block.size).times { f.write(block) }
+      end
+    end
+  end
+end
+
+  @logger.info "creating log ./bbh-#{@config.hook}-#{@config[:parameters][:series]}-result.csv"
+end
+
 def setup
   result = {}
 
@@ -14,7 +32,7 @@ def setup
 
   func(:add, :result, hide: true) do |v|
     unless result[@counter]
-      Global.run(binding, v.host, Scheduler.method(:switch), @logger, v.scheduler, @target.infra[v.host][:volumes])
+      Scheduler.switch(@logger, v.scheduler)
       result[@counter] = Global.run(binding, v.host, proc { `#{v.command}`.strip })
     end
     result[@counter]
@@ -37,7 +55,7 @@ def setup
   func(:add, :units) { @config[:workload][:units] }
 
   # standard functions for infrastructure metrics
-  Platform.add_infra(space: self, target: @target, gpu: false)
+  Platform.add_infra(space: self, gpu: false)
 end
 
 end

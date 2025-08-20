@@ -5,16 +5,16 @@
 		"protocol": "file",
 		"target": "/home/opc/dump",
 		"total_size": "2G",
-		"iterations": 4,
+		"iterations": 1,
 		"units": "MB/s",
 		"precision": 3
 	},
 	"parameters": {
-		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],
+		"scheduler": [ "none", "bfq" ],
 		"operation": [ "read", "write" ],
-		"block_size": [ "4k", "8k", "16k", "32k" ],
+		"block_size": [ "1K" ],
 		"ioengine": [ "libaio" ],
-		"iodepth": [ 64, 128, 512, 256, 512 ],
-		"processes": [ 1, 2, 4, 8, 16, 32, 64, 96, 104 ]
+		"iodepth": [ 64 ],
+		"processes": [ 1  ]
 	}
 }

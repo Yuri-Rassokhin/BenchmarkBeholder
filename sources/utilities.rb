@@ -1,5 +1,4 @@
 module Utilities
-  module_function
 
 MULTIPLIERS = {
   'K' => 1024,
@@ -11,7 +10,7 @@ MULTIPLIERS = {
 }.freeze
 
 # takes JSON and unscale all numbers of a kind '2845G', '4343K', etc, case-insensitive
-def json_unscale(logger, obj)
+def self.json_unscale(logger, obj)
   case obj
   when Hash
     obj.transform_values { |v| json_unscale(logger, v) }
@@ -24,7 +23,7 @@ def json_unscale(logger, obj)
 end
 
 # converts given value between scaling units: K/k, M/m, G/g, T/t, P/p.
-def convert_units(logger, value, from: , to: , precision: )
+def self.convert_units(logger, value, from: , to: , precision: )
   bytes = units_to_bytes(logger, value, from: from, precision: precision)
   bytes_to_units(logger, bytes, to: to, precision: precision)
 end
@@ -85,5 +84,10 @@ def self.bytes_to_units(logger, value, to: , precision: )
   end
   res.round(precision)
 end
+
+def self.file_exists?(file)
+  system("command -v #{file} >/dev/null 2>&1")
+end
+
 
 end

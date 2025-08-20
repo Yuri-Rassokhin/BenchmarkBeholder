@@ -6,24 +6,20 @@ class Config
 def initialize(logger, config_path)
   @logger = logger
   @data = preprocess(load_json(config_path))
-  @schema = "./hooks/#{hook}/schema.rb"
+  @schema = "./hooks/#{workload}/schema.rb"
   check_schema
 end
 
-def hook
-  get(:workload, :hook)
+def workload
+  get :workload
+end
+
+def sweep
+  get :sweep
 end
 
 def actor
   get(:workload, :actor)
-end
-
-def iterations
-  get(:workload, :iterations)
-end
-
-def hosts
-  get(:parameters, :host)
 end
 
 def protocol
@@ -36,10 +32,6 @@ end
 
 def schedulers
   get(:parameters, :scheduler)
-end
-
-def parameters
-  get(:parameters)
 end
 
 def [](key)
@@ -62,15 +54,16 @@ def preprocess(json)
 end
 
 def load_json(path)
+  @logger.info "using sweep file #{path}"
   result = JSON.parse(File.read(path), symbolize_names: true)
   rescue Errno::ENOENT
-    @logger.error "workload file '#{path}' not found"
+    @logger.error "sweep file '#{path}' not found"
     exit 0
   rescue Errno::EACCES
-    @logger.error "workload file '#{path}' not accessible"
+    @logger.error "sweep file '#{path}' not accessible"
     exit 0
   rescue JSON::ParserError
-    @logger.error "workload file '#{path}' contains invalid JSON"
+    @logger.error "sweep file '#{path}' contains invalid JSON"
     exit 0
   result
 end
@@ -99,7 +92,5 @@ def get(*keys)
   @logger.error "missing configuration parameter '#{keys.join('.')}'" if value.nil?
   value
 end
-
-
 
 end

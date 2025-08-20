@@ -1,11 +1,8 @@
 {
-	"workload": {
-		"hook": "ping_dns",
-		"actor": "ping",
-		"iterations": 4
-	},
-	"parameters": {
+	"workload": "ping_dns",
+	"sweep": {
 		"dns": [ "8.8.8.8", "1.1.1.1", "208.67.222.222" ],
-		"size": [ 16, 32 ]
+		"size": [ 16, 32 ],
+		"iteration": [ 1, 2, 3, 4 ]
 	}
 }

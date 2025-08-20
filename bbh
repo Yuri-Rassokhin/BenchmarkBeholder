@@ -5,54 +5,43 @@ require 'flex-cartesian'
 
 require './sources/infra/scheduler'
 require './sources/infra/platform'
-require './sources/infra/utilities_general'
+require './sources/infra/utilities_general' # TODO: restructure
 require './sources/options'
-require './sources/target'
-require './sources/ssh/ssh_sharing'
+#require './sources/target' # TODO: correct it and enable
 require './sources/config'
-require './sources/head'
-require './sources/nodes'
-require './sources/global-ruby'
-require './sources/hook'
+require './sources/node'
+require './sources/workload'
 require './sources/log'
+require './sources/utilities'
 
-series = Time.now.to_i.to_s # start counting total processing time
+series = Time.now.to_i.to_s
+logger = Log.new
 
-logger = Log.new # logger for the entire application
+options = Options.new(logger, ARGV)
+config = Config.new(logger, options.workload)
+workload = Workload.new(logger: logger, config: config)
 
-logger.info "Starting series #{series}"
+logger.info "parameter space: #{workload.dimensions(separator: ', ')}"
+logger.info "total invocations: #{workload.size}"
+exit 0 if options.space_mode
 
-options = Options.new(logger, ARGV) # parse CLI options
-config = Config.new(logger, options.workload) # parse the workload configuration file
-config[:parameters][:host] = options.hosts # add benchmark nodes from CLI
-config[:parameters][:series] = series # add unique series ID
+Node.check(logger: logger, config: config)
 
-Head.check(logger, config) # head node checks such as consistent hook files
-Nodes.check(logger, config) # benchmark node checks such as SSH availability, actor presence, etc
+TODO: continue from this point
 
-# TODO: encapsulate this 
-if File.exist?("./sources/hooks/#{config.hook}/prepare.rb")
-  require "./sources/hooks/#{config.hook}/prepare"
-  logger.info "Running preparations on the nodes"
-  config.hosts.each { |h| Global.run(binding, h, Prepare.method(:prepare), logger, config) }
-end
-
+# subject of the operation
 target = Target.new(logger, config)
 
-# create the class that implements target metrics using its child named after the hook
-require_relative "./sources/hooks/#{config.hook}/metrics"
-space = Hook.new(logger, config, target)
+# infrastructure platform of the target
+platform = Platform.new(logger, target)
 
-logger.info "Parameter space: #{space.dimensions(separator: ', ')}"
-logger.info "Number of invocations: #{space.size}"
-exit 0 if options.mode == "space"
-
-#  Global.run(binding, h, space.method(:func), :run)
+logger.info "Starting series #{series}"
+config[:sweep][:series] = series
 
 space.func(:run)
 logger.info "Series #{series} completed"
 
-report = "./log/bbh-#{config.hook}-#{series}-result.csv"
+report = "./log/bbh-#{hook}-#{series}-result.csv"
 FileUtils.mkdir_p(File.dirname(report))
 space.output(format: :csv, file: report)
 space.output(colorize: true, align: true)

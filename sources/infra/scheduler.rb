@@ -11,6 +11,7 @@ def self.prepare(logger, config)
 end
 
 def self.switch(logger, scheduler, volumes)
+  @target.infra[v.host][:volumes]
   volumes.each do |v|
     begin
       `sudo bash -c "echo #{scheduler} > /sys/block/#{base_device(v)}/queue/scheduler"`

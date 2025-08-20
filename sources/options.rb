@@ -2,19 +2,15 @@ require 'optparse'
 
 class Options
 
-attr_reader :mode, :hosts, :workload
+attr_reader :workload, :space_mode
 
 def initialize(logger, argv)
   @logger = logger
   @hosts = []
-  @mode = "launch"
+  @space_mode = false
   @workload = nil
   @hooks = Dir.entries("./sources/hooks") - %w[. ..]
   options_parse(argv)
-  if @hosts == []
-    @logger.info "no nodes specified, running on 127.0.0.1"
-    @hosts = [ '127.0.0.1' ]
-  end
 end
 
 private
@@ -23,7 +19,7 @@ def options_parse(argv)
   options = {}
 
   parser = OptionParser.new do |opts|
-    opts.banner = "Usage: bbh [-v] [-h] [-s] [workload_file] [host] ..."
+    opts.banner = "Usage: bbh { -v | -h | [-s] sweep_file }"
 
     opts.on('-h', '--help', 'Show help') do
       opts.to_s.each_line { |line| @logger.info line.chomp }
@@ -48,19 +44,17 @@ def options_parse(argv)
     exit 0
   elsif options[:space]
     if args.empty?
-      @logger.error "-s requires workload file"
+      @logger.error "-s requires sweep file"
       exit 1
     end
-    @mode = "space"
+    @space_mode = true
     @workload = args.shift
-    @hosts ||= args
   else
     if args.empty?
       @logger.error "missing arguments, use -h for help"
       exit 1
     end
     @workload = args.shift
-    @hosts = (@hosts ? @hosts += args : args)
   end
 end
 

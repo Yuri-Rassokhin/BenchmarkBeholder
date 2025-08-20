@@ -1,5 +1,4 @@
-module Prepare
-  module_function
+class Target
 
 def prepare(logger, config)
   size = config[:workload][:total_size]
