@@ -29,10 +29,11 @@ Node.check(logger: logger, config: config)
 
 workload.preparation
 
-TODO: stopped here
+TODO: most of the target is not needed - just accumulate data collection in Platform object.
+TODO: the user will decide if they need to add Platform data to the metrics
+TODO: Similarly, the user will be able to call Scheduler from the metrics, etc.
+TODO: NO automated checks - just provide modularized methods to hook creator.
 target = Target.new(logger, config)
-
-# infrastructure platform of the target
 platform = Platform.new(logger, target)
 
 logger.info "Starting series #{series}"
@@ -41,6 +42,8 @@ config[:sweep][:series] = series
 space.func(:run)
 logger.info "Series #{series} completed"
 
+TODO: to replace this chunk with last function that pushes each result outside
+TODO: to initialize the report in prepare method of the hook
 report = "./log/bbh-#{hook}-#{series}-result.csv"
 FileUtils.mkdir_p(File.dirname(report))
 space.output(format: :csv, file: report)
