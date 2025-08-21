@@ -10,12 +10,19 @@ def initialize(logger: , config: )
   @workload_name = @config.workload
   @series = Time.now.to_i.to_s
   @result = {}
+  @platform = nil
   load_metrics
   counter_set
   setup
 end
 
 def preparation
+  prepare_path = "./sources/hooks/#{@workload_name}/prepare.rb"
+  if File.exist?(prepare_path)
+    require prepare_path
+    load prepare_path
+  end
+
   if self.class.private_instance_methods(false).include?(:prepare)
     @logger.info "running preparations for the benchmarking"
     prepare

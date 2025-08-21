@@ -1,4 +1,4 @@
-module Node
+module Startup
 @logger, @config, @workload = nil, nil, nil
 
 def self.check(logger: , config: )

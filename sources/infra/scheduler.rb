@@ -1,15 +1,13 @@
 module Scheduler
 
 def self.prepare(logger, config)
-  conf_schedulers = Set.new(config.schedulers)
-  host_schedulers = Set.new(Scheduler.schedulers.split)
+  conf_schedulers = Set.new(config[:sweep][:scheduler])
+  host_schedulers = Set.new(schedulers.split)
   diff = conf_schedulers ^ host_schedulers
   logger.warn "IO schedulers #{diff.join(", ")} are not in sweep file" unless diff.empty?
-  end
 end
 
 def self.switch(logger, scheduler, volumes)
-  @target.infra[v.host][:volumes]
   volumes.each do |v|
     begin
       `sudo bash -c "echo #{scheduler} > /sys/block/#{base_device(v)}/queue/scheduler"`
@@ -19,7 +17,6 @@ def self.switch(logger, scheduler, volumes)
   end
 end
 
-class << self
 private
 
 def base_device(dev_path)

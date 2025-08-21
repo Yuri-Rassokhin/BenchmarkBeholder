@@ -1,18 +1,16 @@
-class Platform
+module Platform
+  attr_accessor :device
 
-def initialize(logger, target)
-  @logger = logger
-  @target = target
-  @space = nil
-end
-
-def metrics(space: , compute: true, storage: true, os: true, gpu: true)
-  @space = space
+def self.metrics(logger: , target: , space: , compute: true, storage: true, os: true, gpu: true)
+  @logger, @target, @space = logger, target, space
+  @device = nil
   metrics_compute if compute
   metrics_storage if storage
   metrics_os if os
   metrics_gpu if gpu
 end
+
+class << self
 
 private
 
@@ -39,7 +37,7 @@ def metrics_compute
   tmp = platform
   @space.func(:add, :cloud_platform) { tmp }
 
-  tmp = shape
+  tmp = shape(platform)
   @space.func(:add, :compute_shape) { tmp }
 
   tmp = cpu_arch
@@ -65,6 +63,7 @@ def metrics_storage
 
   if File.file?(s)
     tmp = scan_device(s)
+    @device = tmp
     @space.func(:add, :storage_fs) { |v| tmp[:filesystem] }
     @space.func(:add, :storage_fs_block_size) { tmp[:filesystem_block_size] }
     @space.func(:add, :storage_fs_mount_options) { |v| "\"#{tmp[:filesystem_mount_options]}\"" }
@@ -81,7 +80,7 @@ def metrics_os
   @space.func(:add, :os_release) { tmp }
 end
 
-def scan_device(logger, src)
+def scan_device(src)
   #raise "Incorrect path or not a regular file '#{src}'" unless File.file?(src)
 
   # Get the mount point, filesystem, and device where the file resides
@@ -112,7 +111,7 @@ def scan_device(logger, src)
   end
   {
     filesystem: "#{filesystem}",
-    filesystem_block_size: filesystem_block_size(logger, main_device(src), filesystem),
+    filesystem_block_size: filesystem_block_size(main_device(src), filesystem),
     filesystem_mount_options: filesystem_mount_options(main_device(src)),
     type: "#{type}",
     volumes: "#{volumes}".split,
@@ -265,7 +264,7 @@ end
     `mpstat | head -4 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
-def filesystem_block_size(logger, main_dev, filesystem)
+def filesystem_block_size(main_dev, filesystem)
   "" if main_dev.nil? || %w[tmpfs ramfs nfs NA].include?(filesystem)
 
   case filesystem
@@ -276,7 +275,7 @@ def filesystem_block_size(logger, main_dev, filesystem)
   when "vboxsf"
     "NA"
   else
-    logger.warn "unsupported filesystem #{filesystem} on #{main_dev}"
+    @logger.warn "unsupported filesystem #{filesystem} on #{main_dev}"
     ""
   end
 end
@@ -347,3 +346,4 @@ end
 
 end
 
+end

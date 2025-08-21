@@ -12,7 +12,7 @@ def workload
 end
 
 def target
-  @data[:target]
+  @data[:misc][:target]
 end
 
 def sweep

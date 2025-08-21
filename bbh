@@ -18,26 +18,26 @@ require './sources/infra/platform'
 require './sources/infra/utilities_general' # TODO: restructure
 require './sources/options'
 require './sources/config'
-require './sources/node'
+require './sources/startup'
 require './sources/workload'
 require './sources/log'
 require './sources/utilities'
 
 logger = Log.new
-
 options = Options.new(logger, ARGV)
 config = Config.new(logger, options.workload)
+
 workload = Workload.new(logger: logger, config: config)
 
-logger.info "parameter space: #{workload.dimensions(separator: ', ')}"
-logger.info "total invocations: #{workload.size}"
-exit 0 if options.space_mode
+if options.space_mode
+  logger.info "parameter space: #{workload.dimensions(separator: ', ')}"
+  logger.info "total invocations: #{workload.size}"
+  exit
+end
 
-Node.check(logger: logger, config: config)
+Startup.check(logger: logger, config: config)
 
 workload.preparation
-
-platform = Platform.new(logger, config.target)
 
 workload.benchmark
 
