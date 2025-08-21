@@ -17,7 +17,11 @@ end
 private
 
 def metrics_gpu
-  (1..`lspci | grep -i nvidia`.lines.count).each do |i|
+  gpu_count = `lspci | grep -i nvidia`.lines.count
+
+  @space.func(:add, "gpu_count".to_sym) { gpu_count }
+
+  (1..gpu_count).each do |i|
 
     model = `nvidia-smi --query-gpu=name --format=csv,noheader -i #{i-1}`.chomp
     @space.func(:add, "gpu#{i}_model".to_sym) { model }
@@ -30,34 +34,42 @@ def metrics_gpu
 end
 
 def metrics_compute
+  @space.func(:add, :cpu_load) { cpu_load }
+
   tmp = platform
-  @space.func(:add, :platform) { tmp }
+  @space.func(:add, :cloud_platform) { tmp }
 
   tmp = shape
-  @space.func(:add, :shape) { tmp }
+  @space.func(:add, :compute_shape) { tmp }
 
   tmp = cpu_arch
-  @space.func(:add, :arch) { tmp }
+  @space.func(:add, :cpu_arch) { tmp }
 
   tmp = cpu_model
-  @space.func(:add, :cpu) { tmp }
+  @space.func(:add, :cpu_model) { tmp }
 
   tmp = cpu_cores
-  @space.func(:add, :cores) { tmp }
+  @space.func(:add, :cpu_cores) { tmp }
 
   tmp = cpu_ram
   @space.func(:add, :cpu_ram) { tmp }
 end
 
-TODO: distinguish between block, fs, ram, etc.
 def metrics_storage
-  if storage and (@target.has_device? or @target.supports_fs?)
-    @space.func(:add, :device) { |v| @target.infra[v.host][:device] }
-    @space.func(:add, :fs) { |v| @target.infra[v.host][:filesystem] }
-    @space.func(:add, :fs_block_size) { |v| @target.infra[v.host][:filesystem_block_size] }
-    @space.func(:add, :fs_mount_options) { |v| "\"#{@target.infra[v.host][:filesystem_mount_options]}\"" }
-    @space.func(:add, :type) { |v| @target.infra[v.host][:type] }
-    @space.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
+  s = @target
+  @logger.error "storage #{s} is not supported" unless (File.blockdev?(s) or File.file?(s))
+
+  tmp = main_device(s)
+  @space.func(:add, :storage_device) { |v| tmp }
+  @space.func(:add, :storage_load) { io_load }
+
+  if File.file?(s)
+    tmp = scan_device(s)
+    @space.func(:add, :storage_fs) { |v| tmp[:filesystem] }
+    @space.func(:add, :storage_fs_block_size) { tmp[:filesystem_block_size] }
+    @space.func(:add, :storage_fs_mount_options) { |v| "\"#{tmp[:filesystem_mount_options]}\"" }
+    @space.func(:add, :storage_type) { |v| tmp[:type] }
+    @space.func(:add, :storage_volumes) { |v| tmp[:volumes] }
   end
 end
 
@@ -69,22 +81,7 @@ def metrics_os
   @space.func(:add, :os_release) { tmp }
 end
 
-def platform_collect(logger, has_device)
-  result = {
-    platform: platform,
-    shape: shape(platform),
-    device: main_device(@target),
-    kernel: kernel_release,
-    os_release: os_release,
-    arch: cpu_arch,
-    cpu: cpu_model,
-    cores: cpu_cores,
-    cpu_ram: cpu_ram,
-  }
-  result.merge!(check_device(logger, @target)) if has_device
-end
-
-def check_device(logger, src)
+def scan_device(logger, src)
   #raise "Incorrect path or not a regular file '#{src}'" unless File.file?(src)
 
   # Get the mount point, filesystem, and device where the file resides
@@ -153,26 +150,6 @@ def platform
   "unknown"
 end
 
-  def kernel_release
-    `uname -r`.strip
-  end
-
-  def cpu_arch
-    `uname -m`.strip
-  end
-
-  def cpu_model
-    `grep "model name" /proc/cpuinfo | sed -e 's/^.*: //' | head -n 1`.strip
-  end
-
-  def cpu_cores
-    `grep processor /proc/cpuinfo | wc -l`.strip
-  end
-
-  def cpu_ram
-    `grep -i memtotal /proc/meminfo | sed -e 's/MemTotal:[ ]*//' | sed -e 's/ kB//'`.strip
-  end
-
   def main_device(src)
     `df -h #{src} | tail -1 | sed -e 's/ .*$//'`.strip
   end
@@ -205,41 +182,6 @@ end
     bucket_names = response.data.map(&:name)
     bucket_names.include?(bucket_name)
 end
-
-  def actor_exists?(actor_file)
-    file = actor_file.strip
-    File.exist?("./hooks/#{actor_file}") || File.exist?(`which #{actor_file}`.strip)
-  end
-
-  def block_device_exists?(file)
-    File.blockdev?(`which #{file}`.strip)
-  end
-
-  def dir_exists?(file)
-    `test -d #{file} && echo 1`.strip == "1"
-  end
-
-  def count_gpu
-
-    def gpu?
-      if `lspci | grep -i nvidia`.empty?
-        return false
-      elsif `which nvidia-smi`.empty?
-        return false
-      end
-      true
-    end
-
-    if gpu?
-      `nvidia-smi --list-gpus | wc -l`.strip
-    else
-      "0"
-    end
-  end
-
-  def hostname
-    `hostname -s`.strip
-  end
 
   def os_release
     distro_name = "Unknown"
@@ -281,11 +223,11 @@ end
     `grep "model name" /proc/cpuinfo | sed -e 's/^.*: //' | head -n 1`.strip
   end
 
-  def core_count
+  def cpu_cores
     `grep processor /proc/cpuinfo | wc -l`.strip
   end
 
-  def cpu_ram_amount
+  def cpu_ram
     `grep -i memtotal /proc/meminfo | sed -e 's/MemTotal:[ ]*//' | sed -e 's/ kB//'`.strip
   end
 
@@ -306,11 +248,20 @@ end
     end
   end
 
-  def cpu_idle()
+  def cpu_load
+    (100 - cpu_idle)
+  end
+
+def io_load
+  (100 - io_idle)
+end
+
+  def cpu_idle
     `mpstat 1 1 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
-  def io_idle()
+  def io_idle
+    # TODO!!! it's iostat
     `mpstat | head -4 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
@@ -332,24 +283,6 @@ end
 
 def filesystem_mount_options(main_dev)
   `cat /proc/mounts | grep "#{main_dev}" | awk '{print $4}'`.strip
-end
-
-# This one is benchmark-specific, for FIO, and should be moved to its own class
-def get_units(value)
-  case value
-  when /k/
-    (value.gsub('k', '').to_i * 1024).to_s
-  when /M/
-    (value.gsub('M', '').to_i * 1024 * 1024).to_s
-  when /G/
-    (value.gsub('G', '').to_i * 1024 * 1024 * 1024).to_s
-  when /T/
-    (value.gsub('T', '').to_i * 1024 * 1024 * 1024 * 1024).to_s
-  when /P/
-    (value.gsub('P', '').to_i * 1024 * 1024 * 1024 * 1024 * 1024).to_s
-  else
-    value.to_s
-  end
 end
 
 def switch_scheduler(dev, filesystem, scheduler, raid_members, aggregated)

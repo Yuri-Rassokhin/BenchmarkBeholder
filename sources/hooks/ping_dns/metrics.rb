@@ -10,12 +10,11 @@ private
 # NOTE: If you need pre-benchmark preparation, just place it in the beginning of `setup`
 # NOTE: If you need preparation before EACH combination is benchmarked, define it as one more `func(:add, ...)` and call it from the function that invokes benchmark
 def setup
-  result = {} # here we'll store raw result of PING
   self.func(:add, :command) { |v| "ping -c #{v.count} -s #{v.size} #{v.dns}" } # construct PING command with current combination of parameters
-  self.func(:add, :raw_ping, hide: true) { |v| result[v.command] ||= `#{v.command} 2>&1` } # run PING and capture its raw result
-  self.func(:add, :time) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = [^\/]+\/([^\/]+)/, 1]&.to_f } # extract ping time
-  self.func(:add, :min) { |v| v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = ([^\/]+)/, 1]&.to_f } # extract min ping time
-  self.func(:add, :loss) { |v| v.raw_ping[/(\d+(?:\.\d+)?)% packet loss/, 1]&.to_f } # extract loss rate
+  self.func(:add, :raw_ping, hide: true) { |v| @result[:raw] ||= `#{v.command} 2>&1` } # run PING and save its raw result
+  self.func(:add, :time) { |v| @result[:time] ||= v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = [^\/]+\/([^\/]+)/, 1]&.to_f }
+  self.func(:add, :min) { |v| @result[:min] ||= v.raw_ping[/min\/avg\/max\/(?:mdev|stddev) = ([^\/]+)/, 1]&.to_f }
+  self.func(:add, :loss) { |v| @result[:loss] ||= v.raw_ping[/(\d+(?:\.\d+)?)% packet loss/, 1]&.to_f }
 end
 
 end

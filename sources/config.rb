@@ -11,24 +11,12 @@ def workload
   get :workload
 end
 
+def target
+  @data[:target]
+end
+
 def sweep
   get :sweep
-end
-
-def actor
-  get(:workload, :actor)
-end
-
-def protocol
-  get(:workload, :protocol)
-end
-
-def target
-  get(:workload, :target)
-end
-
-def schedulers
-  get(:parameters, :scheduler)
 end
 
 def [](key)
