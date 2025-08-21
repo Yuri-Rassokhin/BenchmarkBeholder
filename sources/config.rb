@@ -1,6 +1,3 @@
-require 'json'
-require 'dry-validation'
-
 class Config
 
 def initialize(logger, config_path)

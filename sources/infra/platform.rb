@@ -1,47 +1,72 @@
-require 'open3'
-require 'fileutils'
-require 'tempfile'
-
 class Platform
 
 def initialize(logger, target)
   @logger = logger
   @target = target
+  @space = nil
 end
 
-# standard functions for infrastructure metrics  
-def add_infra(space: , gpu: true, storage: true, os: true, platform: true)
+def metrics(space: , compute: true, storage: true, os: true, gpu: true)
+  @space = space
+  metrics_compute if compute
+  metrics_storage if storage
+  metrics_os if os
+  metrics_gpu if gpu
+end
 
-  if gpu
-    (1..`lspci | grep -i nvidia`.lines.count).each do |i|
-      space.func(:add, "gpu#{i}_model".to_sym) { `nvidia-smi --query-gpu=name --format=csv,noheader -i #{i-1}`.chomp }
-      space.func(:add, "gpu#{i}_memory".to_sym) { `nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i #{i-1}`.chomp.to_i }
-      space.func(:add, "gpu#{i}_utilization".to_sym) { `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits -i #{i-1}`.chomp.to_f }
-    end
+private
+
+def metrics_gpu
+  (1..`lspci | grep -i nvidia`.lines.count).each do |i|
+
+    model = `nvidia-smi --query-gpu=name --format=csv,noheader -i #{i-1}`.chomp
+    @space.func(:add, "gpu#{i}_model".to_sym) { model }
+
+    memory = `nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i #{i-1}`.chomp.to_i
+    @space.func(:add, "gpu#{i}_memory".to_sym) { memory }
+
+    @space.func(:add, "gpu#{i}_utilization".to_sym) { `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits -i #{i-1}`.chomp.to_f }
   end
+end
 
-  if platform
-    space.func(:add, :platform) { |v| @target.infra[v.host][:platform] }
-    space.func(:add, :shape) { |v| @target.infra[v.host][:shape] }
-    space.func(:add, :arch) { |v| @target.infra[v.host][:arch] }
-    space.func(:add, :cpu) { |v| @target.infra[v.host][:cpu] }
-    space.func(:add, :cores) { |v| @target.infra[v.host][:cores] }
-    space.func(:add, :cpu_ram) { |v| @target.infra[v.host][:cpu_ram] }
-  end
+def metrics_compute
+  tmp = platform
+  @space.func(:add, :platform) { tmp }
 
+  tmp = shape
+  @space.func(:add, :shape) { tmp }
+
+  tmp = cpu_arch
+  @space.func(:add, :arch) { tmp }
+
+  tmp = cpu_model
+  @space.func(:add, :cpu) { tmp }
+
+  tmp = cpu_cores
+  @space.func(:add, :cores) { tmp }
+
+  tmp = cpu_ram
+  @space.func(:add, :cpu_ram) { tmp }
+end
+
+TODO: distinguish between block, fs, ram, etc.
+def metrics_storage
   if storage and (@target.has_device? or @target.supports_fs?)
-    space.func(:add, :device) { |v| @target.infra[v.host][:device] }
-    space.func(:add, :fs) { |v| @target.infra[v.host][:filesystem] }
-    space.func(:add, :fs_block_size) { |v| @target.infra[v.host][:filesystem_block_size] }
-    space.func(:add, :fs_mount_options) { |v| "\"#{@target.infra[v.host][:filesystem_mount_options]}\"" }
-    space.func(:add, :type) { |v| @target.infra[v.host][:type] }
-    space.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
+    @space.func(:add, :device) { |v| @target.infra[v.host][:device] }
+    @space.func(:add, :fs) { |v| @target.infra[v.host][:filesystem] }
+    @space.func(:add, :fs_block_size) { |v| @target.infra[v.host][:filesystem_block_size] }
+    @space.func(:add, :fs_mount_options) { |v| "\"#{@target.infra[v.host][:filesystem_mount_options]}\"" }
+    @space.func(:add, :type) { |v| @target.infra[v.host][:type] }
+    @space.func(:add, :volumes) { |v| @target.infra[v.host][:volumes] }
   end
+end
 
-  if os
-    space.func(:add, :kernel) { |v| @target.infra[v.host][:kernel] }
-    space.func(:add, :os_release) { |v| @target.infra[v.host][:os_release] }
-  end
+def metrics_os
+  tmp = kernel_release
+  @space.func(:add, :kernel) { tmp }
+
+  tmp = os_release
+  @space.func(:add, :os_release) { tmp }
 end
 
 def platform_collect(logger, has_device)
@@ -184,10 +209,6 @@ end
   def actor_exists?(actor_file)
     file = actor_file.strip
     File.exist?("./hooks/#{actor_file}") || File.exist?(`which #{actor_file}`.strip)
-  end
-
-  def bbh_running?
-    not `ps ax | grep "ruby /tmp/remote_method_call.rb" | grep -v grep`.strip.empty?
   end
 
   def block_device_exists?(file)

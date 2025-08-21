@@ -1,5 +1,3 @@
-require 'optparse'
-
 class Options
 
 attr_reader :workload, :space_mode

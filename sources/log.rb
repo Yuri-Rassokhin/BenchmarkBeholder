@@ -1,8 +1,3 @@
-require 'logger'
-require 'telegram'
-require 'net/http'
-require 'json'
-
 class Log
   def initialize
     @logger = logger_initialize

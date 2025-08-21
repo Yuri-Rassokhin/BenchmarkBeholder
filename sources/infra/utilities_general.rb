@@ -1,8 +1,3 @@
-
-require 'open3'
-require 'fileutils'
-require 'tempfile'
-
 #module UtilitiesGeneral
 
   def oci_bucket_exists?(bucket_name, namespace)

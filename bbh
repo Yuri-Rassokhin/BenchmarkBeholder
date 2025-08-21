@@ -1,7 +1,17 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
+require 'bundler/setup'
 require 'flex-cartesian'
+require 'open3'
+require 'fileutils'
+require 'tempfile'
+require 'json'
+require 'dry-validation'
+require 'logger'
+require 'telegram'
+require 'net/http'
+require 'json'
+require 'optparse'
 
 require './sources/infra/scheduler'
 require './sources/infra/platform'
@@ -33,7 +43,6 @@ TODO: most of the target is not needed - just accumulate data collection in Plat
 TODO: the user will decide if they need to add Platform data to the metrics
 TODO: Similarly, the user will be able to call Scheduler from the metrics, etc.
 TODO: NO automated checks - just provide modularized methods to hook creator.
-target = Target.new(logger, config)
 platform = Platform.new(logger, target)
 
 logger.info "Starting series #{series}"
