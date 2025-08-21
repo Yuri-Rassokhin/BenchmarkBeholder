@@ -30,6 +30,12 @@ def benchmark
   @logger.info "Series #{@series} completed"
 end
 
+def save
+  report = "./log/bbh-#{@workload_name}-#{@series}-result.csv"
+  FileUtils.mkdir_p(File.dirname(report))
+  output(format: :csv, file: report)
+end
+
 private
 
 def setup

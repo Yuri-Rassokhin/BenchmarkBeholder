@@ -17,7 +17,6 @@ require './sources/infra/scheduler'
 require './sources/infra/platform'
 require './sources/infra/utilities_general' # TODO: restructure
 require './sources/options'
-#require './sources/target' # TODO: correct it and enable
 require './sources/config'
 require './sources/node'
 require './sources/workload'
@@ -42,10 +41,6 @@ platform = Platform.new(logger, config.target)
 
 workload.benchmark
 
+workload.save
 #TODO: to replace this chunk with last function that pushes each result outside
-#TODO: to initialize the report in prepare method of the hook
-#report = "./log/bbh-#{hook}-#{series}-result.csv"
-#FileUtils.mkdir_p(File.dirname(report))
-#space.output(format: :csv, file: report)
-#space.output(colorize: true, align: true)
 
