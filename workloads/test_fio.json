@@ -1,20 +1,16 @@
 {
-	"workload": {
-		"hook": "fio",
-		"actor": "fio",
-		"protocol": "file",
+	"workload": "fio",
+	"misc": {
 		"target": "/home/opc/dump",
-		"total_size": "2G",
-		"iterations": 1,
-		"units": "MB/s",
-		"precision": 3
+		"total_size": "1G"
 	},
-	"parameters": {
-		"scheduler": [ "none", "bfq" ],
-		"operation": [ "read", "write" ],
-		"block_size": [ "1K" ],
+	"sweep": {
+		"scheduler": [ "none", "kyber"],
+		"operation": [ "read" ],
+		"size": [ "4k" ],
 		"ioengine": [ "libaio" ],
 		"iodepth": [ 64 ],
-		"processes": [ 1  ]
+		"processes": [ 8 ],
+		"iteration": [ 1 ]
 	}
 }

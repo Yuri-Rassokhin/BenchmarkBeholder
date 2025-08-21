@@ -6,27 +6,20 @@ def setup
   result = {}
 
   # NOTE: so far, indirect access is hardcoded for A). simplicity (to avoid validity checks with with ioengines, and B. practical need
-  func(:add, :command) { |v| @result[:command] ||= "fio --direct=0 --unit_base=8 --kb_base=1024 --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --runtime=15 --numjobs=#{v.processes} --time_based --group_reporting --name=bbh_fio --eta-newline=1 --filename=#{@config.target}".strip }
+  func(:add, :command) { |v| @result[:command] ||= "fio --direct=0 --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --output-format=json --runtime=15 --numjobs=#{v.processes} --time_based --name=bbh_fio --filename=#{@config.target}".strip }
 
-  func(:add, :result, hide: true) { |v| Scheduler.switch(@logger, v.scheduler, @platform.device[:volumes]); @result[:result] = `#{v.command}`.strip }
+  func(:add, :result, hide: true) { |v| Scheduler.switch(@logger, v.scheduler, @volumes); @result[:result] = `#{v.command}`.strip }
 
-  func(:add, :iops) do |v|
-    line = v.result.lines.select { |l| l.include?("iops") && l.include?("avg=") }.last
-    res = line&.match(/avg=([\d.]+)/)&.captures&.first&.to_i || 0
-    @result[:iops] ||= res
-  end
+  # TODO!!! operation "read" can be different...
+  func(:add, :iops) { |v| @result[:iops] ||= JSON.parse(v.result)["jobs"][0]["read"]["iops"].to_i }
 
-  func(:add, :bandwidth) do |v|
-    bw = v.result[/ \((\d+)kB\/s-/, 1].to_f
-    res = Utilities.convert_units(@logger, bw, from: "KB/s", to: v.units, precision: @config[:misc][:precision])
-    @result[:bandwidth] ||= res
-    res
-  end
+  # BW converted to MB/s
+  func(:add, :bandwidth) { |v| @result[:bandwidth] ||= JSON.parse(v.result)["jobs"][0]["read"]["bw_bytes"].to_f / 1_000_000 }
 
-  func(:add, :units) { @config[:workload][:units] }
+  func(:add, :units) { "MB/s" }
 
   # standard functions for infrastructure metrics
-  Platform.metrics(logger: @logger, target: @config[:misc][:target], space: self, gpu: false)
+#  Platform.metrics(logger: @logger, target: @config[:misc][:target], space: self, gpu: false)
 end
 
 end

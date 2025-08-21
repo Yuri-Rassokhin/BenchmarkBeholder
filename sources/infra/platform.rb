@@ -1,20 +1,14 @@
 module Platform
-  attr_accessor :device
 
 def self.metrics(logger: , target: , space: , compute: true, storage: true, os: true, gpu: true)
   @logger, @target, @space = logger, target, space
-  @device = nil
-  metrics_compute if compute
-  metrics_storage if storage
-  metrics_os if os
-  metrics_gpu if gpu
+  self.metrics_compute if compute
+  self.metrics_storage if storage
+  self.metrics_os if os
+  self.metrics_gpu if gpu
 end
 
-class << self
-
-private
-
-def metrics_gpu
+def self.metrics_gpu
   gpu_count = `lspci | grep -i nvidia`.lines.count
 
   @space.func(:add, "gpu_count".to_sym) { gpu_count }
@@ -31,7 +25,7 @@ def metrics_gpu
   end
 end
 
-def metrics_compute
+def self.metrics_compute
   @space.func(:add, :cpu_load) { cpu_load }
 
   tmp = platform
@@ -53,7 +47,7 @@ def metrics_compute
   @space.func(:add, :cpu_ram) { tmp }
 end
 
-def metrics_storage
+def self.metrics_storage
   s = @target
   @logger.error "storage #{s} is not supported" unless (File.blockdev?(s) or File.file?(s))
 
@@ -63,7 +57,6 @@ def metrics_storage
 
   if File.file?(s)
     tmp = scan_device(s)
-    @device = tmp
     @space.func(:add, :storage_fs) { |v| tmp[:filesystem] }
     @space.func(:add, :storage_fs_block_size) { tmp[:filesystem_block_size] }
     @space.func(:add, :storage_fs_mount_options) { |v| "\"#{tmp[:filesystem_mount_options]}\"" }
@@ -72,7 +65,7 @@ def metrics_storage
   end
 end
 
-def metrics_os
+def self.metrics_os
   tmp = kernel_release
   @space.func(:add, :kernel) { tmp }
 
@@ -80,7 +73,7 @@ def metrics_os
   @space.func(:add, :os_release) { tmp }
 end
 
-def scan_device(src)
+def self.scan_device(src)
   #raise "Incorrect path or not a regular file '#{src}'" unless File.file?(src)
 
   # Get the mount point, filesystem, and device where the file resides
@@ -119,7 +112,7 @@ def scan_device(src)
   }
 end
 
-def shape(platform)
+def self.shape(platform)
   case platform
   when "OCI"
     raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
@@ -136,7 +129,7 @@ def shape(platform)
   end
 end
 
-def platform
+def self.platform
   raw = `curl -s -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/ | grep -iw shape | awk '{print $2}' | sed 's/"//g' | sed 's/,//'`
   return "OCI" if not raw.empty?
 
@@ -149,11 +142,11 @@ def platform
   "unknown"
 end
 
-  def main_device(src)
+def self.main_device(src)
     `df -h #{src} | tail -1 | sed -e 's/ .*$//'`.strip
-  end
+end
 
-  def oci_bucket_exists?(bucket_name, namespace)
+def self.oci_bucket_exists?(bucket_name, namespace)
     require 'oci'
     config = OCI::ConfigFileLoader.load_config()
     object_storage = OCI::ObjectStorage::ObjectStorageClient.new(config: config)
@@ -182,7 +175,7 @@ end
     bucket_names.include?(bucket_name)
 end
 
-  def os_release
+  def self.os_release
     distro_name = "Unknown"
     distro_version = "Unknown"
 
@@ -210,31 +203,31 @@ end
   #    `lsb_release -si`.strip + " " + `lsb_release -sr`.strip
   end
 
-  def kernel_release
+  def self.kernel_release
     `uname -r`.strip
   end
 
-  def cpu_arch
+  def self.cpu_arch
     `uname -m`.strip
   end
 
-  def cpu_model
+  def self.cpu_model
     `grep "model name" /proc/cpuinfo | sed -e 's/^.*: //' | head -n 1`.strip
   end
 
-  def cpu_cores
+  def self.cpu_cores
     `grep processor /proc/cpuinfo | wc -l`.strip
   end
 
-  def cpu_ram
+  def self.cpu_ram
     `grep -i memtotal /proc/meminfo | sed -e 's/MemTotal:[ ]*//' | sed -e 's/ kB//'`.strip
   end
 
-  def main_device(src)
+  def self.main_device(src)
     `df -h #{src} | tail -1 | sed -e 's/ .*$//'`.strip
   end
 
-  def filesystem(file)
+  def self.filesystem(file)
     s_type = `stat -c "%F" #{file}`.strip
     case s_type
     when "regular file", "regular empty file"
@@ -247,24 +240,24 @@ end
     end
   end
 
-  def cpu_load
+  def self.cpu_load
     (100 - cpu_idle)
   end
 
-def io_load
+  def self.io_load
   (100 - io_idle)
 end
 
-  def cpu_idle
+  def self.cpu_idle
     `mpstat 1 1 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
-  def io_idle
+  def self.io_idle
     # TODO!!! it's iostat
     `mpstat | head -4 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
   end
 
-def filesystem_block_size(main_dev, filesystem)
+  def self.filesystem_block_size(main_dev, filesystem)
   "" if main_dev.nil? || %w[tmpfs ramfs nfs NA].include?(filesystem)
 
   case filesystem
@@ -280,11 +273,11 @@ def filesystem_block_size(main_dev, filesystem)
   end
 end
 
-def filesystem_mount_options(main_dev)
+  def self.filesystem_mount_options(main_dev)
   `cat /proc/mounts | grep "#{main_dev}" | awk '{print $4}'`.strip
 end
 
-def switch_scheduler(dev, filesystem, scheduler, raid_members, aggregated)
+  def self.switch_scheduler(dev, filesystem, scheduler, raid_members, aggregated)
   return if %w[ramfs tmpfs nfs fuse.glusterfs].include?(filesystem) || scheduler == "N/A"
 
   dev_name = File.basename(dev)
@@ -315,7 +308,7 @@ def run_sudo(cmd)
   result.strip
 end
 
-def check_raid(main_dev_name)
+def self.check_raid(main_dev_name)
   raid_level = `grep #{main_dev_name} /proc/mdstat | tr ' ' '\n' | grep raid | sed -e 's/raid//'`.strip
   if raid_level.empty?
     { raid_members: "n/a", raid_members_amount: 1, storage_type: "\"Single Drive\"" }
@@ -330,11 +323,11 @@ def check_raid(main_dev_name)
   end
 end
 
-def get_cpu_consumption
+def self.get_cpu_consumption
   `echo "scale=3;(100 - $(mpstat | tail -n 1 | awk '{print $12}'))/100" | bc`.strip
 end
 
-def get_storage_consumption(device, main_dev)
+def self.get_storage_consumption(device, main_dev)
   if device == "RAM"
     -1
   elsif device == "NFS"
@@ -342,8 +335,6 @@ def get_storage_consumption(device, main_dev)
   else
     `iostat #{main_dev} | grep #{File.basename(main_dev)} | awk '{print $2}'`.strip
   end
-end
-
 end
 
 end

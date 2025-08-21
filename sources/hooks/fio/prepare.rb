@@ -10,6 +10,8 @@ def prepare
 
   Scheduler.prepare(@logger, @config)
 
+  @volumes = Platform.scan_device(file)[:volumes]
+
   @logger.info "creating target file #{file} of the size #{size}, rounded to megabytes"
   File.open(file, "wb") do |f|
       block = "\0" * 1024 * 1024  # 1MB

@@ -2,9 +2,7 @@
 	"workload": "fio",
 	"misc": {
 		"target": "/home/opc/dump",
-		"total_size": "2G",
-		"units": "MB/s",
-		"precision": 3
+		"total_size": "2G"
 	},
 	"sweep": {
 		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],

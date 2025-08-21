@@ -24,7 +24,9 @@ end
 
 # converts given value between scaling units: K/k, M/m, G/g, T/t, P/p.
 def self.convert_units(logger, value, from: , to: , precision: )
+  puts "HERE RAW: #{value}"
   bytes = units_to_bytes(logger, value, from: from, precision: precision)
+  puts "HERE BYTES: #{bytes}"
   bytes_to_units(logger, bytes, to: to, precision: precision)
 end
 
@@ -80,7 +82,7 @@ def self.bytes_to_units(logger, value, to: , precision: )
   when "pb"
     res = value / 1024 / 1024 / 1024 / 1024 / 1024
   else
-    logger.error "unsupported units #{units}"
+    logger.error "unsupported unit #{units}"
   end
   res.round(precision)
 end

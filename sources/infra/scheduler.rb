@@ -17,15 +17,13 @@ def self.switch(logger, scheduler, volumes)
   end
 end
 
-private
-
-def base_device(dev_path)
+def self.base_device(dev_path)
   dev = File.basename(dev_path)
   output = `lsblk -no PKNAME /dev/#{dev}`.lines.first&.strip
   output.empty? ? dev : output
 end
 
-def schedulers
+def self.schedulers
   `cat /sys/block/sda/queue/scheduler`.strip.gsub(/[\[\]]/, '')
 end
 
