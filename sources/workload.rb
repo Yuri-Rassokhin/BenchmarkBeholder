@@ -11,6 +11,7 @@ def initialize(logger: , config: )
   @series = Time.now.to_i.to_s
   @result = {}
   @platform = nil
+  @host = `hostname`.chomp
   load_metrics
   counter_set
   setup
@@ -32,9 +33,9 @@ def preparation
 end
 
 def benchmark
-  @logger.info "Starting series #{@series}"
+  @logger.info "===== STARTED: #{@workload_name} series #{@series} on #{@host} ====="
   func(:run)
-  @logger.info "Series #{@series} completed"
+  @logger.info "===== COMPLETED: #{@workload_name} series #{@series} on #{@host} ====="
 end
 
 def save
@@ -64,8 +65,7 @@ def counter_set
   self.func(:add, :counter, hide: true, order: :first) do |v|
     @counter += 1
     @done = (@counter*100/@total.to_f).to_i
-    host = `hostname`
-    @logger.info " #{host} #{@workload_name} #{@counter}/#{@total} (#{@done}%): #{self.dimensions(v, separator: ' ')}"
+    @logger.info " #{@host} #{@workload_name} #{@counter} of #{@total} (#{@done}%) [ #{self.dimensions(v, separator: ' ')} ]"
   end
   self.func(:add, :store, hide: true, order: :last) do |v|
     @logger.info " => #{@result.inspect}"
