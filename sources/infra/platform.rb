@@ -236,7 +236,8 @@ end
   end
 
   def self.io_idle(device)
-    `iostat -dx #{device} | awk '/^#{device}/ { print $NF }'`.strip.to_f
+    dev = File.basename(device)
+    `iostat -dx #{dev} | awk '/^#{dev}/ { print $NF }'`.strip.to_f
   end
 
   def self.filesystem_block_size(main_dev, filesystem)
