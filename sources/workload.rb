@@ -64,7 +64,8 @@ def counter_set
   self.func(:add, :counter, hide: true, order: :first) do |v|
     @counter += 1
     @done = (@counter*100/@total.to_f).to_i
-    @logger.info " #{@workload_name} #{@counter}/#{@total} (#{@done}%): #{self.dimensions(v, separator: ' ')}"
+    host = `hostname`
+    @logger.info " #{host} #{@workload_name} #{@counter}/#{@total} (#{@done}%): #{self.dimensions(v, separator: ' ')}"
   end
   self.func(:add, :store, hide: true, order: :last) do |v|
     @logger.info " => #{@result.inspect}"
