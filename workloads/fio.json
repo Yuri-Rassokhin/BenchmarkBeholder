@@ -2,15 +2,15 @@
 	"workload": "fio",
 	"misc": {
 		"target": "/home/opc/dump",
-		"total_size": "2G"
+		"total_size": "5G"
 	},
 	"sweep": {
 		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],
 		"operation": [ "read", "write" ],
-		"block_size": [ "4k", "8k", "16k", "32k" ],
+		"size": [ "4k", "8k", "16k", "32k", "64k", "128k", "256k", "512k", "1m" ],
 		"ioengine": [ "libaio" ],
-		"iodepth": [ 64, 128, 512, 256, 512 ],
-		"processes": [ 1, 2, 4, 8, 16, 32, 64, 96, 104 ],
+		"iodepth": [ 64, 128, 256, 512 ],
+		"processes": [ 1, 2, 4, 8, 16, 30 ],
 		"iteration": [ 1, 2, 3, 4 ]
 	}
 }
