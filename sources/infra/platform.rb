@@ -47,7 +47,7 @@ def self.metrics_storage
     @space.func(:add, :storage_fs_block_size) { tmp[:filesystem_block_size] }
     @space.func(:add, :storage_fs_mount_options) { |v| "\"#{tmp[:filesystem_mount_options]}\"" }
     @space.func(:add, :storage_type) { |v| tmp[:type] }
-    @space.func(:add, :storage_volumes) { |v| tmp[:volumes] }
+    @space.func(:add, :storage_volumes) { |v| tmp[:volumes].join(' ') }
 
     tmp[:volumes].each do |volume|
       @space.func(:add, "#{volume}-load}".to_sym) { io_load(volume) }
