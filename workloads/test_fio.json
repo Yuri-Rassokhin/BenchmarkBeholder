@@ -2,11 +2,11 @@
 	"workload": "fio",
 	"misc": {
 		"target": "/home/opc/dump",
-		"total_size": "1G"
+		"total_size": "1M"
 	},
 	"sweep": {
-		"scheduler": [ "none", "kyber"],
-		"operation": [ "read" ],
+		"scheduler": [ "none" ],
+		"operation": [ "read", "write" ],
 		"size": [ "4k" ],
 		"ioengine": [ "libaio" ],
 		"iodepth": [ 64 ],

@@ -1,7 +1,7 @@
 module Platform
 
-def self.metrics(logger: , target: , space: , compute: true, storage: true, os: true, gpu: true)
-  @logger, @target, @space = logger, target, space
+def self.metrics(logger: , target: , space: , result: , compute: true, storage: true, os: true, gpu: true)
+  @logger, @target, @space, @result = logger, target, space, result
   self.metrics_compute if compute
   self.metrics_storage if storage
   self.metrics_os if os
@@ -27,33 +27,19 @@ end
 
 def self.metrics_compute
   @space.func(:add, :cpu_load) { cpu_load }
-
-  tmp = platform
-  @space.func(:add, :cloud_platform) { tmp }
-
-  tmp = shape(platform)
-  @space.func(:add, :compute_shape) { tmp }
-
-  tmp = cpu_arch
-  @space.func(:add, :cpu_arch) { tmp }
-
-  tmp = cpu_model
-  @space.func(:add, :cpu_model) { tmp }
-
-  tmp = cpu_cores
-  @space.func(:add, :cpu_cores) { tmp }
-
-  tmp = cpu_ram
-  @space.func(:add, :cpu_ram) { tmp }
+  @space.func(:add, :cloud_platform) { platform }
+  @space.func(:add, :compute_shape) { shape(platform) }
+  @space.func(:add, :cpu_arch) { cpu_arch }
+  @space.func(:add, :cpu_model) { cpu_model }
+  @space.func(:add, :cpu_cores) { cpu_cores }
+  @space.func(:add, :cpu_ram) { cpu_ram }
 end
 
 def self.metrics_storage
   s = @target
   @logger.error "storage #{s} is not supported" unless (File.blockdev?(s) or File.file?(s))
 
-  tmp = main_device(s)
-  @space.func(:add, :storage_device) { |v| tmp }
-  @space.func(:add, :storage_load) { io_load }
+  @space.func(:add, :storage_device) { |v| main_device(s) }
 
   if File.file?(s)
     tmp = scan_device(s)
@@ -62,15 +48,16 @@ def self.metrics_storage
     @space.func(:add, :storage_fs_mount_options) { |v| "\"#{tmp[:filesystem_mount_options]}\"" }
     @space.func(:add, :storage_type) { |v| tmp[:type] }
     @space.func(:add, :storage_volumes) { |v| tmp[:volumes] }
+
+    tmp[:volumes].each do |volume|
+      @space.func(:add, "#{volume}-load}".to_sym) { io_load(volume) }
+    end
   end
 end
 
 def self.metrics_os
-  tmp = kernel_release
-  @space.func(:add, :kernel) { tmp }
-
-  tmp = os_release
-  @space.func(:add, :os_release) { tmp }
+  @space.func(:add, :kernel) { @result[:kernel] ||= kernel_release }
+  @space.func(:add, :os_release) { @result[:os_release] ||= os_release }
 end
 
 def self.scan_device(src)
@@ -223,10 +210,6 @@ end
     `grep -i memtotal /proc/meminfo | sed -e 's/MemTotal:[ ]*//' | sed -e 's/ kB//'`.strip
   end
 
-  def self.main_device(src)
-    `df -h #{src} | tail -1 | sed -e 's/ .*$//'`.strip
-  end
-
   def self.filesystem(file)
     s_type = `stat -c "%F" #{file}`.strip
     case s_type
@@ -244,17 +227,16 @@ end
     (100 - cpu_idle)
   end
 
-  def self.io_load
-  (100 - io_idle)
+  def self.io_load(device)
+  (100 - io_idle(device))
 end
 
   def self.cpu_idle
-    `mpstat 1 1 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
+    `mpstat 1 1 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_f
   end
 
-  def self.io_idle
-    # TODO!!! it's iostat
-    `mpstat | head -4 | tail -1 | awk 'NF>1{print $NF}' | sed -e 's/\\.[0-9]*$//'`.strip.to_i
+  def self.io_idle(device)
+    `iostat -dx #{device} | awk '/^#{device}/ { print $NF }'`.strip.to_f
   end
 
   def self.filesystem_block_size(main_dev, filesystem)
