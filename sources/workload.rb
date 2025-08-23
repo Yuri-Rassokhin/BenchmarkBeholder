@@ -80,7 +80,7 @@ def counter_set
       *Benchmark* #{@workload_name}
       *Host* #{@host}
       *Series* #{@series}
-      *ETA* #{@done}% #{@counter}/#{@total} #{eta}
+      *ETA* #{@done}% #{@counter} of #{@total} #{eta}
 
     MSG
   res = res + "#{params}"
@@ -88,7 +88,15 @@ def counter_set
   end
 
   self.func(:add, :store, hide: true, order: :last) do |v|
-    @logger.info " => #{@result.inspect}"
+    res = <<~MSG
+      *Benchmark* #{@workload_name}
+      *Host* #{@host}
+      *Series* #{@series}
+      
+      *Metrics #{@counter} of #{@total}*
+
+    MSG
+    @logger.info res + "#{@result.map { |k, v| "*#{k}*=#{v}" }.join("\n\n")}"
     @result = {}
   end
 end
