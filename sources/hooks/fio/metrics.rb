@@ -3,6 +3,13 @@ class Workload
 private
 
 def setup
+  # built-in variables:
+  # @temp - for storing data of the current combination; it is erased at the next combination
+  # @result - for storing result of the current combination; it is logged, and the variable is erased
+  #
+  # Note: all functions, except defined with hide: true, save results in the benchmarking report
+  @temp = { command: nil, raw: nil, infra: nil }
+
   # NOTE: so far, indirect access is hardcoded for A). simplicity (to avoid validity checks with with ioengines, and B. practical need
   func(:add, :command) { |v| @temp[:command] ||= "fio --direct=0 --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --output-format=json --numjobs=#{v.processes} --name=bbh_fio --filename=#{@config.target}".strip }
 
