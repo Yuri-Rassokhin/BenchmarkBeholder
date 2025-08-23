@@ -1,7 +1,7 @@
 {
 	"workload": "fio",
 	"misc": {
-		"target": "/home/opc/dump",
+		"target": "/tmp/dump",
 		"total_size": "1M"
 	},
 	"sweep": {
