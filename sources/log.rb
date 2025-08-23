@@ -6,10 +6,15 @@ class Log
     @telegram_chat_id = telegram_data[:chat_id]
   end
 
-  def info(msg)
-    text = msg[0].upcase + msg[1..]
-    @logger.info(text)
-    telegram_message(:info, text)
+  # generates raw message without modifications
+  # streams: :telegram, :main, or both by default
+  def info!(text, stream = nil)
+    @logger.info(text) unless stream == :telegram
+    telegram_message(:info, text) unless stream == :main
+  end
+
+  def info(msg, stream = nil)
+    info!(msg[0].upcase + msg[1..], stream)
   end
 
   def warn(msg)
@@ -66,11 +71,22 @@ class Log
     { token: nil, chat_id: nil }
   end
 
+    SEVERITY_MAP = {
+      "DEBUG"   => "D",
+      "INFO"    => "I",
+      "WARN"    => "W",
+      "ERROR"   => "E",
+      "FATAL"   => "F",
+      "UNKNOWN" => "U"
+    }
+
   def logger_initialize
     logger = Logger.new(STDOUT)
     logger.level = Logger::INFO
+
     logger.formatter = proc do |severity, datetime, progname, msg|
-      "#{datetime.strftime("%Y-%m-%d %H:%M:%S")} [#{severity}] #{msg}\n"
+      severity_letter = SEVERITY_MAP[severity] || severity[0]
+      "#{datetime.strftime("%Y-%m-%d %H:%M:%S")} #{severity_letter} #{msg}\n"
     end
     logger
   end
@@ -98,9 +114,15 @@ def telegram_format(level, msg)
   res = msg.gsub(/([_\[\]()~`>#+\-=|{}.!\\])/, '\\\\\1')
   case level
   when :warn
-    res = "WARNING " + res
+    tmp = <<~MSG
+    *WARNING*
+    MSG
+    res = tmp + res
   when :error
-    res = "ERROR " + res
+    tmp = <<~MSG
+    *ERROR*
+    MSG
+    res = tmp + res
   end
   res
 end

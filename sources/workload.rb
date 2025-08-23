@@ -67,6 +67,37 @@ def eta
   @logger.human_readable_time(eta_seconds)
 end
 
+def log_invocation_start(v)
+  params = self.dimensions(v, separator: "\n")
+  res = <<~MSG
+    *Benchmark* #{@workload_name}
+    *Host* #{@host}
+    *Series* #{@series}
+    *Step* #{@counter}/#{@total} (#{@done}%)
+    *ETA* #{eta}
+
+    MSG
+  res = res + "#{params}"
+
+  @logger.info!(res, :telegram)
+  @logger.info("benchmark #{@workload_name} | host #{@host} | series #{@series} | step #{@counter}/#{@total} (#{@done}%) | ETA: #{eta}", :main)
+end
+
+def log_invocation_done(v)
+  params = self.dimensions(v, separator: "\n")
+  res = <<~MSG
+    *Benchmark* #{@workload_name}
+    *Host* #{@host}
+    *Series* #{@series}
+    *Step* #{@counter}/#{@total} (#{@done}%)
+
+    *Metrics*
+
+  MSG
+  @logger.info! res + "#{@result.map { |k, v| "*#{k}*=#{v}" }.join("\n\n")}", :telegram
+  @logger.info "metrics #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")}", :main
+end
+
 def counter_set
   @time_start = Time.now.to_i
   @counter = 0
@@ -75,28 +106,11 @@ def counter_set
   self.func(:add, :counter, hide: true, order: :first) do |v|
     @counter += 1
     @done = (@counter*100/@total.to_f).to_i
-    params = self.dimensions(v, separator: "\n")
-    res = <<~MSG
-      *Benchmark* #{@workload_name}
-      *Host* #{@host}
-      *Series* #{@series}
-      *ETA* #{@done}% #{@counter} of #{@total} #{eta}
-
-    MSG
-  res = res + "#{params}"
-  @logger.info res
+    log_invocation_start(v)
   end
 
   self.func(:add, :store, hide: true, order: :last) do |v|
-    res = <<~MSG
-      *Benchmark* #{@workload_name}
-      *Host* #{@host}
-      *Series* #{@series}
-      
-      *Metrics #{@counter} of #{@total}*
-
-    MSG
-    @logger.info res + "#{@result.map { |k, v| "*#{k}*=#{v}" }.join("\n\n")}"
+    log_invocation_done(v)
     @result = {}
   end
 end

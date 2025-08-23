@@ -3,10 +3,12 @@ class Workload
 private
 
 def setup
-  temp(:raw)
+  temp :raw
+  temp :command
+  temp :infra, {}
 
   # NOTE: so far, indirect access is hardcoded for A). simplicity (to avoid validity checks with with ioengines, and B. practical need
-  func(:add, :command) { |v| @result[:command] ||= "fio --direct=0 --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --output-format=json --numjobs=#{v.processes} --name=bbh_fio --filename=#{@config.target}".strip }
+  func(:add, :command) { |v| @command ||= "fio --direct=0 --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --output-format=json --numjobs=#{v.processes} --name=bbh_fio --filename=#{@config.target}".strip }
 
   func(:add, :raw, hide: true) { |v| Scheduler.switch(@logger, v.scheduler, @volumes); @raw = `#{v.command}`.strip }
 
@@ -18,7 +20,7 @@ def setup
   func(:add, :units) { "MB/s" }
 
   # standard functions for infrastructure metrics
-  Platform.metrics(logger: @logger, target: @config.target, space: self, result: @result, gpu: false)
+  Platform.metrics(logger: @logger, target: @config.target, space: self, result: @infra, gpu: false)
 end
 
 end
