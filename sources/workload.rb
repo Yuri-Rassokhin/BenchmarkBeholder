@@ -46,6 +46,10 @@ end
 
 private
 
+def temp(variable, value = nil)
+  instance_variable_set("@#{variable}", value)
+end
+
 def setup
   @logger.info "no metrics specified, nothing to do, exiting"
   exit 0
@@ -67,11 +71,22 @@ def counter_set
   @time_start = Time.now.to_i
   @counter = 0
   @total = self.size
+
   self.func(:add, :counter, hide: true, order: :first) do |v|
     @counter += 1
     @done = (@counter*100/@total.to_f).to_i
-    @logger.info "#{@done}% ETA:#{@counter/@done}  #{@counter}/#{@total} #{@series} #{@host} #{@workload_name} [#{self.dimensions(v, separator: ' ')}]"
+    params = self.dimensions(v, separator: "\n")
+    res = <<~MSG
+      *Benchmark* #{@workload_name}
+      *Host* #{@host}
+      *Series* #{@series}
+      *ETA* #{@done}% #{@counter}/#{@total} #{eta}
+
+    MSG
+  res = res + "#{params}"
+  @logger.info res
   end
+
   self.func(:add, :store, hide: true, order: :last) do |v|
     @logger.info " => #{@result.inspect}"
     @result = {}

@@ -25,6 +25,18 @@ class Log
     exit 1
   end
 
+  def human_readable_time(seconds)
+    days = (seconds / (24 * 3600)).to_i
+    hours = (seconds % (24 * 3600) / 3600).to_i
+    minutes = (seconds % 3600 / 60).to_i
+    readable = []
+    readable << "#{days}d" if days > 0
+    readable << "#{hours}h" if hours > 0
+    readable << "#{minutes}m" if minutes > 1
+    readable << "#{minutes}m" if minutes == 1
+    readable.empty? ? "<1m" : readable.join(" ")
+  end
+
   private
 
   def telegram_initialize
@@ -71,38 +83,26 @@ class Log
     http.use_ssl = true
 
     request = Net::HTTP::Post.new(uri.path, { 'Content-Type' => 'application/json' })
-    request.body = { chat_id: @telegram_chat_id, text: telegram_format(level, text) }.to_json
+    request.body = {
+      chat_id: @telegram_chat_id,
+      text: telegram_format(level, text),
+      parse_mode: "MarkdownV2"
+    }.to_json
 
     http.request(request)
   rescue StandardError => e
     @logger.error("failed to send telegram chat message: #{e.message}")
   end
 
-  def human_readable_time(seconds)
-    days = (seconds / (24 * 3600)).to_i
-    hours = (seconds % (24 * 3600) / 3600).to_i
-    minutes = (seconds % 3600 / 60).to_i
-    readable = []
-    readable << "#{days} days" if days > 0
-    readable << "#{hours} hours" if hours > 0
-    readable << "#{minutes} minutes" if minutes > 1
-    readable << "#{minutes} minute" if minutes == 1
-    readable.empty? ? "less than a minute" : readable.join(" ")
-  end
-
 def telegram_format(level, msg)
+  res = msg.gsub(/([_\[\]()~`>#+\-=|{}.!\\])/, '\\\\\1')
   case level
-  when :info
-    format = "INFO"
   when :warn
-    format = "WARN"
+    res = "WARNING " + res
   when :error
-    format = "ERROR"
-  else
-    @logger.error("unknown severity level")
+    res = "ERROR " + res
   end
-
-  "[" + format + "] " + msg
+  res
 end
 
 end
