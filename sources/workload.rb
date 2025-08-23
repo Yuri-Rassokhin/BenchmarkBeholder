@@ -77,7 +77,7 @@ def log_invocation_start(v)
   res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
   @logger.info!(res, :telegram)
-  @logger.info!("╭ Step #{@counter}/#{@total} (#{@done}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]", :main)
+  @logger.info!("\e[1m╭ Step #{@counter}/#{@total} (#{@done}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]\e[0m", :main)
   @logger.info!("│ Parameters [ #{dimensions(v, separator: " ")} ]", :main)
 end
 
