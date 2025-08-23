@@ -10,6 +10,7 @@ def initialize(logger: , config: )
   @workload_name = @config.workload
   @series = Time.now.to_i.to_s
   @result = {}
+  @temp = {}
   @platform = nil
   @host = `hostname`.chomp
   load_metrics
@@ -33,9 +34,9 @@ def preparation
 end
 
 def benchmark
-  @logger.info "STARTED #{@workload_name} series #{@series} on #{@host}"
+  @logger.info "starting workload #{@workload_name} series #{@series} on #{@host}"
   func(:run)
-  @logger.info "COMPLETED #{@workload_name} series #{@series} on #{@host}"
+  @logger.info "completed workload #{@workload_name} series #{@series} on #{@host}"
 end
 
 def save
@@ -45,10 +46,6 @@ def save
 end
 
 private
-
-def temp(variable, value = nil)
-  instance_variable_set("@#{variable}", value)
-end
 
 def setup
   @logger.info "no metrics specified, nothing to do, exiting"
@@ -68,34 +65,33 @@ def eta
 end
 
 def log_invocation_start(v)
-  params = self.dimensions(v, separator: "\n")
   res = <<~MSG
-    *Benchmark* #{@workload_name}
+    *Workload* #{@workload_name}
     *Host* #{@host}
     *Series* #{@series}
     *Step* #{@counter}/#{@total} (#{@done}%)
     *ETA* #{eta}
 
+    *Parameters*
     MSG
-  res = res + "#{params}"
+  res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
   @logger.info!(res, :telegram)
-  @logger.info("benchmark #{@workload_name} | host #{@host} | series #{@series} | step #{@counter}/#{@total} (#{@done}%) | ETA: #{eta}", :main)
+  @logger.info!("╭ Step #{@counter}/#{@total} (#{@done}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]", :main)
+  @logger.info!("│ Parameters [ #{dimensions(v, separator: " ")} ]", :main)
 end
 
 def log_invocation_done(v)
-  params = self.dimensions(v, separator: "\n")
   res = <<~MSG
-    *Benchmark* #{@workload_name}
+    *Workload* #{@workload_name}
     *Host* #{@host}
     *Series* #{@series}
     *Step* #{@counter}/#{@total} (#{@done}%)
 
     *Metrics*
-
   MSG
-  @logger.info! res + "#{@result.map { |k, v| "*#{k}*=#{v}" }.join("\n\n")}", :telegram
-  @logger.info "metrics #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")}", :main
+  @logger.info! res + "#{@result.map { |k, v| "*#{k}* #{v}" }.join("\n")}", :telegram
+  @logger.info! "╰ Metrics [ #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")} ]", :main
 end
 
 def counter_set
@@ -112,6 +108,7 @@ def counter_set
   self.func(:add, :store, hide: true, order: :last) do |v|
     log_invocation_done(v)
     @result = {}
+    @temp = {}
   end
 end
 
