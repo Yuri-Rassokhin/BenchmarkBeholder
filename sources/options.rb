@@ -57,7 +57,7 @@ end
 def version_show
   @logger.info "### BenchmarkBeholder ###"
   @logger.info "home page: https://github.com/Yuri-Rassokhin/BenchmarkBeholder"
-  @logger.info "supported workloads: #{@hooks.join(", ")}"
+  @logger.info "supported workloads: #{@hooks.sort.join(", ")}"
   @logger.info "supported cloud platforms: OCI, AWS, Azure"
   @logger.info "supported local filesystems: XFS, ext3/4, btrfs, and any other POSIX-compliant"
   @logger.info "supported shared filesystems: GlusterFS, NFS, BeeGFS"
