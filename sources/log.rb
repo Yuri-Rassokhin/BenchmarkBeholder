@@ -8,13 +8,13 @@ class Log
 
   # generates raw message without modifications
   # streams: :telegram, :main, or both by default
-  def info!(text, stream = nil)
+  def info!(text, stream: nil, file: nil)
     @logger.info(text) unless stream == :telegram
-    telegram_message(:info, text) unless stream == :main
+    telegram_message(:info, text, file: file) unless stream == :main
   end
 
-  def info(msg, stream = nil)
-    info!(msg[0].upcase + msg[1..], stream)
+  def info(msg, stream: nil, file: nil)
+    info!(msg[0].upcase + msg[1..], stream: stream, file: file)
   end
 
   def warn(msg)
@@ -91,8 +91,13 @@ class Log
     logger
   end
 
-  def telegram_message(level, text)
+  def telegram_message(level, text, file: nil)
     return unless @telegram_token && @telegram_chat_id
+
+    if file
+      telegram_send_file(text, file)
+      return
+    end
 
     uri = URI("https://api.telegram.org/bot#{@telegram_token}/sendMessage")
     http = Net::HTTP.new(uri.host, uri.port)
@@ -109,6 +114,25 @@ class Log
   rescue StandardError => e
     @logger.error("failed to send telegram chat message: #{e.message}")
   end
+
+def telegram_send_file(text, file)
+  return unless File.exist?(file)
+  uri = URI("https://api.telegram.org/bot#{@telegram_token}/sendDocument")
+  f = File.open(file)
+
+  form_data = {
+    'chat_id' => @telegram_chat_id,
+    'document' => UploadIO.new(f, 'application/octet-stream', File.basename(file))
+  }
+  form_data['caption'] = text if text
+
+  request = Net::HTTP::Post::Multipart.new(uri.path, form_data)
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+  http.request(request)
+ensure
+  f.close if f
+end
 
 def telegram_format(level, msg)
   res = msg.gsub(/([_\[\]()~`>#+\-=|{}.!\\])/, '\\\\\1')

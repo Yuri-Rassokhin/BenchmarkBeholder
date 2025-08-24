@@ -42,7 +42,8 @@ end
 def save
   report = "./log/bbh-#{@workload_name}-#{@series}-result.csv"
   FileUtils.mkdir_p(File.dirname(report))
-  output(format: :csv, file: report)
+  output(format: :csv, separator: ';', file: report)
+  @logger.info "Benchmark report attached", file: report, stream: :telegram
 end
 
 private
@@ -76,9 +77,9 @@ def log_invocation_start(v)
     MSG
   res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
-  @logger.info!(res, :telegram)
-  @logger.info!("\e[1m╭ Step #{@counter}/#{@total} (#{@done}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]\e[0m", :main)
-  @logger.info!("│ Parameters [ #{dimensions(v, separator: " ")} ]", :main)
+  @logger.info!(res, stream: :telegram)
+  @logger.info!("\e[1m╭ Step #{@counter}/#{@total} (#{@done}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]\e[0m", stream: :main)
+  @logger.info!("│ Parameters [ #{dimensions(v, separator: " ")} ]", stream: :main)
 end
 
 def log_invocation_done(v)
@@ -90,8 +91,8 @@ def log_invocation_done(v)
 
     *Metrics*
   MSG
-  @logger.info! res + "#{@result.map { |k, v| "*#{k}* #{v}" }.join("\n")}", :telegram
-  @logger.info! "╰ Metrics [ #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")} ]", :main
+  @logger.info! res + "#{@result.map { |k, v| "*#{k}* #{v}" }.join("\n")}", stream: :telegram
+  @logger.info! "╰ Metrics [ #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")} ]", stream: :main
 end
 
 def counter_set

@@ -24,3 +24,4 @@ gem "ed25519"
 gem "bcrypt_pbkdf"
 gem "flex-cartesian"
 gem "ostruct"
+gem 'multipart-post'
