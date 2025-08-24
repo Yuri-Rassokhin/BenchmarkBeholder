@@ -89,12 +89,20 @@ def self.scan_device(src)
     type = "physical device"
     aggregated = false
   end
+
+  if filesystem == "tmpfs" or filesystem == "ramfs"
+    @logger.warn "ignoging mount options for #{filesystem} filesystem"
+    options = ""
+  else
+    options = filesystem_mount_options(main_device(src))
+  end
+
   {
-    filesystem: "#{filesystem}",
-    filesystem_block_size: filesystem_block_size(main_device(src), filesystem),
-    filesystem_mount_options: filesystem_mount_options(main_device(src)),
-    type: "#{type}",
-    volumes: "#{volumes}".split,
+    filesystem: "#{filesystem.chomp}",
+    filesystem_block_size: filesystem_block_size(main_device(src), filesystem).chomp,
+    filesystem_mount_options: options.chomp,
+    type: "#{type.chomp}",
+    volumes: "#{volumes.chomp}".split,
     aggregated: aggregated,
   }
 end
@@ -241,7 +249,8 @@ end
   end
 
   def self.filesystem_block_size(main_dev, filesystem)
-  "" if main_dev.nil? || %w[tmpfs ramfs nfs NA].include?(filesystem)
+  return "" if main_dev.empty? or filesystem.empty?
+  #|| %w[tmpfs ramfs nfs NA].include?(filesystem)
 
   case filesystem
   when "ext2", "ext3", "ext4"
@@ -249,7 +258,14 @@ end
   when "xfs"
     `xfs_info #{main_dev} | grep bsize | grep data | sed -e 's/^.*bsize=//' | awk '{print $1}'`.strip
   when "vboxsf"
-    "NA"
+    @logger.warn "For VirtualBox, file system block size doesn't apply"
+    ""
+  when "tmpfs", "ramfs"
+    @logger.warn "For #{filesystem}, block size will be PAGE_SIZE"
+    `getconf PAGE_SIZE`
+  when "nfs"
+    @logger.warn "For NFS, block size doesn't apply (use rsize, wsize, VFS bsize, and page size)"
+    ""
   else
     @logger.warn "unsupported filesystem #{filesystem} on #{main_dev}"
     ""
@@ -257,7 +273,7 @@ end
 end
 
   def self.filesystem_mount_options(main_dev)
-  `cat /proc/mounts | grep "#{main_dev}" | awk '{print $4}'`.strip
+  "#{`cat /proc/mounts | grep "#{main_dev}" | awk '{print $4}'`.strip}"
 end
 
   def self.switch_scheduler(dev, filesystem, scheduler, raid_members, aggregated)
