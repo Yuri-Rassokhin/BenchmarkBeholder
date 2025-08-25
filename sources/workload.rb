@@ -87,7 +87,7 @@ def log_invocation_done(v)
     *Workload* #{@workload_name}
     *Host* #{@host}
     *Series* #{@series}
-    *Step* #{@counter}/#{@total} (#{@done*100.round(2)}%)
+    *Step* #{@counter}/#{@total} (#{(@done*100).round(2)}%)
 
     *Metrics*
   MSG
