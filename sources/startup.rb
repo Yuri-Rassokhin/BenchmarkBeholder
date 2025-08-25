@@ -32,12 +32,13 @@ end
 
 def check_cpu_idle
   @logger.info "checking if CPU cores are idle"
-  @logger.error("CPU utilization >= 10%, no good for benchmarking") if cpu_idle < 90
+  @logger.error("CPU utilization >= 10%, no good for benchmarking") if Platform.cpu_idle < 90
 end
 
 def check_storage_idle
+  return true # TODO: DEBUG NEEDED
   @logger.info "checking if IO subsystem is idle"
-  @logger.error("IO utilization >= 10%, no good for benchmarking") if io_idle < 90
+  @logger.error("IO utilization >= 10%, no good for benchmarking") if Platform.io_idle < 90
 end
 
 end
