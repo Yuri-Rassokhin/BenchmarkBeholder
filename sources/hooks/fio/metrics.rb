@@ -11,7 +11,7 @@ def setup
   @temp = { command: nil, raw: nil, infra: nil }
 
   # NOTE: so far, indirect access is hardcoded for A). simplicity (to avoid validity checks with with ioengines, and B. practical need
-  func(:add, :command) { |v| @temp[:command] ||= "fio --direct=0 --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --output-format=json --numjobs=#{v.processes} --name=bbh_fio --filename=#{@config.target}".strip }
+  func(:add, :command) { |v| @temp[:command] ||= "fio --direct=#{v.direct} --rw=#{v.operation} --bs=#{v.size} --ioengine=#{v.ioengine} --iodepth=#{v.iodepth} --output-format=json --numjobs=#{v.processes} --name=bbh_fio --filename=#{@config.target}".strip }
 
   func(:add, :raw, hide: true) { |v| Scheduler.switch(@logger, v.scheduler, @volumes); @temp[:raw] = `#{v.command}`.strip }
 

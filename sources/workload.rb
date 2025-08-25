@@ -61,7 +61,7 @@ def load_metrics
 end
 
 def eta
-  eta_seconds = (@done == 0 ? "TBD" : (Time.now.to_i - @time_start).to_f/@done)
+  eta_seconds = (@done == 0 ? "TBD" : (Time.now.to_i - @time_start).to_i/@done)
   @logger.human_readable_time(eta_seconds)
 end
 
@@ -70,7 +70,7 @@ def log_invocation_start(v)
     *Workload* #{@workload_name}
     *Host* #{@host}
     *Series* #{@series}
-    *Step* #{@counter}/#{@total} (#{@done}%)
+    *Step* #{@counter}/#{@total} (#{(@done*100).round(2)}%)
     *ETA* #{eta}
 
     *Parameters*
@@ -78,7 +78,7 @@ def log_invocation_start(v)
   res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
   @logger.info!(res, stream: :telegram)
-  @logger.info!("\e[1m╭ Step #{@counter}/#{@total} (#{@done}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]\e[0m", stream: :main)
+  @logger.info!("\e[1m╭ Step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]\e[0m", stream: :main)
   @logger.info!("│ Parameters [ #{dimensions(v, separator: " ")} ]", stream: :main)
 end
 
@@ -87,7 +87,7 @@ def log_invocation_done(v)
     *Workload* #{@workload_name}
     *Host* #{@host}
     *Series* #{@series}
-    *Step* #{@counter}/#{@total} (#{@done}%)
+    *Step* #{@counter}/#{@total} (#{@done*100.round(2)}%)
 
     *Metrics*
   MSG
@@ -102,7 +102,7 @@ def counter_set
 
   self.func(:add, :counter, hide: true, order: :first) do |v|
     @counter += 1
-    @done = (@counter*100/@total.to_f).to_i
+    @done = (@counter.to_f/@total.to_f)
     log_invocation_start(v)
   end
 

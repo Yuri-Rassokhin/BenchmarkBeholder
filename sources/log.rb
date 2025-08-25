@@ -31,6 +31,13 @@ class Log
   end
 
   def human_readable_time(seconds)
+
+    def numeric?(seconds)
+      true if Float(seconds) rescue false
+    end
+
+    return seconds unless numeric?(seconds)
+
     days = (seconds / (24 * 3600)).to_i
     hours = (seconds % (24 * 3600) / 3600).to_i
     minutes = (seconds % 3600 / 60).to_i
@@ -39,7 +46,7 @@ class Log
     readable << "#{hours}h" if hours > 0
     readable << "#{minutes}m" if minutes > 1
     readable << "#{minutes}m" if minutes == 1
-    readable.empty? ? "<1m" : readable.join(" ")
+    readable.empty? ? "<1m" : readable.join(":")
   end
 
   private
