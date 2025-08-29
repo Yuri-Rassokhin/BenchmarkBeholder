@@ -11,7 +11,7 @@ def self.validate
     end
 
     required(:sweep).hash do
-      required(:direct).array(:integer, min_size?: 1, included_in?: [0, 1])
+      required(:direct).array(:integer, min_size?: 1).each(included_in?: [0, 1])
       required(:scheduler).array(:string, min_size?: 1, included_in?: %w[none bfq mq-deadline kyber])
       required(:size).array(:integer, min_size?: 1, gt?: 0)
       required(:operation).array(:string, min_size?: 1, included_in?: %w[read write randread randwrite])
