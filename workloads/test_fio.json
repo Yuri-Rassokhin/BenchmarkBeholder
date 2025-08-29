@@ -5,6 +5,7 @@
 		"total_size": "1M"
 	},
 	"sweep": {
+		"direct": [ 1 ],
 		"scheduler": [ "none" ],
 		"operation": [ "read", "write" ],
 		"size": [ "4k" ],
