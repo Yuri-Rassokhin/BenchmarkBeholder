@@ -37,6 +37,11 @@ end
 
 def self.metrics_storage
   s = @target
+
+  return if s.nil?
+
+  @logger.error "storage #{s} doesn't exist" unless File.exist?(s)
+
   @logger.error "storage #{s} is not supported" unless (File.blockdev?(s) or File.file?(s))
 
   @space.func(:add, :storage_device) { |v| main_device(s) }
