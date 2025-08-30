@@ -5,6 +5,25 @@ private
 def prepare
   dir = @config[:misc][:spdk_dir]
 
+  unless Etc.getpwuid(Process.uid).name == 'root' || system('sudo -n true')
+    @logger.error "sudo access is required for system tuning"
+    return
+  end
+
+  @logger.info "setting memlock unlimited for root in limits.conf"
+  limits_conf = "/etc/security/limits.conf"
+  entry = "root hard memlock unlimited\nroot soft memlock unlimited"
+  current = File.read(limits_conf) rescue ""
+  unless current.include?("memlock unlimited")
+    append = <<~LIMITS
+      \n# added by BenchmarkBeholder
+      root hard memlock unlimited
+      root soft memlock unlimited
+    LIMITS
+    system("sudo bash -c 'echo \"#{append.strip}\" >> #{limits_conf}'")
+    @logger.error "limits.conf updated, relogin will be required for change to take effect"
+  end
+
   @logger.error "SPDK path #{dir} is missing, please clone and build https://github.com/spdk/spdk" unless Dir.exist?(dir)
 
   enabler = "#{dir}/scripts/setup.sh"
@@ -14,9 +33,6 @@ def prepare
 
   bdevperf = "#{dir}/build/examples/bdevperf"
   @logger.error "executable #{bdevperf} not found" unless File.exist?(bdevperf)
-
-  @logger.info "Setting unlimited memlock (ulimit)"
-  Process.setrlimit(Process::RLIMIT_MEMLOCK, Process::RLIM_INFINITY, Process::RLIM_INFINITY)
 
   hugepages = 32768
   @logger.info "Setting #{hugepages} hugepages per NUMA node, please check if you've enough memory"
@@ -31,4 +47,6 @@ def prepare
 
   drives = "#{dir}/#{@config.sweep[:media]}"
   @logger.error "drives configuration file #{file} is missing" unless File.exist?(drives)
+end
+
 end
