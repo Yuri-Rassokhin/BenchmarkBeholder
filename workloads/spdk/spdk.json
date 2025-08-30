@@ -1,0 +1,15 @@
+{
+	"workload": "spdk",
+	"misc": {
+		"spdk_dir": "/tmp/spdk"
+	},
+	"sweep": {
+		"media": "drives.conf",
+		"queue": [ 64, 128, 256, 512, 1024 ],
+		"operation": [ "read" ],
+		"size": [ "1m", "2m", "4m" ],
+		"cores": [ "1,2,3,4" ],
+		"iteration": [ 1, 2, 3, 4 ]
+	}
+}
+
