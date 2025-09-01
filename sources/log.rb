@@ -4,17 +4,20 @@ class Log
     telegram_data = telegram_initialize
     @telegram_token = telegram_data[:token]
     @telegram_chat_id = telegram_data[:chat_id]
+    @in_group = false
   end
 
+  # this is the basic method for logging
   # generates raw message without modifications
   # streams: :telegram, :main, or both by default
-  def info!(text, stream: nil, file: nil)
-    @logger.info(text) unless stream == :telegram
-    telegram_message(:info, text, file: file) unless stream == :main
+  def info!(text, stream: nil, file: nil, group: nil)
+    res = group_prefix(text, group)
+    @logger.info(res) unless stream == :telegram
+    telegram_message(:info, res, file: file) unless stream == :main
   end
 
-  def info(msg, stream: nil, file: nil)
-    info!(msg[0].upcase + msg[1..], stream: stream, file: file)
+  def info(msg, stream: nil, file: nil, group: nil)
+    info!(msg[0].upcase + msg[1..], stream: stream, file: file, group: group)
   end
 
   def warn(msg)
@@ -50,6 +53,26 @@ class Log
   end
 
   private
+
+  def group_prefix(text, group)
+    # close group
+    if group == false and @in_group
+      @in_group = false
+      return "╰ #{text}"
+    end
+
+    # open group
+    if group == true and not @in_group
+      @in_group = true
+      return "\e[1m╭ #{text}\e[0m"
+    end
+
+    # inside the group
+    return "│ #{text}" if @in_group
+
+    # not in group
+    text
+  end
 
   def telegram_initialize
     token_file = File.expand_path("~/.bbh/telegram")

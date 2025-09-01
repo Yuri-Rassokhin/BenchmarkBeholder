@@ -26,8 +26,9 @@ def preparation
   end
 
   if self.class.private_instance_methods(false).include?(:prepare)
-    @logger.info "running preparations for the benchmarking"
+    @logger.info "preparing environment for the benchmarking", group: true
     prepare
+    @logger.info "preparation completed", group: false
   else
     @logger.info "nothing to prepare for the benchmarking"
   end
@@ -78,8 +79,8 @@ def log_invocation_start(v)
   res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
   @logger.info!(res, stream: :telegram)
-  @logger.info!("\e[1m╭ Step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]\e[0m", stream: :main)
-  @logger.info!("│ Parameters [ #{dimensions(v, separator: " ")} ]", stream: :main)
+  @logger.info "step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]", stream: :main, group: true
+  @logger.info "parameters [ #{dimensions(v, separator: " ")} ]", stream: :main
 end
 
 def log_invocation_done(v)
@@ -92,7 +93,7 @@ def log_invocation_done(v)
     *Metrics*
   MSG
   @logger.info! res + "#{@result.map { |k, v| "*#{k}* #{v}" }.join("\n")}", stream: :telegram
-  @logger.info! "╰ Metrics [ #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")} ]", stream: :main
+  @logger.info "metrics [ #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")} ]", stream: :main, group: false
 end
 
 def counter_set

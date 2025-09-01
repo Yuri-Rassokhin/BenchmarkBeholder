@@ -3,10 +3,12 @@ module Startup
 
 def self.check(logger: , config: )
   @logger, @config = logger, config
+  @logger.info "checking consistency of the environment", group: true
   check_another_instance
   check_dependencies
   check_cpu_idle
   check_storage_idle
+  @logger.info "environment is consistent", group: false
 end
 
 class << self
