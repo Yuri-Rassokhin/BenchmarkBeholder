@@ -48,7 +48,7 @@ def prepare
     system("sudo sh -c 'echo performance > #{path} 2>&1 > /dev/null'")
   end
 
-  drives = "#{dir}/#{@config.sweep[:media]}"
+  drives = "#{dir}/#{@config.misc[:media]}"
   @logger.error "drives configuration file #{file} is missing" unless File.exist?(drives)
 end
 

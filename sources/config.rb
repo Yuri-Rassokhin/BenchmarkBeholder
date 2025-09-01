@@ -19,6 +19,10 @@ def sweep
   get :sweep
 end
 
+def misc
+  get :misc
+end
+
 def [](key)
   get(key)
 end
