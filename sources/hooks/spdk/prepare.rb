@@ -10,6 +10,9 @@ def prepare
     return
   end
 
+  @logger.info "clearing up bdevperf instances"
+  system("ps aux | grep '[b]devperf' | awk '{print $2}' | xargs -r sudo kill -9")
+
   @logger.info "setting memlock unlimited for root in limits.conf"
   limits_conf = "/etc/security/limits.conf"
   entry = "root hard memlock unlimited\nroot soft memlock unlimited"
@@ -29,7 +32,7 @@ def prepare
   enabler = "#{dir}/scripts/setup.sh"
   @logger.error "SPDK enabler #{enabler} not found" unless File.exist?(enabler)
   @logger.info "enabling SPDK user space drivers"
-  system("sudo #{enabler}")
+  system("sudo #{enabler} 2>&1 > /dev/null")
 
   bdevperf = "#{dir}/build/examples/bdevperf"
   @logger.error "executable #{bdevperf} not found" unless File.exist?(bdevperf)
@@ -42,7 +45,7 @@ def prepare
 
   @logger.info "Setting CPU governor to performance"
   Dir.glob('/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor') do |path|
-    system("sudo sh -c 'echo performance > #{path}'")
+    system("sudo sh -c 'echo performance > #{path} 2>&1 > /dev/null'")
   end
 
   drives = "#{dir}/#{@config.sweep[:media]}"
