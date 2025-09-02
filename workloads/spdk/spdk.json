@@ -2,13 +2,18 @@
 	"workload": "spdk",
 	"misc": {
 		"spdk_dir": "/tmp/spdk",
-		"media": "drives.conf"
+		"media": "drives.conf",
+		"hugepages": 32768,
+		"time": 30
 	},
 	"sweep": {
 		"queue": [ 64, 128, 256, 512, 1024 ],
+		"queue": [ 64 ],
 		"operation": [ "read" ],
 		"size": [ "1m", "2m", "4m" ],
-		"cores": [ "1,2,3,4" ],
-		"iteration": [ 1, 2, 3, 4 ]
+		"size": [ "1m" ],
+		"cores": [ "1" ],
+		"iteration": [ 1, 2, 3, 4 ],
+		"iteration": [ 1 ]
 	}
 }

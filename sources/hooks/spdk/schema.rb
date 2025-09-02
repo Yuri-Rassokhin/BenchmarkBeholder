@@ -8,6 +8,8 @@ def self.validate
     required(:misc).hash do
       required(:spdk_dir).filled(:string)
       required(:media).filled(:string)
+      required(:hugepages).filled(:integer, gt?: 0)
+      required(:time).filled(:integer, gt?: 0)
     end
 
     required(:sweep).hash do

@@ -37,10 +37,10 @@ def prepare
   bdevperf = "#{dir}/build/examples/bdevperf"
   @logger.error "executable #{bdevperf} not found" unless File.exist?(bdevperf)
 
-  hugepages = 32768
+  hugepages = @config.misc[:hugepages]
   @logger.info "Setting #{hugepages} hugepages per NUMA node, please check if you've enough memory"
   Dir.glob('/sys/devices/system/node/node*/hugepages/hugepages-2048kB/nr_hugepages') do |path|
-    system("sudo sh -c 'echo 32768 > #{path}'")
+    system("sudo sh -c 'echo #{hugepages} > #{path}'")
   end
 
   @logger.info "Setting CPU governor to performance"
