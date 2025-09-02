@@ -13,22 +13,26 @@ class Log
   def info!(text, stream: nil, file: nil, group: nil)
     res = group_prefix(text, group)
     @logger.info(res) unless stream == :telegram
-    telegram_message(:info, res, file: file) unless stream == :main
+    telegram_message(:info, text, file: file) unless stream == :main
   end
 
   def info(msg, stream: nil, file: nil, group: nil)
     info!(msg[0].upcase + msg[1..], stream: stream, file: file, group: group)
   end
 
-  def warn(msg)
+  def warn(msg, group: nil)
     text = msg[0].upcase + msg[1..]
-    @logger.warn(text)
+    res = group_prefix(text, group)
+    res = yellow(res)
+    @logger.warn(res)
     telegram_message(:warn, text)
   end
 
-  def error(msg)
+  def error(msg, group: nil)
     text = msg[0].upcase + msg[1..]
-    @logger.error(text)
+    res = group_prefix(text, group)
+    res = red(res)
+    @logger.error(res)
     telegram_message(:error, text)
     exit 1
   end
@@ -53,6 +57,14 @@ class Log
   end
 
   private
+
+  def yellow(text)
+    "\e[33m#{text}\e[0m"
+  end
+
+  def red(text)
+    "\e[31m#{text}\e[0m"
+  end
 
   def group_prefix(text, group)
     # close group

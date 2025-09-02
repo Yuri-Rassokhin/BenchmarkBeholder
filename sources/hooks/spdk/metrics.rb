@@ -6,7 +6,6 @@ def setup
   # built-in variables:
   # @temp - for storing data of the current combination; it is erased at the next combination
   # @result - for storing result of the current combination; it is logged, and the variable is erased
-  #
   # Note: all functions, except defined with hide: true, save results in the benchmarking report
   @temp = { command: nil, raw: nil, infra: nil }
   spdk_dir = "#{@config[:misc][:spdk_dir]}"
@@ -14,7 +13,7 @@ def setup
   drives = JSON.generate(JSON.parse(File.read(drives_conf)))
   path = "#{spdk_dir}/build/examples"
 
-  func(:add, :drives) { |v| @result[:nvme_conf] ||= drives }
+  func(:add, :drives) { |v| @temp[:nvme_conf] ||= "\"drives\"" }
 
   func(:add, :command) { |v| @temp[:command] ||= "sudo #{path}/bdevperf -c #{drives_conf} -q #{v.queue} -o #{v.size} -w #{v.operation} -t 3 --lcores #{v.cores} 2>&1".strip }
 
@@ -24,7 +23,7 @@ def setup
 
   func(:add, :bandwidth_units) { "MiB/s" }
 
-  func(:add, :fails_per_sec) { |v| @result[:fails_per_sec] ||= v.raw[/Total\s*:\s+[\d.]+\s+[\d.]+\s+([\d.]+)/, 1]&.to_f }
+  func(:add, :failures_per_sec) { |v| @result[:failures_per_sec] ||= v.raw[/Total\s*:\s+[\d.]+\s+[\d.]+\s+([\d.]+)/, 1]&.to_f }
 
   func(:add, :min_latency) { |v| @result[:min_latency] ||= v.raw[/Total\s*:\s+(?:[\d.]+\s+){5}([\d.]+)/, 1]&.to_f }
 

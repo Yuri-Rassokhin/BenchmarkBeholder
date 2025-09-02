@@ -79,7 +79,7 @@ def log_invocation_start(v)
   res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
   @logger.info!(res, stream: :telegram)
-  @logger.info "step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} [ workload #{@workload_name} | host #{@host} | series #{@series} ]", stream: :main, group: true
+  @logger.info "step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} workload: #{@workload_name} host: #{@host} series: #{@series} ]", stream: :main, group: true
   @logger.info "parameters [ #{dimensions(v, separator: " ")} ]", stream: :main
 end
 
