@@ -39,70 +39,18 @@ ls ./build/examples/bdevperf
     {
       "subsystem": "bdev",
       "config": [
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme0",
-            "trtype": "PCIe",
-            "traddr": "0000:1b:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme1",
-            "trtype": "PCIe",
-            "traddr": "0000:1c:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme2",
-            "trtype": "PCIe",
-            "traddr": "0000:3e:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme3",
-            "trtype": "PCIe",
-            "traddr": "0000:3f:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme4",
-            "trtype": "PCIe",
-            "traddr": "0000:94:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme5",
-            "trtype": "PCIe",
-            "traddr": "0000:95:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme6",
-            "trtype": "PCIe",
-            "traddr": "0000:e6:00.0"
-          }
-        },
-        {
-          "method": "bdev_nvme_attach_controller",
-          "params": {
-            "name": "nvme7",
-            "trtype": "PCIe",
-            "traddr": "0000:e7:00.0"
-          }
-        }
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme0",  "trtype": "PCIe", "traddr": "0000:21:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme1",  "trtype": "PCIe", "traddr": "0000:22:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme2",  "trtype": "PCIe", "traddr": "0000:23:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme3",  "trtype": "PCIe", "traddr": "0000:24:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme4",  "trtype": "PCIe", "traddr": "0000:41:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme5",  "trtype": "PCIe", "traddr": "0000:42:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme6",  "trtype": "PCIe", "traddr": "0000:81:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme7",  "trtype": "PCIe", "traddr": "0000:82:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme8",  "trtype": "PCIe", "traddr": "0000:c1:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme9",  "trtype": "PCIe", "traddr": "0000:c2:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme10", "trtype": "PCIe", "traddr": "0000:c3:00.0" } },
+        { "method": "bdev_nvme_attach_controller", "params": { "name": "nvme11", "trtype": "PCIe", "traddr": "0000:c4:00.0" } }
       ]
     }
   ]

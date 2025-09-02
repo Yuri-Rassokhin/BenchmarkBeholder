@@ -90,7 +90,8 @@ class Log
     token_file = File.expand_path("~/.bbh/telegram")
 
     unless File.exist?(token_file)
-      @logger.warn("telegram token is not specified, there will be no telegram logging")
+      msg = "telegram token is not specified, there will be no telegram logging"
+      @logger.warn(group_prefix(msg))
       return { token: nil, chat_id: nil }
     end
 
@@ -100,10 +101,12 @@ class Log
     updates = JSON.parse(response)
 
     if updates["result"] == []
-      @logger.error("telegram bot has gone asleep, please send something to it and rerun the benchmark")
+      msg = "telegram bot has gone asleep, please send something to it and rerun the benchmark"
+      @logger.error(group_prefix(msg))
       exit 0
     elsif updates["result"] == nil
-      @logger.error("telegram bot not found, please check correctness of the token #{token_file}")
+      msg = "telegram bot not found, please check correctness of the token in #{token_file}"
+      @logger.error(group_prefix(msg))
     end
 
     updates["result"].each do |update|
@@ -154,7 +157,8 @@ class Log
 
     http.request(request)
   rescue StandardError => e
-    @logger.error("failed to send telegram chat message: #{e.message}")
+    msg = "failed to send telegram chat message: #{e.message}"
+    @logger.error(group_prefix(msg))
   end
 
 def telegram_send_file(text, file)

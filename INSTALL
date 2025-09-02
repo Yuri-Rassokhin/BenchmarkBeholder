@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+
+set -e
+
+echo "Installing system dependencies..."
+sudo dnf config-manager --set-enabled ol9_codeready_builder
+sudo dnf -y install git ruby rubygems sysstat rubygem-psych libyaml-devel
+
+echo "Checking bundler..."
+if ! gem list bundler -i > /dev/null; then
+  sudo gem install bundler
+fi
+
+echo "Installing gems..."
+bundle config set --local path 'vendor/bundle'
+bundle install --jobs 4
+
+echo "✅ Done. To run BenchmarkBeholder, use: ./bbh ./workloads/<workload_file.json>"

@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'flex-cartesian'
+require 'open3'
+require 'fileutils'
+require 'tempfile'
+require 'json'
+require 'dry-validation'
+require 'logger'
+require 'telegram'
+require 'net/http'
+require 'json'
+require 'optparse'
+require 'net/http/post/multipart'
+require 'multipart/post'
+require 'uri'
+
+require './sources/infra/scheduler'
+require './sources/infra/platform'
+require './sources/infra/utilities_general' # TODO: restructure
+require './sources/options'
+require './sources/config'
+require './sources/startup'
+require './sources/workload'
+require './sources/log'
+require './sources/utilities'
+
+logger = Log.new
+options = Options.new(logger, ARGV)
+config = Config.new(logger, options.workload)
+
+workload = Workload.new(logger: logger, config: config)
+
+if options.space_mode
+  logger.info "parameter space: #{workload.dimensions(separator: ', ')}"
+  logger.info "total invocations: #{workload.size}"
+  exit
+end
+
+Startup.check(logger: logger, config: config)
+
+workload.preparation
+
+workload.benchmark
+
+workload.save
+#TODO: to replace this chunk with last function that pushes each result outside
+
