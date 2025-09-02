@@ -3,7 +3,7 @@ class Workload
 private
 
 def prepare
-  size = @config[:misc][:total_size]
+  size = @config.startup[:total_size]
   file = @config.target
 
   @logger.error "command fio not found in the system" if `command -v fio`.empty?

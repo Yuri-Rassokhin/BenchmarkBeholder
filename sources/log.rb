@@ -83,7 +83,7 @@ class Log
     return "│ #{text}" if @in_group
 
     # not in group
-    text
+    "  " + text
   end
 
   def telegram_initialize

@@ -3,7 +3,7 @@ class Workload
 private
 
 def prepare
-  dir = @config[:misc][:spdk_dir]
+  dir = @config.startup[:spdk_dir]
 
   unless Etc.getpwuid(Process.uid).name == 'root' || system('sudo -n true')
     @logger.error "sudo access is required for system tuning"
@@ -37,7 +37,7 @@ def prepare
   bdevperf = "#{dir}/build/examples/bdevperf"
   @logger.error "executable #{bdevperf} not found" unless File.exist?(bdevperf)
 
-  hugepages = @config.misc[:hugepages]
+  hugepages = @config.startup[:hugepages]
   @logger.info "Setting #{hugepages} hugepages per NUMA node, please check if you've enough memory"
   Dir.glob('/sys/devices/system/node/node*/hugepages/hugepages-2048kB/nr_hugepages') do |path|
     system("sudo sh -c 'echo #{hugepages} > #{path}'")
@@ -48,7 +48,7 @@ def prepare
     system("sudo sh -c 'echo performance > #{path} 2>&1 > /dev/null'")
   end
 
-  drives = "#{dir}/#{@config.misc[:media]}"
+  drives = "#{dir}/#{@config.startup[:media]}"
   @logger.error "drives configuration file #{file} is missing" unless File.exist?(drives)
 end
 

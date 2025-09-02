@@ -35,9 +35,8 @@ def preparation
 end
 
 def benchmark
-  @logger.info "starting workload #{@workload_name} series #{@series} on #{@host}"
   func(:run)
-  @logger.info "completed workload #{@workload_name} series #{@series} on #{@host}"
+  @logger.info "workload #{@workload_name} series #{@series} completed on #{@host}"
 end
 
 def save
@@ -79,8 +78,8 @@ def log_invocation_start(v)
   res = res + "#{v.to_h.map { |k, v| "*#{k}* #{v}" }.join("\n")}"
 
   @logger.info!(res, stream: :telegram)
-  @logger.info "step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} workload: #{@workload_name} host: #{@host} series: #{@series} ]", stream: :main, group: true
-  @logger.info "parameters [ #{dimensions(v, separator: " ")} ]", stream: :main
+  @logger.info "step #{@counter}/#{@total} (#{(@done*100).round(2)}%) ETA #{eta} workload=#{@workload_name} host=#{@host} series=#{@series}", stream: :main, group: true
+  @logger.info "parameters: #{dimensions(v, separator: " ")}", stream: :main
 end
 
 def log_invocation_done(v)
@@ -93,7 +92,7 @@ def log_invocation_done(v)
     *Metrics*
   MSG
   @logger.info! res + "#{@result.map { |k, v| "*#{k}* #{v}" }.join("\n")}", stream: :telegram
-  @logger.info "metrics [ #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")} ]", stream: :main, group: false
+  @logger.info "metrics: #{@result.map { |k, v| "#{k}=#{v}" }.join(" ")}", stream: :main, group: false
 end
 
 def counter_set

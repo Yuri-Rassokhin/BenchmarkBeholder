@@ -5,7 +5,7 @@ def self.validate
 
     required(:workload).filled(:string)
 
-    required(:misc).hash do
+    required(:startup).hash do
       required(:spdk_dir).filled(:string)
       required(:media).filled(:string)
       required(:hugepages).filled(:integer, gt?: 0)

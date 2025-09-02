@@ -12,15 +12,15 @@ def workload
 end
 
 def target
-  @data[:misc][:target]
+  @data[:startup][:target]
 end
 
 def sweep
   get :sweep
 end
 
-def misc
-  get :misc
+def startup
+  get :startup
 end
 
 def [](key)
@@ -43,16 +43,16 @@ def preprocess(json)
 end
 
 def load_json(path)
-  @logger.info "using sweep file #{path}"
+  @logger.info "workload file #{path}"
   result = JSON.parse(File.read(path), symbolize_names: true)
   rescue Errno::ENOENT
-    @logger.error "sweep file '#{path}' not found"
+    @logger.error "workload file '#{path}' not found"
     exit 0
   rescue Errno::EACCES
-    @logger.error "sweep file '#{path}' not accessible"
+    @logger.error "workload file '#{path}' not accessible"
     exit 0
   rescue JSON::ParserError
-    @logger.error "sweep file '#{path}' contains invalid JSON"
+    @logger.error "workload file '#{path}' contains invalid JSON"
     exit 0
   result
 end

@@ -5,7 +5,7 @@ def self.validate
 
     required(:workload).filled(:string)
 
-    required(:misc).hash do
+    required(:startup).hash do
       required(:target).filled(:string)
       required(:total_size).filled(:integer, gt?: 0)
     end
