@@ -4,10 +4,9 @@ module Schema
 def validate
   Dry::Schema.JSON do
 
-    required(:workload).hash do
-      required(:hook).filled(:string)
-      required(:actor).filled(:string)
-      required(:protocol).filled(:string, included_in?: %w[file])
+    required(:workload).filled(:string)
+
+    required(:startup).hash do
       required(:target).filled(:string)
       required(:iterations).filled(:integer, gt?: 0)
       required(:total_size).filled(:integer, gt?: 0)

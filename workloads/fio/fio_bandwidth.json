@@ -1,14 +1,14 @@
 {
 	"workload": "fio",
-	"misc": {
-		"target": "/home/opc/dump",
+	"startup": {
+		"target": "/mnt/dump",
 		"total_size": "5G"
 	},
 	"sweep": {
 		"scheduler": [ "none", "kyber", "bfq", "mq-deadline" ],
 		"operation": [ "read", "write" ],
 		"size": [ "4k", "8k", "16k", "32k", "64k", "128k", "256k", "512k", "1m" ],
-		"ioengine": [ "libaio" ],
+		"ioengine": [ "libaio", "io_uring" ],
 		"iodepth": [ 64, 128, 256, 512 ],
 		"processes": [ 1, 2, 4, 8, 16, 30 ],
 		"iteration": [ 1, 2, 3, 4 ]

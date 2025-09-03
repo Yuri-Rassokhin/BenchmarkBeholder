@@ -21,7 +21,9 @@ def setup
 
   func(:add, :raw, hide: true) { |v| @temp[:raw] = `#{v.command}`.strip }
 
-  func(:add, :bandwidth) { |v| @result[:bandwidth] ||= v.raw[/Total\s*:\s+([\d.]+)/, 1]&.to_f }
+  func(:add, :iops) { |v| @result[:iops] ||= v.raw[/Total\s*:\s+([\d.]+)/, 1]&.to_f }
+
+  func(:add, :bandwidth) { |v| v.raw[/Total\s*:\s+(?:[\d.]+\s+){1}([\d.]+)/, 1]&.to_f }
 
   func(:add, :bandwidth_units) { "MiB/s" }
 
