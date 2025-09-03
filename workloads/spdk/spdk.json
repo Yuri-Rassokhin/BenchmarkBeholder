@@ -3,6 +3,7 @@
 	"startup": {
 		"spdk_dir": "/tmp/spdk",
 		"media": "drives.conf",
+		"hyperthreading": 0,
 		"hugepages": 32768,
 		"time": 30
 	},
