@@ -11,7 +11,7 @@ class Log
   # generates raw message without modifications
   # streams: :telegram, :main, or both by default
   def info!(text, stream: nil, file: nil, group: nil)
-    res = group_prefix(text, group)
+    res = group_prefix(text, group: group)
     @logger.info(res) unless stream == :telegram
     telegram_message(:info, text, file: file) unless stream == :main
   end
@@ -22,7 +22,7 @@ class Log
 
   def warn(msg, group: nil)
     text = msg[0].upcase + msg[1..]
-    res = group_prefix(text, group)
+    res = group_prefix(text, group: group)
     res = yellow(res)
     @logger.warn(res)
     telegram_message(:warn, text)
@@ -30,7 +30,7 @@ class Log
 
   def error(msg, group: nil)
     text = msg[0].upcase + msg[1..]
-    res = group_prefix(text, group)
+    res = group_prefix(text, group: group)
     res = red(res)
     @logger.error(res)
     telegram_message(:error, text)
@@ -66,7 +66,7 @@ class Log
     "\e[31m#{text}\e[0m"
   end
 
-  def group_prefix(text, group)
+  def group_prefix(text, group: nil)
     # close group
     if group == false and @in_group
       @in_group = false
