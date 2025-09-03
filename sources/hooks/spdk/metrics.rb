@@ -13,6 +13,8 @@ def setup
   drives = JSON.generate(JSON.parse(File.read(drives_conf)))
   path = "#{spdk_dir}/build/examples"
 
+  func(:add, :series_id) { self.series }
+
   func(:add, :drives) { |v| @temp[:nvme_conf] ||= "\"#{drives}\"" }
 
   func(:add, :command) { |v| @temp[:command] ||= "sudo #{path}/bdevperf -c #{drives_conf} -q #{v.queue} -o #{v.size} -w #{v.operation} -t #{@config.startup[:time]} --lcores #{v.cores} 2>&1".strip }
@@ -39,7 +41,7 @@ def setup
 
   # standard functions for infrastructure metrics
   @temp[:infra] = {}
-  Platform.metrics(logger: @logger, target: @config.target, space: self, result: @temp[:infra], gpu: false)
+  Platform.metrics(logger: @logger, target: @config.target, space: self, result: @temp[:infra], gpu: false, storage: false, compute: true, os: true)
 end
 
 end
