@@ -8,6 +8,7 @@ def self.validate
     required(:startup).hash do
       required(:spdk_dir).filled(:string)
       required(:media).filled(:string)
+      required(:hyperthreading).filled(:integer).value(included_in?: [0, 1])
       required(:hugepages).filled(:integer, gt?: 0)
       required(:time).filled(:integer, gt?: 0)
     end

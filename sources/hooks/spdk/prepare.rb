@@ -13,6 +13,14 @@ def prepare
   @logger.info "clearing up bdevperf instances"
   system("ps aux | grep '[b]devperf' | awk '{print $2}' | xargs -r sudo kill -9")
 
+  if @config.startup[:hyperthreading] == 1
+    @logger.info "enabling CPU hyper-threading"
+    `echo on | sudo tee /sys/devices/system/cpu/smt/control 2>&1 > /dev/null`
+  else
+    @logger.info "disabling CPU hyper-threading"
+    `echo off | sudo tee /sys/devices/system/cpu/smt/control 2>&1 > /dev/null`
+  end
+
   @logger.info "setting memlock unlimited for root in limits.conf"
   limits_conf = "/etc/security/limits.conf"
   entry = "root hard memlock unlimited\nroot soft memlock unlimited"

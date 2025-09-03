@@ -31,6 +31,12 @@ def setup
 
   func(:add, :latency_units) { "us" }
 
+  func(:add, :hugepages) { @config.startup[:hugepages].to_i }
+
+  func(:add, :hyperthreading) { @config.startup[:hyperthreading].to_i }
+
+  func(:add, :time) { @config.startup[:time].to_i }
+
   # standard functions for infrastructure metrics
   @temp[:infra] = {}
   Platform.metrics(logger: @logger, target: @config.target, space: self, result: @temp[:infra], gpu: false)

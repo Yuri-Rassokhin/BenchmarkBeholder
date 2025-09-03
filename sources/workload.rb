@@ -42,7 +42,7 @@ end
 def save
   report = "./log/bbh-#{@workload_name}-#{@series}-result.csv"
   FileUtils.mkdir_p(File.dirname(report))
-  output(format: :csv, separator: ';', file: report)
+  output(format: :csv, separator: ";", file: report)
   @logger.info "Benchmark report attached", file: report, stream: :telegram
 end
 
