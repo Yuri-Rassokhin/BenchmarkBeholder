@@ -15,10 +15,10 @@ def prepare
 
   if @config.startup[:hyperthreading] == 1
     @logger.info "enabling CPU hyper-threading"
-    `echo on | sudo tee /sys/devices/system/cpu/smt/control 2>&1 > /dev/null`
+    `sudo bash -c 'echo on > /sys/devices/system/cpu/smt/control 2>&1 > /dev/null'`
   else
     @logger.info "disabling CPU hyper-threading"
-    `echo off | sudo tee /sys/devices/system/cpu/smt/control 2>&1 > /dev/null`
+    `sudo bash -c 'echo off > /sys/devices/system/cpu/smt/control 2>&1 > /dev/null'`
   end
 
   @logger.info "setting memlock unlimited for root in limits.conf"
