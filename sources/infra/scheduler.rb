@@ -4,7 +4,7 @@ def self.prepare(logger, config)
   conf_schedulers = Set.new(config[:sweep][:scheduler])
   host_schedulers = Set.new(schedulers.split)
   diff = conf_schedulers ^ host_schedulers
-  logger.warn "IO scheduler(s) #{diff.join(", ")} not in sweep file" unless diff.empty?
+  logger.warn "IO scheduler(s) #{diff.join(", ")} not in workload file" unless diff.empty?
 end
 
 def self.switch(logger, scheduler, volumes)
